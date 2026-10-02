@@ -53,7 +53,7 @@ const TOOLS = [
     ["", "+ modelos de IA"],
 ]
 
-const LOGO_BASE = "https://cdn.jsdelivr.net/gh/lucibellelemos-commits/meustudio@main/clientes/preto/"
+const LOGO_BASE = "https://cdn.jsdelivr.net/gh/lucibellelemos-commits/meustudio@a9e7c421fdff6c76ed97e66fc3f0e07cc186447d/clientes/preto/"
 
 // [nome, arquivo, altura em px] — alturas ajustadas para equilibrar o peso visual
 const CLIENTS: [string, string, number][] = [
@@ -133,7 +133,7 @@ export function LCIBlock(props: any) {
                     <div className="lci-track rev" style={{ ["--dur" as any]: "100s" }}>
                         {clients.map(([name, file, h], i) => (
                             <span className="lci-logo" key={i} aria-hidden={i >= CLIENTS.length}>
-                                <img src={LOGO_BASE + file} alt={name} style={{ height: h }} loading="lazy" draggable={false} />
+                                <img src={LOGO_BASE + file} alt={name} style={{ height: h }} loading="eager" draggable={false} />
                             </span>
                         ))}
                     </div>
