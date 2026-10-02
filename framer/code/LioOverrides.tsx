@@ -71,7 +71,7 @@ const EMAIL = "lucibellelemos@gmail.com"
 const BLOCK_CSS = `
 .lci-b{width:100%;box-sizing:border-box;padding:80px 0 8px;font-family:"Switzer","Switzer Placeholder",sans-serif;font-size:16px;font-weight:500;letter-spacing:-.01em;line-height:1.2;color:var(--fg);background:var(--bg)}
 .lci-b *{box-sizing:border-box}
-.lci-row{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,3fr);align-items:center;column-gap:20px;padding:14px var(--pad);border-top:1px solid var(--line)}
+.lci-row{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,3fr);align-items:center;column-gap:20px;margin:0 var(--pad);padding:14px 0;border-top:1px solid var(--line)}
 .lci-row:last-child{border-bottom:1px solid var(--line)}
 .lci-lab{font-family:"Fragment Mono",monospace;font-size:10px;font-weight:400;letter-spacing:0;line-height:1;text-transform:uppercase;color:var(--fg)}
 .lci-mq{position:relative;min-width:0;overflow:hidden;-webkit-mask-image:linear-gradient(90deg,transparent,#000 5%,#000 95%,transparent);mask-image:linear-gradient(90deg,transparent,#000 5%,#000 95%,transparent)}
@@ -127,8 +127,7 @@ export function LCIBlock(props: any) {
                     <div className="lci-track" style={{ ["--dur" as any]: "90s" }}>
                         {tools.map(([ab, name], i) => (
                             <span className={"lci-it" + (ab ? "" : " lci-mut")} key={i} aria-hidden={i >= TOOLS.length}>
-                                {ab && <span className="lci-ic">{ab}</span>}
-                                {name}
+                                                                {name}
                             </span>
                         ))}
                     </div>
