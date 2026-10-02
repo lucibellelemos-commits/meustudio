@@ -22,11 +22,47 @@ const LOGO_CSS = `
 .lio-logo p::after{content:"®";display:inline-block;font-size:0.36em;letter-spacing:0;line-height:1;vertical-align:top;margin-left:0.12em;margin-top:0.05em}
 `
 
+const DOTS_CSS = `
+.lci-dots{position:fixed;top:7px;left:var(--g,15px);right:var(--g,15px);height:4px;display:flex;justify-content:space-between;pointer-events:none;z-index:9;mix-blend-mode:difference}
+.lci-dots i{width:4px;height:4px;border-radius:50%;background:#fff;display:block}
+.lci-dots i.d{display:block}
+@media (max-width:809px){.lci-dots i.d{display:none}}
+`
+
+// Linha de bolinhas no topo do site, alinhada às margens da logo
+function GridDots() {
+    const [g, setG] = React.useState(15)
+    React.useEffect(() => {
+        const fit = () => {
+            const logo = document.querySelector('[aria-label="LCI Studio"]') as HTMLElement | null
+            if (logo) setG(Math.round(logo.getBoundingClientRect().left))
+        }
+        fit()
+        const t = setTimeout(fit, 500)
+        window.addEventListener("resize", fit)
+        return () => {
+            clearTimeout(t)
+            window.removeEventListener("resize", fit)
+        }
+    }, [])
+    // 7 bolinhas no desktop, 4 no celular (as marcadas com "d" somem)
+    const cls = ["", "d", "", "d", "", "d", ""]
+    return (
+        <div className="lci-dots" style={{ ["--g" as any]: g + "px" }} aria-hidden>
+            <style>{DOTS_CSS}</style>
+            {cls.map((c, i) => (
+                <i key={i} className={c} />
+            ))}
+        </div>
+    )
+}
+
 // Logo "LCI Studio®" numa linha no lugar do nome do template (mantém a cor de cada variante)
 export function withLioLogo(Component): ComponentType {
     return (props: any) => (
         <>
             <style>{LOGO_CSS}</style>
+            <GridDots />
             <Component
                 {...props}
                 text="LCI Studio"
