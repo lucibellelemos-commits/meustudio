@@ -50,44 +50,42 @@ const TOOLS = [
     ["Oa", "OpenArt"],
     ["Ax", "Axis"],
     ["Gp", "ChatGPT"],
+    ["", "+ modelos de IA"],
 ]
 
 const CLIENTS = [
-    "Orbis",
-    "Mescla",
-    "Aysù",
-    "Flávia Aranha",
-    "Easy Diagnostics",
-    "Clínica LYS",
-    "Ema Studio",
-    "Best Amuse",
-    "Botteh Tapetes",
-    "Mônica Di Creddo",
+    "Havaianas",
+    "Google",
+    "Eudora",
+    "Harper’s Bazaar",
+    "Buddemeyer",
+    "SPFW",
+    "BVLGARI",
+    "Nubank",
+    "Itaú",
+    "Lupo",
 ]
 
 const EMAIL = "lucibellelemos@gmail.com"
 
 const BLOCK_CSS = `
-.lci-b{width:100%;box-sizing:border-box;padding:96px 0 24px;font-family:"Switzer","Switzer Placeholder",sans-serif;color:var(--fg);background:var(--bg);overflow:hidden}
+.lci-b{width:100%;box-sizing:border-box;padding:80px 0 8px;font-family:"Switzer","Switzer Placeholder",sans-serif;font-size:16px;font-weight:500;letter-spacing:-.01em;line-height:1.2;color:var(--fg);background:var(--bg)}
 .lci-b *{box-sizing:border-box}
-.lci-in{padding:0 var(--pad)}
-.lci-lab{font-family:"Fragment Mono",monospace;font-size:10px;line-height:1;text-transform:uppercase;color:var(--mut);margin:0 0 18px}
-.lci-mq{position:relative;width:100%;overflow:hidden;-webkit-mask-image:linear-gradient(90deg,transparent,#000 4%,#000 96%,transparent);mask-image:linear-gradient(90deg,transparent,#000 4%,#000 96%,transparent)}
+.lci-row{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,3fr);align-items:center;column-gap:20px;padding:14px var(--pad);border-top:1px solid var(--line)}
+.lci-row:last-child{border-bottom:1px solid var(--line)}
+.lci-lab{font-family:"Fragment Mono",monospace;font-size:10px;font-weight:400;letter-spacing:0;line-height:1;text-transform:uppercase;color:var(--fg)}
+.lci-mq{position:relative;min-width:0;overflow:hidden;-webkit-mask-image:linear-gradient(90deg,transparent,#000 5%,#000 95%,transparent);mask-image:linear-gradient(90deg,transparent,#000 5%,#000 95%,transparent)}
 .lci-track{display:flex;align-items:center;width:max-content;animation:lci-x var(--dur) linear infinite}
 .lci-track.rev{animation-direction:reverse}
 .lci-mq:hover .lci-track{animation-play-state:paused}
 @keyframes lci-x{from{transform:translateX(0)}to{transform:translateX(-50%)}}
-.lci-tool{display:flex;align-items:center;gap:8px;padding:0 28px 0 0;white-space:nowrap;font-size:16px;font-weight:500;letter-spacing:-.01em;line-height:1}
-.lci-ic{width:22px;height:22px;border-radius:5px;border:1px solid var(--fg);display:flex;align-items:center;justify-content:center;font-family:"Fragment Mono",monospace;font-size:9px;font-weight:400;letter-spacing:0}
-.lci-note{color:var(--mut);font-size:16px;line-height:1.2;letter-spacing:-.02em;margin:16px 0 0}
-.lci-cl{font-size:24px;font-weight:500;letter-spacing:-.02em;line-height:1.1;white-space:nowrap;padding:0 18px 0 0}
-.lci-cl::after{content:"/";color:var(--mut);margin-left:18px;font-weight:400}
-.lci-sec{margin-bottom:64px}
-.lci-h{font-size:clamp(24px,2.5vw,32px);font-weight:500;letter-spacing:-.02em;line-height:1.1;margin:0}
-.lci-p{color:var(--mut);font-size:16px;line-height:1.2;letter-spacing:-.02em;max-width:420px;margin:12px 0 0}
-.lci-mail{display:inline-block;margin-top:28px;font-size:clamp(24px,2.5vw,32px);font-weight:500;letter-spacing:-.02em;line-height:1.1;color:var(--fg);text-decoration:none;background:linear-gradient(currentColor,currentColor) 0 100%/0 1px no-repeat;transition:background-size .4s}
-.lci-mail:hover{background-size:100% 1px}
-@media (max-width:809px){.lci-b{padding-top:72px}.lci-sec{margin-bottom:48px}.lci-cl{font-size:20px}}
+.lci-it{display:flex;align-items:center;gap:6px;padding-right:32px;white-space:nowrap}
+.lci-ic{width:16px;height:16px;border-radius:4px;border:1px solid currentColor;display:inline-flex;align-items:center;justify-content:center;font-family:"Fragment Mono",monospace;font-size:7px;font-weight:400;letter-spacing:0}
+.lci-mut{color:var(--mut)}
+.lci-ct{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 12px}
+.lci-mail{color:var(--mut);text-decoration:none;background:linear-gradient(currentColor,currentColor) 0 100%/0 1px no-repeat;transition:background-size .4s,color .3s}
+.lci-mail:hover{color:var(--fg);background-size:100% 1px}
+@media (max-width:809px){.lci-b{padding-top:56px}.lci-row{grid-template-columns:1fr;row-gap:10px;padding-top:12px;padding-bottom:12px}}
 @media (prefers-reduced-motion:reduce){.lci-track{animation:none}}
 `
 
@@ -96,13 +94,12 @@ export function LCIBlock(props: any) {
     const ref = React.useRef<HTMLElement>(null)
     const [pad, setPad] = React.useState(0)
     React.useEffect(() => {
-        // alinha o texto com a margem da logo no topo do site
+        // alinha com a margem da logo no topo do site
         const fit = () => {
             const el = ref.current
             const logo = document.querySelector('[aria-label="LCI Studio"]') as HTMLElement | null
             if (!el || !logo) return
-            const d = logo.getBoundingClientRect().left - el.getBoundingClientRect().left
-            setPad(Math.max(0, Math.round(d)))
+            setPad(Math.max(0, Math.round(logo.getBoundingClientRect().left - el.getBoundingClientRect().left)))
         }
         fit()
         const t = setTimeout(fit, 600)
@@ -116,47 +113,47 @@ export function LCIBlock(props: any) {
         "--fg": dark ? "#FFFFFF" : "#000000",
         "--bg": dark ? "#000000" : "transparent",
         "--mut": dark ? "rgba(255,255,255,.4)" : "rgba(0,0,0,.4)",
+        "--line": dark ? "rgba(255,255,255,.15)" : "rgba(0,0,0,.1)",
         "--pad": pad + "px",
-        "--dur": "60s",
     }
     const tools = [...TOOLS, ...TOOLS, ...TOOLS, ...TOOLS]
-    const clients = [...CLIENTS, ...CLIENTS]
+    const clients = [...CLIENTS, ...CLIENTS, ...CLIENTS, ...CLIENTS]
     return (
         <section ref={ref} className="lci-b" style={{ ...vars, ...(props.style || {}) }}>
             <style>{BLOCK_CSS}</style>
-            <div className="lci-sec">
-                <p className="lci-lab lci-in">Ferramentas</p>
+            <div className="lci-row">
+                <span className="lci-lab">Ferramentas</span>
                 <div className="lci-mq">
-                    <div className="lci-track" style={{ ["--dur" as any]: "80s" }}>
+                    <div className="lci-track" style={{ ["--dur" as any]: "90s" }}>
                         {tools.map(([ab, name], i) => (
-                            <div className="lci-tool" key={i} aria-hidden={i >= TOOLS.length}>
-                                <span className="lci-ic">{ab}</span>
+                            <span className={"lci-it" + (ab ? "" : " lci-mut")} key={i} aria-hidden={i >= TOOLS.length}>
+                                {ab && <span className="lci-ic">{ab}</span>}
                                 {name}
-                            </div>
+                            </span>
                         ))}
                     </div>
                 </div>
-                <p className="lci-note lci-in">E modelos de IA, e o que mais cada projeto pedir.</p>
             </div>
-            <div className="lci-sec">
-                <p className="lci-lab lci-in">Clientes</p>
+            <div className="lci-row">
+                <span className="lci-lab">Clientes</span>
                 <div className="lci-mq">
-                    <div className="lci-track rev" style={{ ["--dur" as any]: "90s" }}>
+                    <div className="lci-track rev" style={{ ["--dur" as any]: "100s" }}>
                         {clients.map((c, i) => (
-                            <span className="lci-cl" key={i} aria-hidden={i >= CLIENTS.length}>
+                            <span className="lci-it" key={i} aria-hidden={i >= CLIENTS.length}>
                                 {c}
                             </span>
                         ))}
                     </div>
                 </div>
             </div>
-            <div className="lci-in">
-                <p className="lci-lab">Contato</p>
-                <h2 className="lci-h">Tem um projeto em mente?</h2>
-                <p className="lci-p">Conte a ideia e o prazo, e a gente resolve o resto junto.</p>
-                <a className="lci-mail" href={"mailto:" + EMAIL}>
-                    {EMAIL}
-                </a>
+            <div className="lci-row">
+                <span className="lci-lab">Contato</span>
+                <div className="lci-ct">
+                    <span>Tem um projeto em mente?</span>
+                    <a className="lci-mail" href={"mailto:" + EMAIL}>
+                        {EMAIL}
+                    </a>
+                </div>
             </div>
         </section>
     )
