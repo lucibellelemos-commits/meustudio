@@ -53,17 +53,20 @@ const TOOLS = [
     ["", "+ modelos de IA"],
 ]
 
-const CLIENTS = [
-    "Havaianas",
-    "Google",
-    "Eudora",
-    "Harper’s Bazaar",
-    "Buddemeyer",
-    "SPFW",
-    "BVLGARI",
-    "Nubank",
-    "Itaú",
-    "Lupo",
+const LOGO_BASE = "https://cdn.jsdelivr.net/gh/lucibellelemos-commits/meustudio@main/clientes/preto/"
+
+// [nome, arquivo, altura em px] — alturas ajustadas para equilibrar o peso visual
+const CLIENTS: [string, string, number][] = [
+    ["Havaianas", "havaianas.png", 20],
+    ["Google", "google.png", 22],
+    ["Eudora", "eudora.png", 17],
+    ["Harper’s Bazaar", "harpers.png", 24],
+    ["Buddemeyer", "buddemeyer.png", 20],
+    ["SPFW", "spfw.png", 18],
+    ["BVLGARI", "bvlgari.png", 12],
+    ["Nubank", "nubank.png", 22],
+    ["Itaú", "itau.png", 28],
+    ["Lupo", "lupo.png", 18],
 ]
 
 const EMAIL = "lucibellelemos@gmail.com"
@@ -82,11 +85,13 @@ const BLOCK_CSS = `
 .lci-it{display:flex;align-items:center;gap:6px;padding-right:32px;white-space:nowrap}
 .lci-ic{width:16px;height:16px;border-radius:4px;border:1px solid currentColor;display:inline-flex;align-items:center;justify-content:center;font-family:"Fragment Mono",monospace;font-size:7px;font-weight:400;letter-spacing:0}
 .lci-mut{color:var(--mut)}
+.lci-logo{display:flex;align-items:center;height:36px;padding-right:56px}
+.lci-logo img{display:block;width:auto;filter:var(--lf);opacity:.9}
 .lci-cta{margin:120px var(--pad) 0;display:flex;flex-direction:column;align-items:flex-start;gap:10px}
 .lci-q{margin:0;font-size:clamp(24px,2.2vw,32px);letter-spacing:-.02em;line-height:1.1}
 .lci-mail{color:var(--mut);text-decoration:none;background:linear-gradient(currentColor,currentColor) 0 100%/0 1px no-repeat;transition:background-size .4s,color .3s}
 .lci-mail:hover{color:var(--fg);background-size:100% 1px}
-@media (max-width:809px){.lci-b{padding-top:56px}.lci-cta{margin-top:80px}.lci-row{grid-template-columns:1fr;row-gap:10px;padding-top:12px;padding-bottom:12px}}
+@media (max-width:809px){.lci-logo{padding-right:40px}.lci-logo img{transform:scale(.85)}.lci-b{padding-top:56px}.lci-cta{margin-top:80px}.lci-row{grid-template-columns:1fr;row-gap:10px;padding-top:12px;padding-bottom:12px}}
 @media (prefers-reduced-motion:reduce){.lci-track{animation:none}}
 `
 
@@ -115,6 +120,7 @@ export function LCIBlock(props: any) {
         "--bg": dark ? "#000000" : "transparent",
         "--mut": dark ? "rgba(255,255,255,.4)" : "rgba(0,0,0,.4)",
         "--line": dark ? "rgba(255,255,255,.15)" : "rgba(0,0,0,.1)",
+        "--lf": dark ? "invert(1)" : "none",
         "--pad": pad + "px",
     }
     const clients = [...CLIENTS, ...CLIENTS, ...CLIENTS, ...CLIENTS]
@@ -125,9 +131,9 @@ export function LCIBlock(props: any) {
                 <span className="lci-lab">Clientes</span>
                 <div className="lci-mq">
                     <div className="lci-track rev" style={{ ["--dur" as any]: "100s" }}>
-                        {clients.map((c, i) => (
-                            <span className="lci-it" key={i} aria-hidden={i >= CLIENTS.length}>
-                                {c}
+                        {clients.map(([name, file, h], i) => (
+                            <span className="lci-logo" key={i} aria-hidden={i >= CLIENTS.length}>
+                                <img src={LOGO_BASE + file} alt={name} style={{ height: h }} loading="lazy" draggable={false} />
                             </span>
                         ))}
                     </div>
