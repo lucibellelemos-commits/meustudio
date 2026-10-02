@@ -1,12 +1,12 @@
-# Textos do site — Lio Studio
+# Textos do site — LCI Studio
 
 ## Descrição (SEO)
-Lio Studio é um estúdio criativo em São Paulo e Recife. Branding, identidade visual, direção de arte e motion.
+LCI Studio é um estúdio criativo em São Paulo e Recife. Branding, identidade visual, direção de arte e motion.
 
 ## Títulos de página
-- Início — Lio Studio
-- Trabalhos — Lio Studio
-- {{Nome do projeto}} — Lio Studio
+- Início — LCI Studio
+- Trabalhos — LCI Studio
+- {{Nome do projeto}} — LCI Studio
 
 ## Contato
 - E-mail: lucibellelemos@gmail.com
@@ -15,3 +15,6 @@ Lio Studio é um estúdio criativo em São Paulo e Recife. Branding, identidade 
 
 ## Projetos
 A descrição completa de cada projeto está em `cms/lio_projetos.csv` (coluna Info).
+
+## Playground
+O Playground é um lugar especial para experimentos, ferramentas e ideias guiadas pelo instinto, pela curiosidade e pelo código.
