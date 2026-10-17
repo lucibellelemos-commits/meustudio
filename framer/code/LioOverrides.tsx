@@ -135,12 +135,12 @@ function CaptionLabels() {
         }
         apply()
         const observer = new MutationObserver(() => {
-            if (!frame) frame = requestAnimationFrame(apply)
+            if (!frame) frame = window.setTimeout(apply, 60)
         })
         observer.observe(document.body, { childList: true, subtree: true })
         return () => {
             observer.disconnect()
-            if (frame) cancelAnimationFrame(frame)
+            if (frame) window.clearTimeout(frame)
         }
     }, [])
     return <style>{CAPTION_LABELS_CSS}</style>
