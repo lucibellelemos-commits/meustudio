@@ -111,6 +111,7 @@ export function withLioLogo(Component): ComponentType {
                 <ViewportVideos />
                 <OldPathRedirect />
                 <SobreClientLogos />
+                <ProjectRows />
                 <Component
                     {...props}
                     text="LUCI Studio"
@@ -212,6 +213,62 @@ function CaptionLabels() {
         }
     }, [])
     return <style>{CAPTION_LABELS_CSS}</style>
+}
+
+// Projeto aberto: cada linha de imagens ocupa a largura toda (alturas iguais na linha)
+function ProjectRows() {
+    React.useEffect(() => {
+        if (document.body.dataset.luciRowsOwner) return
+        document.body.dataset.luciRowsOwner = "true"
+        const ratio = (fig: HTMLElement) => {
+            if (fig.hasAttribute("data-luci-r")) return
+            const img = fig.querySelector("img")
+            const video = fig.querySelector("video")
+            const set = (w: number, h: number) => {
+                if (!w || !h) return
+                fig.style.setProperty("--r", String(Math.round((w / h) * 1000) / 1000))
+                fig.setAttribute("data-luci-r", "")
+            }
+            if (img) {
+                if (img.complete && img.naturalWidth)
+                    set(img.naturalWidth, img.naturalHeight)
+                else
+                    img.addEventListener(
+                        "load",
+                        () => set(img.naturalWidth, img.naturalHeight),
+                        { once: true }
+                    )
+            } else if (video) {
+                if (video.videoWidth) set(video.videoWidth, video.videoHeight)
+                else
+                    video.addEventListener(
+                        "loadedmetadata",
+                        () => set(video.videoWidth, video.videoHeight),
+                        { once: true }
+                    )
+            }
+        }
+        const scan = () =>
+            document
+                .querySelectorAll<HTMLElement>(".luci-project-story > figure")
+                .forEach(ratio)
+        scan()
+        let timer = 0
+        const mo = new MutationObserver(() => {
+            if (!timer)
+                timer = window.setTimeout(() => {
+                    timer = 0
+                    scan()
+                }, 80)
+        })
+        mo.observe(document.body, { childList: true, subtree: true })
+        return () => {
+            mo.disconnect()
+            if (timer) window.clearTimeout(timer)
+            delete document.body.dataset.luciRowsOwner
+        }
+    }, [])
+    return null
 }
 
 // Sobre: clientes em logos (o texto fica como descrição das imagens)
@@ -900,6 +957,7 @@ const WORK_TEMPLATE_CSS = `
 .luci-project-story img,.luci-project-story video,.luci-project-story .luci-project-hero img,.luci-project-story .luci-project-hero video,.luci-project-story .luci-project-frame img,.luci-project-story .luci-project-frame video{height:100%!important;width:auto!important;max-width:100%;max-height:none!important;object-fit:cover;display:block}
 @media(max-width:809px){.luci-project-credits{padding:90px 0 40px}.luci-project-story{--h:auto;padding:24px 15px 100px}.luci-project-story figure,.luci-project-story .luci-project-hero,.luci-project-story .luci-project-frame,.luci-project-story .luci-project-frame:nth-child(2n+1){width:100%!important;height:auto}.luci-project-story img,.luci-project-story video,.luci-project-story .luci-project-hero img,.luci-project-story .luci-project-hero video,.luci-project-story .luci-project-frame img,.luci-project-story .luci-project-frame video{width:100%!important;height:auto!important;max-height:70vh!important;object-fit:contain}}
 @media(prefers-reduced-motion:reduce){.luci-template-modal[open]{animation:none;scroll-behavior:auto}}
+@media(min-width:810px){.luci-project-story::after{content:"";flex-grow:9999}.luci-project-story figure[data-luci-r]{flex:var(--r) 1 calc(var(--h) * var(--r))!important;width:auto!important;height:auto!important;aspect-ratio:var(--r)}.luci-project-story figure[data-luci-r] img,.luci-project-story figure[data-luci-r] video{width:100%!important;height:100%!important;max-width:none;object-fit:cover}}
 `
 // Arrastar a imagem do card pra cima, até um limite, revelando o + e as infos
 const liftMax = () => Math.min(76, Math.max(48, window.innerWidth * 0.048))
@@ -2777,7 +2835,7 @@ function UnniStickerMotion() {
 const WORK_BATCH_MEDIA = {
     "ai-video": [
         {
-            title: "Itaú — Vídeo com IA",
+            title: "Itaú — Orla e cidade",
             description:
                 "Três cenas em vídeo com IA para o Itaú: personagens, bicicletas e movimento entre a orla e a cidade.",
             media: [
@@ -2927,7 +2985,7 @@ const WORK_BATCH_MEDIA = {
     ],
     "ai-foto": [
         {
-            title: "Achei Primeiro — Stills com IA",
+            title: "Achei Primeiro — Stills de produto",
             description:
                 "Stills de produto com IA e tratamento de imagem para o e-commerce de luxo Achei Primeiro: bolsas, calçados, acessórios e roupas em fundos neutros, com destaque para forma, textura e acabamento.",
             media: [
