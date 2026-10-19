@@ -315,12 +315,31 @@ function ViewportVideos() {
             },
             { rootMargin: "200px 0px" }
         )
-        const scan = () =>
+        const scan = () => {
             document.querySelectorAll<HTMLVideoElement>("video").forEach((v) => {
                 if (seen.has(v)) return
                 seen.add(v)
+                // sem capa: mostra o primeiro quadro em vez de um bloco vazio
+                const src = v.getAttribute("src")
+                if (
+                    src &&
+                    !v.poster &&
+                    v.paused &&
+                    v.hasAttribute("data-luci-autoplay") &&
+                    !src.includes("#t=")
+                )
+                    v.setAttribute("src", src + "#t=0.1")
                 io.observe(v)
             })
+            // links internos abrem na mesma aba
+            document
+                .querySelectorAll<HTMLAnchorElement>('a[target="_blank"]')
+                .forEach((a) => {
+                    const href = a.getAttribute("href") || ""
+                    if (href.startsWith("./") || href.startsWith("/"))
+                        a.removeAttribute("target")
+                })
+        }
         scan()
         let timer = 0
         const mo = new MutationObserver(() => {
