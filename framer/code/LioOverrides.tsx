@@ -23,6 +23,7 @@ const SITE_FIX_CSS = `
 [data-luci-home-card] p,[data-luci-pg-card] p{overflow:hidden!important;text-overflow:ellipsis!important;white-space:nowrap!important;max-width:100%}
 .luci-template-caption span{color:#6f6f6f}
 .luci-template-controls button[aria-pressed="true"]{color:#8a8a8a!important}
+[data-framer-name="Right Column"] [data-framer-name="Link Wrapper"]:has(+div>a[href$="/imprint"])>[data-framer-component-type="RichTextContainer"],[data-framer-name="Right Column"] [data-framer-name="Link Wrapper"]:has(+div>a[href$="/creditos"])>[data-framer-component-type="RichTextContainer"]{display:none!important}
 @media(max-width:809px){
 [data-luci-gallery-buttons]{display:none!important}
 [data-luci-gallery-title]{padding-right:0!important}
@@ -99,12 +100,13 @@ export function withLioLogo(Component): ComponentType {
                 <HomeBvlgariReplacement />
                 <CleanVideoPresentation />
                 <SilentSiteMedia />
-                <style>{`[data-framer-name="Right Column"] div:has(>a[href$="/imprint"]),[data-framer-name="Right Column"] [data-framer-component-type="RichTextContainer"]:has(+div>a[href$="/imprint"]){display:none!important}`}</style>
+                <style>{`[data-framer-name="Right Column"] div:has(>a[href$="/imprint"]),[data-framer-name="Right Column"] div:has(>a[href$="/creditos"]),[data-framer-name="Right Column"] [data-framer-component-type="RichTextContainer"]:has(+div>a[href$="/imprint"]),[data-framer-name="Right Column"] [data-framer-component-type="RichTextContainer"]:has(+div>a[href$="/creditos"]){display:none!important}`}</style>
                 <PlaygroundLightbox />
                 <BritneyRemakeVideo />
                 <PlaygroundCuration />
                 <CaptionLabels />
                 <ViewportVideos />
+                <OldPathRedirect />
                 <Component
                     {...props}
                     text="LUCI Studio"
@@ -206,6 +208,24 @@ function CaptionLabels() {
         }
     }, [])
     return <style>{CAPTION_LABELS_CSS}</style>
+}
+
+// Endereços antigos (/Info, /contact, /imprint) levam para os novos
+const OLD_PATHS: Record<string, string> = {
+    "/info": "/sobre",
+    "/contact": "/contato",
+    "/imprint": "/creditos",
+}
+function OldPathRedirect() {
+    React.useEffect(() => {
+        const path = window.location.pathname.replace(/\/$/, "").toLowerCase()
+        const target = OLD_PATHS[path]
+        if (target)
+            window.location.replace(
+                target + window.location.search + window.location.hash
+            )
+    }, [])
+    return null
 }
 
 // Vídeos só tocam (e baixam) quando aparecem na tela; pausam ao sair.
@@ -2721,28 +2741,29 @@ const WORK_BATCH_MEDIA = {
     ],
     motion: [
         {
-            title: "Motion editorial",
+            title: "Moda — Estudos de motion",
             description:
                 "Filmes de moda e composições editoriais animadas, com ritmo de revista.",
             media: [
                 {
-                    caption: "Moda — Motion editorial",
+                    caption: "Moda — Filme",
                     poster: "https://framerusercontent.com/images/aRARAIoYHPaHXYX3cnGoXWOVbxE.jpg?width=720&height=1280",
                     src: "https://framerusercontent.com/assets/pYGdvO7rXavEdlLnzSyg9PHfzTI.mp4",
                 },
                 {
-                    caption: "Composição — Motion editorial",
+                    caption: "Moda — Composição animada",
                     poster: "https://framerusercontent.com/images/9fEaqScMZ5GsZuhXxc7RV3YT1rA.jpg?width=720&height=898",
                     src: "https://framerusercontent.com/assets/gcPaue6SbTueOTX5RW4VJklK3I.mp4",
                 },
             ],
         },
         {
-            title: "Imagens e tipografia",
-            description: "Sequência de imagens com animação tipográfica.",
+            title: "Harper’s Bazaar — Imagens e tipografia",
+            description:
+                "Sequência de imagens com animação tipográfica para a Harper’s Bazaar.",
             media: [
                 {
-                    caption: "Motion — Imagens e tipografia",
+                    caption: "Harper’s Bazaar — Imagens e tipografia",
                     poster: "https://framerusercontent.com/images/LAtZvUf5CC3jHb5w7pWDvPMR6bE.jpg?width=720&height=1280",
                     src: "https://framerusercontent.com/assets/jx0anlyrrmNtDRXej3IzcD3PnkI.mp4",
                 },
