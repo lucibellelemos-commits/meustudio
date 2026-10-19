@@ -31,7 +31,10 @@ const SITE_FIX_CSS = `
 .luci-template-control{grid-template-columns:100px 1fr!important}
 .luci-template-caption{display:grid!important;grid-template-columns:minmax(0,1fr);gap:2px}
 .luci-template-caption .luci-template-details{margin-left:0!important;justify-self:start}
+.luci-template-dot{display:none}
+[data-framer-name="Project Container"]{padding-bottom:48px!important}
 }
+.luci-template-dot{font-style:normal}
 `
 
 const LOGO_CSS = `
@@ -107,6 +110,7 @@ export function withLioLogo(Component): ComponentType {
                 <CaptionLabels />
                 <ViewportVideos />
                 <OldPathRedirect />
+                <SobreClientLogos />
                 <Component
                     {...props}
                     text="LUCI Studio"
@@ -208,6 +212,54 @@ function CaptionLabels() {
         }
     }, [])
     return <style>{CAPTION_LABELS_CSS}</style>
+}
+
+// Sobre: clientes em logos (o texto fica como descrição das imagens)
+function SobreClientLogos() {
+    React.useEffect(() => {
+        if (window.location.pathname.replace(/\/$/, "") !== "/sobre") return
+        const apply = () =>
+            document
+                .querySelectorAll<HTMLElement>('[data-framer-name="Info"]')
+                .forEach((info) => {
+                    if (info.querySelector(".luci-sobre-logos")) return
+                    const title = info.querySelector(
+                        '[data-framer-name="Title"] p'
+                    )
+                    if (title?.textContent?.trim() !== "[CLIENTES]") return
+                    const content = info.querySelector<HTMLElement>(
+                        '[data-framer-name="Content"]'
+                    )
+                    if (!content) return
+                    const list = document.createElement("ul")
+                    list.className = "luci-sobre-logos"
+                    list.setAttribute("aria-label", "Clientes")
+                    CLIENTS.forEach(([name, file, height]) => {
+                        const item = document.createElement("li")
+                        const img = document.createElement("img")
+                        img.src = LOGO_BASE + file
+                        img.alt = name
+                        img.loading = "lazy"
+                        img.style.height = Math.round(height * 0.8) + "px"
+                        item.appendChild(img)
+                        list.appendChild(item)
+                    })
+                    content.style.setProperty("display", "none", "important")
+                    content.after(list)
+                })
+        apply()
+        const observer = new MutationObserver(apply)
+        observer.observe(document.body, { childList: true, subtree: true })
+        return () => {
+            observer.disconnect()
+            document
+                .querySelectorAll(".luci-sobre-logos")
+                .forEach((n) => n.remove())
+        }
+    }, [])
+    return (
+        <style>{`.luci-sobre-logos{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(2,max-content);gap:22px 40px;align-items:center}.luci-sobre-logos li{display:flex;align-items:center;height:28px}.luci-sobre-logos img{display:block;width:auto;filter:invert(1);opacity:.92}`}</style>
+    )
 }
 
 // Endereços antigos (/Info, /contact, /imprint) levam para os novos
@@ -1045,7 +1097,8 @@ function WorkTemplate() {
             <div className="luci-template-caption">
                 <button onClick={() => setOpened(entry)}>{entry.title}</button>
                 <span>
-                    · {AREA_DATA.find(([id]) => id === entry.area)?.[1]}
+                    <i className="luci-template-dot">· </i>
+                    {AREA_DATA.find(([id]) => id === entry.area)?.[1]}
                 </span>
                 <button
                     className="luci-template-details"
