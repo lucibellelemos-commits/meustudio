@@ -17,6 +17,22 @@ export const withIntro = withText(
     "LUCI Studio é um estúdio de design gráfico e interativo que trabalha na interseção entre design, tecnologia e cultura."
 )
 
+// Ajustes gerais: celular, legendas e contraste
+const SITE_FIX_CSS = `
+[data-luci-gallery-title]{position:relative!important;padding-right:125px!important;box-sizing:border-box!important}
+[data-luci-home-card] p,[data-luci-pg-card] p{overflow:hidden!important;text-overflow:ellipsis!important;white-space:nowrap!important;max-width:100%}
+.luci-template-caption span{color:#6f6f6f}
+.luci-template-controls button[aria-pressed="true"]{color:#8a8a8a!important}
+@media(max-width:809px){
+[data-luci-gallery-buttons]{display:none!important}
+[data-luci-gallery-title]{padding-right:0!important}
+.luci-template-controls{grid-template-columns:1fr!important;gap:22px!important}
+.luci-template-control{grid-template-columns:100px 1fr!important}
+.luci-template-caption{display:grid!important;grid-template-columns:minmax(0,1fr);gap:2px}
+.luci-template-caption .luci-template-details{margin-left:0!important;justify-self:start}
+}
+`
+
 const LOGO_CSS = `
 .lio-logo,.lio-logo p,.lio-logo span{white-space:nowrap!important}
 .lio-logo p,.lio-logo h1,.lio-logo h2,.lio-logo h3,.lio-logo h4,.lio-logo h5,.lio-logo h6{font-size:20px!important;line-height:1!important;letter-spacing:-0.06em!important;font-weight:500!important}
@@ -71,6 +87,7 @@ export function withLioLogo(Component): ComponentType {
         return (
             <React.Fragment key={route}>
                 <style>{LOGO_CSS}</style>
+                <style>{SITE_FIX_CSS}</style>
                 <PortfolioStopMotion />
                 <PortfolioCuration />
                 <HomeHoverGalleries />
@@ -87,6 +104,7 @@ export function withLioLogo(Component): ComponentType {
                 <BritneyRemakeVideo />
                 <PlaygroundCuration />
                 <CaptionLabels />
+                <ViewportVideos />
                 <Component
                     {...props}
                     text="LUCI Studio"
@@ -116,34 +134,139 @@ const CAPTION_LABELS: Record<string, string> = {
 }
 const CAPTION_LABELS_CSS = `
 p[data-luci-label]{font-size:0!important;line-height:0!important}
-p[data-luci-label]::after{content:attr(data-luci-label);font-size:var(--luci-label-fs,10px);line-height:var(--luci-label-lh,1.2)}
+p[data-luci-label]::after{content:attr(data-luci-label);display:block;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:var(--luci-label-fs,10px);line-height:var(--luci-label-lh,1.2);color:var(--luci-label-color,currentColor)}
 `
 function CaptionLabels() {
     React.useEffect(() => {
         let frame = 0
+        // tamanho do texto: o mesmo de uma legenda vizinha com o mesmo estilo
+        const measure = (p: HTMLElement) => {
+            const twin = Array.from(
+                document.querySelectorAll<HTMLElement>("p:not([data-luci-label])")
+            ).find(
+                (o) =>
+                    o.className === p.className &&
+                    o.getBoundingClientRect().width > 0
+            )
+            const cs = getComputedStyle(twin || p)
+            if (parseFloat(cs.fontSize) > 0) {
+                p.style.setProperty("--luci-label-fs", cs.fontSize)
+                p.style.setProperty("--luci-label-lh", cs.lineHeight)
+                p.style.setProperty("--luci-label-color", cs.color)
+            }
+        }
         const apply = () => {
             frame = 0
             document.querySelectorAll<HTMLElement>("p").forEach((p) => {
                 if (p.hasAttribute("data-luci-label")) return
                 const label = CAPTION_LABELS[p.textContent?.trim() || ""]
                 if (!label) return
-                const cs = getComputedStyle(p)
-                p.style.setProperty("--luci-label-fs", cs.fontSize)
-                p.style.setProperty("--luci-label-lh", cs.lineHeight)
+                measure(p)
+                p.style.setProperty("font-size", "0px", "important")
+                p.style.setProperty("line-height", "0", "important")
                 p.setAttribute("data-luci-label", label)
             })
+            // imagens sem descrição: usa a legenda do card
+            document
+                .querySelectorAll<HTMLImageElement>(
+                    "[data-luci-home-card] img:not([alt]),[data-luci-home-card] img[alt=''],[data-luci-pg-card] img:not([alt]),[data-luci-pg-card] img[alt='']"
+                )
+                .forEach((img) => {
+                    const card = img.closest<HTMLElement>(
+                        "[data-luci-home-card],[data-luci-pg-card]"
+                    )
+                    const p = card?.querySelector<HTMLElement>("p")
+                    const text =
+                        p?.getAttribute("data-luci-label") ||
+                        p?.textContent?.trim()
+                    if (text) img.alt = text
+                })
+        }
+        const remeasure = () => {
+            document
+                .querySelectorAll<HTMLElement>("p[data-luci-label]")
+                .forEach(measure)
         }
         apply()
         const observer = new MutationObserver(() => {
             if (!frame) frame = window.setTimeout(apply, 60)
         })
         observer.observe(document.body, { childList: true, subtree: true })
+        let resize = 0
+        const onResize = () => {
+            window.clearTimeout(resize)
+            resize = window.setTimeout(remeasure, 150)
+        }
+        window.addEventListener("resize", onResize)
         return () => {
             observer.disconnect()
+            window.removeEventListener("resize", onResize)
+            window.clearTimeout(resize)
             if (frame) window.clearTimeout(frame)
         }
     }, [])
     return <style>{CAPTION_LABELS_CSS}</style>
+}
+
+// Vídeos só tocam (e baixam) quando aparecem na tela; pausam ao sair.
+function ViewportVideos() {
+    React.useEffect(() => {
+        if (document.body.dataset.luciViewportOwner) return
+        document.body.dataset.luciViewportOwner = "true"
+        const wants = (v: HTMLVideoElement) =>
+            v.hasAttribute("data-luci-autoplay") || v.autoplay
+        if (!("IntersectionObserver" in window)) {
+            const playAll = () =>
+                document
+                    .querySelectorAll<HTMLVideoElement>("video")
+                    .forEach((v) => {
+                        if (wants(v) && v.paused) v.play().catch(() => {})
+                    })
+            playAll()
+            const timer = window.setInterval(playAll, 1000)
+            return () => {
+                window.clearInterval(timer)
+                delete document.body.dataset.luciViewportOwner
+            }
+        }
+        const seen = new WeakSet<HTMLVideoElement>()
+        const io = new IntersectionObserver(
+            (entries) => {
+                entries.forEach((entry) => {
+                    const v = entry.target as HTMLVideoElement
+                    if (entry.isIntersecting) {
+                        if (wants(v) && v.paused) v.play().catch(() => {})
+                    } else if (!v.paused) {
+                        v.pause()
+                    }
+                })
+            },
+            { rootMargin: "200px 0px" }
+        )
+        const scan = () =>
+            document.querySelectorAll<HTMLVideoElement>("video").forEach((v) => {
+                if (seen.has(v)) return
+                seen.add(v)
+                io.observe(v)
+            })
+        scan()
+        let timer = 0
+        const mo = new MutationObserver(() => {
+            if (!timer)
+                timer = window.setTimeout(() => {
+                    timer = 0
+                    scan()
+                }, 100)
+        })
+        mo.observe(document.body, { childList: true, subtree: true })
+        return () => {
+            io.disconnect()
+            mo.disconnect()
+            if (timer) window.clearTimeout(timer)
+            delete document.body.dataset.luciViewportOwner
+        }
+    }, [])
+    return null
 }
 
 function usePortfolioRoute() {
@@ -879,7 +1002,7 @@ function WorkTemplate() {
                         src={entry.src}
                         poster={entry.poster}
                         muted
-                        autoPlay
+                        data-luci-autoplay=""
                         loop
                         playsInline
                         preload="metadata"
@@ -1019,7 +1142,7 @@ function WorkTemplate() {
                                             src={media.src}
                                             poster={media.poster}
                                             muted
-                                            autoPlay
+                                            data-luci-autoplay=""
                                             loop
                                             playsInline
                                             controls={false}
@@ -1975,23 +2098,7 @@ function HomeGalleryControls() {
                         native.style.setProperty("display", "none", "important")
                         native.insertAdjacentElement("afterend", host)
                         const title = native.parentElement
-                        if (title) {
-                            title.style.setProperty(
-                                "position",
-                                "relative",
-                                "important"
-                            )
-                            title.style.setProperty(
-                                "padding-right",
-                                "125px",
-                                "important"
-                            )
-                            title.style.setProperty(
-                                "box-sizing",
-                                "border-box",
-                                "important"
-                            )
-                        }
+                        if (title) title.dataset.luciGalleryTitle = "true"
                         Object.assign(host.style, {
                             position: "absolute",
                             right: "0",
@@ -2533,7 +2640,7 @@ function NewPortfolioMedia() {
                                     poster={media.poster}
                                     aria-label={media.caption}
                                     muted
-                                    autoPlay
+                                    data-luci-autoplay=""
                                     loop
                                     playsInline
                                     preload="metadata"
@@ -2564,7 +2671,7 @@ function UnniStickerMotion() {
                     poster={NEW_UNNI_MEDIA.poster}
                     aria-label="Unni Studio — Adesivos em movimento"
                     muted
-                    autoPlay
+                    data-luci-autoplay=""
                     loop
                     playsInline
                     controls={false}
@@ -2817,7 +2924,7 @@ function WorkMediaGroup({ group }) {
                                     poster={media.poster}
                                     aria-label={media.caption}
                                     muted
-                                    autoPlay
+                                    data-luci-autoplay=""
                                     loop
                                     playsInline
                                     controls={false}
@@ -3239,7 +3346,7 @@ function HomeMetaProject() {
                                 src={src}
                                 aria-label={"Meta — Filme " + (index + 1)}
                                 muted
-                                autoPlay
+                                data-luci-autoplay=""
                                 loop
                                 playsInline
                                 controls={false}
@@ -3349,7 +3456,7 @@ function HomeBvlgariReplacement() {
                                 src={src}
                                 aria-label={"BVLGARI — Filme " + (index + 1)}
                                 muted
-                                autoPlay
+                                data-luci-autoplay=""
                                 loop
                                 playsInline
                                 controls={false}
@@ -3556,7 +3663,7 @@ function HomeBazaarMedia() {
                                 }
                                 aria-label={media.caption}
                                 muted
-                                autoPlay
+                                data-luci-autoplay=""
                                 loop
                                 playsInline
                                 controls={false}
@@ -3632,7 +3739,7 @@ function BritneyRemakeVideo() {
                 src="https://framerusercontent.com/assets/D00UkTmpyi7hkwjhGDv1iNzM.mp4"
                 poster="https://framerusercontent.com/images/M2UQetPruMaaECmXRqbengIWDg.jpg?width=716&height=806"
                 aria-label="Remake Britney"
-                autoPlay
+                data-luci-autoplay=""
                 muted
                 loop
                 playsInline
