@@ -3722,10 +3722,18 @@ function HomeMetaProject() {
                 // igual às outras: o texto do + abre por cima, sem empurrar a galeria
                 const slot = document.createElement("div")
                 slot.dataset.luciMetaSlot = "true"
-                slot.style.position = "relative"
+                // fica presa no topo ao rolar, como as barras dos outros projetos
+                slot.style.position = "sticky"
                 slot.style.height = "45px"
                 slot.style.marginBottom = "18px"
-                slot.style.zIndex = "3"
+                slot.style.zIndex = "8"
+                const syncTop = () => {
+                    const sticky = native.parentElement
+                    const top = sticky ? getComputedStyle(sticky).top : "0px"
+                    slot.style.top = top && top !== "auto" ? top : "0px"
+                }
+                syncTop()
+                window.addEventListener("resize", syncTop)
                 bar.style.position = "absolute"
                 bar.style.top = "0"
                 bar.style.left = "0"
