@@ -450,12 +450,90 @@ const BLOCK_CSS = `
 .lci-cta{margin:56px var(--pad) 0;display:flex;flex-direction:column;align-items:flex-start;gap:12px}
 .lci-sub{margin:0;max-width:520px;color:var(--mut);font-size:16px;line-height:1.4}
 .lci-sub .lci-mail{color:var(--fg);background-size:100% 1px}
+.lci-form{width:100%;max-width:560px;display:flex;flex-direction:column;gap:18px;margin-top:22px}
+.lci-in{width:100%;font:inherit;font-size:16px;font-weight:500;color:var(--fg);background:transparent;border:0;border-bottom:1px solid var(--line);border-radius:0;padding:8px 0;outline:none;resize:none;appearance:none}
+.lci-in::placeholder{color:var(--mut)}
+.lci-in:focus{border-bottom-color:var(--fg)}
+.lci-ta{min-height:72px}
+.lci-actions{display:flex;flex-wrap:wrap;align-items:baseline;gap:8px 18px;margin-top:6px}
+.lci-send{font:inherit;font-size:16px;font-weight:500;color:var(--fg);background:none;border:0;padding:0;cursor:pointer;text-decoration:underline;text-underline-offset:4px}
+.lci-note{font-size:14px;color:var(--mut)}
+.lci-note .lci-mail{color:var(--fg)}
 .lci-q{margin:0;font-size:clamp(24px,2.2vw,32px);letter-spacing:-.02em;line-height:1.1}
 .lci-mail{color:var(--mut);text-decoration:none;background:linear-gradient(currentColor,currentColor) 0 100%/0 1px no-repeat;transition:background-size .4s,color .3s}
 .lci-mail:hover{color:var(--fg);background-size:100% 1px}
 @media (max-width:809px){.lci-logo{padding-right:40px}.lci-logo img{transform:scale(.85)}.lci-b{padding-top:56px}.lci-cta{margin-top:40px}.lci-row{grid-template-columns:1fr;row-gap:10px;padding-top:12px;padding-bottom:12px}}
 @media (prefers-reduced-motion:reduce){.lci-track{animation:none}}
 `
+
+// Formulário do bloco final: abre o e-mail já preenchido para o estúdio
+function LCIForm() {
+    const [name, setName] = React.useState("")
+    const [mail, setMail] = React.useState("")
+    const [msg, setMsg] = React.useState("")
+    const [sent, setSent] = React.useState(false)
+    const submit = (e: React.FormEvent) => {
+        e.preventDefault()
+        const subject = "Projeto — " + (name || "contato pelo site")
+        const body =
+            msg + "\n\n" + name + (mail ? "\n" + mail : "")
+        window.location.href =
+            "mailto:" +
+            EMAIL +
+            "?subject=" +
+            encodeURIComponent(subject) +
+            "&body=" +
+            encodeURIComponent(body)
+        setSent(true)
+    }
+    return (
+        <form className="lci-form" onSubmit={submit}>
+            <input
+                className="lci-in"
+                name="Nome"
+                placeholder="Nome"
+                autoComplete="name"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                required
+            />
+            <input
+                className="lci-in"
+                type="email"
+                name="E-mail"
+                placeholder="E-mail"
+                autoComplete="email"
+                value={mail}
+                onChange={(e) => setMail(e.target.value)}
+                required
+            />
+            <textarea
+                className="lci-in lci-ta"
+                name="Mensagem"
+                placeholder="Mensagem"
+                rows={3}
+                value={msg}
+                onChange={(e) => setMsg(e.target.value)}
+                required
+            />
+            <div className="lci-actions">
+                <button className="lci-send" type="submit">
+                    Enviar
+                </button>
+                <span className="lci-note">
+                    {sent
+                        ? "Abrimos o seu e-mail com a mensagem pronta."
+                        : "ou escreva para "}
+                    {!sent && (
+                        <a className="lci-mail" href={"mailto:" + EMAIL}>
+                            {EMAIL}
+                        </a>
+                    )}
+                </span>
+            </div>
+        </form>
+    )
+}
 
 export function LCIBlock(props: any) {
     const dark = props.theme === "dark"
@@ -531,13 +609,10 @@ export function LCIBlock(props: any) {
             <div className="lci-cta">
                 <p className="lci-q">Vamos criar juntos?</p>
                 <p className="lci-sub">
-                    Conte sobre a sua marca, campanha ou ideia. Escreva pelo
-                    formulário abaixo ou para{" "}
-                    <a className="lci-mail" href={"mailto:" + EMAIL}>
-                        {EMAIL}
-                    </a>
-                    .
+                    Conte sobre a sua marca, campanha ou ideia. Respondemos
+                    por e-mail.
                 </p>
+                <LCIForm />
             </div>
         </section>
     )
