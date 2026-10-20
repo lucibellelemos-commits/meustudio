@@ -19,6 +19,7 @@ export const withIntro = withText(
 
 // Ajustes gerais: celular, legendas e contraste
 const SITE_FIX_CSS = `
+[data-luci-home-clone],[data-luci-home-clone] [data-framer-appear-id]{opacity:1!important;transform:none!important}
 [data-luci-gallery-title]{position:relative!important;padding-right:125px!important;box-sizing:border-box!important}
 [data-luci-home-card] p,[data-luci-pg-card] p{overflow:hidden!important;text-overflow:ellipsis!important;white-space:nowrap!important;max-width:100%}
 .luci-template-caption span{color:#6f6f6f}
@@ -103,6 +104,11 @@ export function withLioLogo(Component): ComponentType {
                     owner="Orbis"
                     match={["ORB_02.JPG", "ORB_04.JPG"]}
                     items={HOME_ORBIS_NEW}
+                />
+                <HomeExtraMedia
+                    owner="Buddemeyer"
+                    match={["Vision — Filme de produto"]}
+                    items={HOME_BUDDEMEYER_NEW}
                 />
                 <HomeExtraMedia
                     owner="Unni"
@@ -1832,6 +1838,10 @@ function PortfolioStopMotion() {
 
 // Seleção revisada: frames recusados e proporções variadas apenas na home.
 const REJECTED_CAPTIONS = new Set([
+    "Vision — Caimento do tecido",
+    "Vision — Detalhe do cetim",
+    "UltraSoft — Fibras e volume",
+    "UltraSoft — Toalhas",
     "ORB_01.JPG",
     "ORB_03.JPG",
     "ORB_05.JPG",
@@ -3802,6 +3812,14 @@ const HOME_UNNI_NEW: ExtraMedia[] = [
         src: "https://cdn.jsdelivr.net/gh/lucibellelemos-commits/meustudio@88bce082b19b9e68ee8b689fbaa986cf376d6c01/unni/unni-adesivos-02.mp4",
         poster: "https://cdn.jsdelivr.net/gh/lucibellelemos-commits/meustudio@88bce082b19b9e68ee8b689fbaa986cf376d6c01/unni/unni-adesivos-02.jpg",
         caption: "Unni Studio — Adesivos",
+        video: true,
+    },
+]
+const HOME_BUDDEMEYER_NEW: ExtraMedia[] = [
+    {
+        src: "https://cdn.jsdelivr.net/gh/lucibellelemos-commits/meustudio@4767de0e7b4c9fb51eee3d9b99b6dd9f2aa575a6/buddemeyer/buddemeyer-filme.mp4",
+        poster: "https://cdn.jsdelivr.net/gh/lucibellelemos-commits/meustudio@4767de0e7b4c9fb51eee3d9b99b6dd9f2aa575a6/buddemeyer/buddemeyer-filme.jpg",
+        caption: "UltraSoft — Filme",
         video: true,
     },
 ]
