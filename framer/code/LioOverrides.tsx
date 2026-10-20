@@ -99,7 +99,16 @@ export function withLioLogo(Component): ComponentType {
                 <HomeInfoToggle />
                 <NewPortfolioMedia />
                 <HomeBazaarMedia />
-                <HomeOrbisMedia />
+                <HomeExtraMedia
+                    owner="Orbis"
+                    match={["ORB_02.JPG", "ORB_04.JPG"]}
+                    items={HOME_ORBIS_NEW}
+                />
+                <HomeExtraMedia
+                    owner="Unni"
+                    match={["Unni — Collective Force"]}
+                    items={HOME_UNNI_NEW}
+                />
                 <HomeMetaProject />
                 <HomeBvlgariReplacement />
                 <CleanVideoPresentation />
@@ -3703,7 +3712,7 @@ video::-webkit-media-controls,video::-webkit-media-controls-enclosure{display:no
 }
 
 // Home: mockups novos da Orbis no fim da galeria do projeto
-const HOME_ORBIS_NEW = [
+const HOME_ORBIS_NEW: ExtraMedia[] = [
     { src: "https://cdn.jsdelivr.net/gh/lucibellelemos-commits/meustudio@cf7905a8825d0d9cc855e816bfada4c54fae2f66/orbis/orbis-01.jpg", caption: "Orbis — Cartões" },
     { src: "https://cdn.jsdelivr.net/gh/lucibellelemos-commits/meustudio@cf7905a8825d0d9cc855e816bfada4c54fae2f66/orbis/orbis-02.jpg", caption: "Orbis — Ecobag" },
     { src: "https://cdn.jsdelivr.net/gh/lucibellelemos-commits/meustudio@cf7905a8825d0d9cc855e816bfada4c54fae2f66/orbis/orbis-03.jpg", caption: "Orbis — Abrigo de ônibus" },
@@ -3712,21 +3721,33 @@ const HOME_ORBIS_NEW = [
     { src: "https://cdn.jsdelivr.net/gh/lucibellelemos-commits/meustudio@cf7905a8825d0d9cc855e816bfada4c54fae2f66/orbis/orbis-06.jpg", caption: "Orbis — Moletom" },
     { src: "https://cdn.jsdelivr.net/gh/lucibellelemos-commits/meustudio@cf7905a8825d0d9cc855e816bfada4c54fae2f66/orbis/orbis-07.jpg", caption: "Orbis — Cartazes iluminados" },
 ]
-function HomeOrbisMedia() {
+type ExtraMedia = { src: string; caption: string; video?: boolean; poster?: string }
+const HOME_UNNI_NEW: ExtraMedia[] = [
+    {
+        src: "https://cdn.jsdelivr.net/gh/lucibellelemos-commits/meustudio@88bce082b19b9e68ee8b689fbaa986cf376d6c01/unni/unni-adesivos-02.mp4",
+        poster: "https://cdn.jsdelivr.net/gh/lucibellelemos-commits/meustudio@88bce082b19b9e68ee8b689fbaa986cf376d6c01/unni/unni-adesivos-02.jpg",
+        caption: "Unni Studio — Adesivos",
+        video: true,
+    },
+]
+function HomeExtraMedia(props: {
+    owner: string
+    match: string[]
+    items: ExtraMedia[]
+}) {
     const [target, setTarget] = React.useState<HTMLElement | null>(null)
     React.useEffect(() => {
         if (window.location.pathname.replace(/\/$/, "") !== "") return
-        if (document.body.dataset.luciOrbisOwner) return
-        document.body.dataset.luciOrbisOwner = "true"
+        const key = "luciExtra" + props.owner
+        if (document.body.dataset[key]) return
+        document.body.dataset[key] = "true"
         const find = () => {
             const gallery = Array.from(
                 document.querySelectorAll<HTMLElement>(
                     "[data-luci-home-gallery]"
                 )
-            ).find(
-                (node) =>
-                    node.textContent?.includes("ORB_02.JPG") ||
-                    node.textContent?.includes("ORB_04.JPG")
+            ).find((node) =>
+                props.match.some((text) => node.textContent?.includes(text))
             )
             if (gallery)
                 setTarget((current) =>
@@ -3743,16 +3764,16 @@ function HomeOrbisMedia() {
         })
         return () => {
             observer.disconnect()
-            delete document.body.dataset.luciOrbisOwner
+            delete document.body.dataset[key]
         }
     }, [])
     if (!target) return null
     return createPortal(
         <>
-            {HOME_ORBIS_NEW.map((media) => (
+            {props.items.map((media) => (
                 <article
                     key={media.src}
-                    data-framer-name="Project Item Added Orbis"
+                    data-framer-name={"Project Item Added " + props.owner}
                     data-luci-home-card="regular"
                     style={{ minWidth: 0, fontFamily: "monospace" }}
                 >
@@ -3760,19 +3781,39 @@ function HomeOrbisMedia() {
                         data-framer-name="Content Wrapper"
                         style={{ width: "100%", overflow: "hidden" }}
                     >
-                        <img
-                            src={media.src}
-                            alt={media.caption}
-                            width={1800}
-                            height={1013}
-                            loading="lazy"
-                            style={{
-                                display: "block",
-                                width: "100%",
-                                height: "auto",
-                                objectFit: "contain",
-                            }}
-                        />
+                        {media.video ? (
+                            <video
+                                src={media.src}
+                                poster={media.poster}
+                                aria-label={media.caption}
+                                muted
+                                data-luci-autoplay=""
+                                loop
+                                playsInline
+                                controls={false}
+                                preload="metadata"
+                                style={{
+                                    display: "block",
+                                    width: "100%",
+                                    height: "auto",
+                                    objectFit: "contain",
+                                }}
+                            />
+                        ) : (
+                            <img
+                                src={media.src}
+                                alt={media.caption}
+                                width={1800}
+                                height={1013}
+                                loading="lazy"
+                                style={{
+                                    display: "block",
+                                    width: "100%",
+                                    height: "auto",
+                                    objectFit: "contain",
+                                }}
+                            />
+                        )}
                     </div>
                     <p
                         style={{
