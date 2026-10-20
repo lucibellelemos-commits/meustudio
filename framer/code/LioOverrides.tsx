@@ -289,30 +289,63 @@ function ProjectRows() {
     return null
 }
 
-// Sem palavra sozinha na última linha (para navegadores sem text-wrap)
+// Sem palavra sozinha na última linha: liga as duas últimas palavras dos
+// títulos (funciona também quando o texto é animado letra por letra)
 function NoOrphans() {
     React.useEffect(() => {
-        if (typeof CSS !== "undefined" && CSS.supports?.("text-wrap", "pretty"))
-            return
         const fix = () =>
             document
-                .querySelectorAll<HTMLElement>("h1, h2, h3, .lci-q, .lci-sub")
+                .querySelectorAll<HTMLElement>(
+                    "h1, h2, h3, .lci-q, .lci-sub, [data-framer-name=\"Info\"] p"
+                )
                 .forEach((el) => {
+                    if (el.dataset.luciNoOrphan) return
+                    // texto animado letra por letra: junta as duas últimas palavras
+                    const words = Array.from(el.children).filter(
+                        (c) => c.tagName === "SPAN"
+                    ) as HTMLElement[]
+                    if (
+                        words.length >= 4 &&
+                        words.every((w) => w.children.length > 0)
+                    ) {
+                        const a = words[words.length - 2]
+                        const b = words[words.length - 1]
+                        const between = a.nextSibling
+                        const wrap = document.createElement("span")
+                        wrap.style.whiteSpace = "nowrap"
+                        wrap.style.display = "inline-block"
+                        a.before(wrap)
+                        wrap.append(a)
+                        if (between && between !== b && between.nodeType === 3)
+                            wrap.append(between)
+                        wrap.append(b)
+                        el.dataset.luciNoOrphan = "true"
+                        return
+                    }
+                    const nodes: Text[] = []
                     const walker = document.createTreeWalker(
                         el,
                         NodeFilter.SHOW_TEXT
                     )
-                    let last: Text | null = null
                     let node: Node | null
-                    while ((node = walker.nextNode()))
-                        if ((node as Text).data.trim()) last = node as Text
-                    if (!last) return
-                    const text = last.data.replace(/\s+$/, "")
-                    const i = text.lastIndexOf(" ")
-                    if (i <= 0 || text.split(" ").length < 4) return
-                    last.data =
-                        text.slice(0, i) + "\u00a0" + text.slice(i + 1) +
-                        last.data.slice(text.length)
+                    while ((node = walker.nextNode())) nodes.push(node as Text)
+                    const count = (el.textContent || "").trim().split(/\s+/)
+                    if (count.length < 4) return
+                    let seenWord = false
+                    for (let n = nodes.length - 1; n >= 0; n--) {
+                        const data = nodes[n].data
+                        for (let i = data.length - 1; i >= 0; i--) {
+                            const ch = data[i]
+                            if (ch === "\u00a0" && seenWord) return
+                            if (/\s/.test(ch)) {
+                                if (!seenWord) continue
+                                nodes[n].data =
+                                    data.slice(0, i) + "\u00a0" + data.slice(i + 1)
+                                return
+                            }
+                            seenWord = true
+                        }
+                    }
                 })
         fix()
         let timer = 0
@@ -323,7 +356,11 @@ function NoOrphans() {
                     fix()
                 }, 200)
         })
-        mo.observe(document.body, { childList: true, subtree: true })
+        mo.observe(document.body, {
+            childList: true,
+            subtree: true,
+            characterData: true,
+        })
         return () => {
             mo.disconnect()
             if (timer) window.clearTimeout(timer)
@@ -1054,6 +1091,17 @@ const WORK_TEMPLATE_CSS = `
 @media(prefers-reduced-motion:reduce){.luci-template-modal[open]{animation:none;scroll-behavior:auto}}
 @media(min-width:810px){.luci-project-story::after{content:"";flex-grow:9999}.luci-project-story figure[data-luci-r]{flex:var(--r) 1 calc(var(--h) * var(--r))!important;width:auto!important;height:auto!important;aspect-ratio:var(--r)}.luci-project-story figure[data-luci-r] img,.luci-project-story figure[data-luci-r] video{width:100%!important;height:100%!important;max-width:none;object-fit:cover}}
 `
+// Ordem de destaque na Work (os demais seguem na ordem atual)
+const WORK_PRIORITY = [
+    "Harper’s Bazaar — Retoque 3D",
+    "Porsche × Louis Vuitton",
+    "Kleber Matheus Studio — Index Conectada",
+    "Itaú — Estudo visual",
+    "Moda — Estudos de motion",
+    "Harper’s Bazaar — Imagens e tipografia",
+    "Achei Primeiro — Stills de produto",
+]
+
 // Arrastar a imagem do card pra cima, até um limite, revelando o + e as infos
 const liftMax = () => Math.min(76, Math.max(48, window.innerWidth * 0.048))
 function liftStart(e: React.PointerEvent<HTMLElement>) {
@@ -1222,7 +1270,15 @@ function WorkTemplate() {
         area === "all"
             ? "Work"
             : AREA_DATA.find(([id]) => id === area)?.[1] || "Work"
-    const items = entries.filter((e) => area === "all" || e.area === area)
+    const rank = (e: WorkEntry) => {
+        const i = WORK_PRIORITY.indexOf(e.title)
+        return i < 0 ? WORK_PRIORITY.length : i
+    }
+    const items = entries
+        .filter((e) => area === "all" || e.area === area)
+        .map((e, i) => ({ e, i }))
+        .sort((a, b) => rank(a.e) - rank(b.e) || a.i - b.i)
+        .map(({ e }) => e)
     const close = () => {
         modal.current?.close()
         setOpened(null)
