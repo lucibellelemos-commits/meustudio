@@ -621,7 +621,7 @@ const BLOCK_CSS = `
 .lci-note{font-size:12px;color:var(--mut)}
 .lci-note .lci-mail{color:var(--fg)}
 @media (max-width:809px){.lci-form{grid-template-columns:1fr}}
-.lci-q{margin:0;font-size:clamp(24px,2.2vw,32px);letter-spacing:-.02em;line-height:1.1}
+.lci-q{margin:0;font-size:clamp(20px,1.7vw,26px);letter-spacing:-.02em;line-height:1.1}
 .lci-mail{color:var(--mut);text-decoration:none;background:linear-gradient(currentColor,currentColor) 0 100%/0 1px no-repeat;transition:background-size .4s,color .3s}
 .lci-mail:hover{color:var(--fg);background-size:100% 1px}
 @media (max-width:809px){.lci-logo{padding-right:40px}.lci-logo img{transform:scale(.85)}.lci-b{padding-top:56px}.lci-cta{margin-top:40px}.lci-row{grid-template-columns:1fr;row-gap:10px;padding-top:12px;padding-bottom:12px}}
