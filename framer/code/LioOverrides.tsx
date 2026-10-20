@@ -19,6 +19,8 @@ export const withIntro = withText(
 
 // Ajustes gerais: celular, legendas e contraste
 const SITE_FIX_CSS = `
+h1,h2,h3,h4,h5,h6,p,li,figcaption,.lci-q,.lci-sub{text-wrap:pretty}
+h1,h2,h3{text-wrap:balance}
 [data-luci-home-clone],[data-luci-home-clone] [data-framer-appear-id]{opacity:1!important;transform:none!important}
 [data-luci-gallery-title]{position:relative!important;padding-right:125px!important;box-sizing:border-box!important}
 [data-luci-home-card] p,[data-luci-pg-card] p{overflow:hidden!important;text-overflow:ellipsis!important;white-space:nowrap!important;max-width:100%}
@@ -126,6 +128,7 @@ export function withLioLogo(Component): ComponentType {
                 <CaptionLabels />
                 <ViewportVideos />
                 <OldPathRedirect />
+                <NoOrphans />
                 <ProjectRows />
                 <Component
                     {...props}
@@ -281,6 +284,49 @@ function ProjectRows() {
             mo.disconnect()
             if (timer) window.clearTimeout(timer)
             delete document.body.dataset.luciRowsOwner
+        }
+    }, [])
+    return null
+}
+
+// Sem palavra sozinha na última linha (para navegadores sem text-wrap)
+function NoOrphans() {
+    React.useEffect(() => {
+        if (typeof CSS !== "undefined" && CSS.supports?.("text-wrap", "pretty"))
+            return
+        const fix = () =>
+            document
+                .querySelectorAll<HTMLElement>("h1, h2, h3, .lci-q, .lci-sub")
+                .forEach((el) => {
+                    const walker = document.createTreeWalker(
+                        el,
+                        NodeFilter.SHOW_TEXT
+                    )
+                    let last: Text | null = null
+                    let node: Node | null
+                    while ((node = walker.nextNode()))
+                        if ((node as Text).data.trim()) last = node as Text
+                    if (!last) return
+                    const text = last.data.replace(/\s+$/, "")
+                    const i = text.lastIndexOf(" ")
+                    if (i <= 0 || text.split(" ").length < 4) return
+                    last.data =
+                        text.slice(0, i) + "\u00a0" + text.slice(i + 1) +
+                        last.data.slice(text.length)
+                })
+        fix()
+        let timer = 0
+        const mo = new MutationObserver(() => {
+            if (!timer)
+                timer = window.setTimeout(() => {
+                    timer = 0
+                    fix()
+                }, 200)
+        })
+        mo.observe(document.body, { childList: true, subtree: true })
+        return () => {
+            mo.disconnect()
+            if (timer) window.clearTimeout(timer)
         }
     }, [])
     return null
