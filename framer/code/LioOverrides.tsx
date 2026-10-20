@@ -1162,10 +1162,10 @@ const WORK_TEMPLATE_CSS = `
 .luci-project-story img,.luci-project-story video,.luci-project-story .luci-project-hero img,.luci-project-story .luci-project-hero video,.luci-project-story .luci-project-frame img,.luci-project-story .luci-project-frame video{height:100%!important;width:auto!important;max-width:100%;max-height:none!important;object-fit:cover;display:block}
 @media(max-width:809px){.luci-project-credits{padding:90px 0 40px}.luci-project-story{--h:auto;padding:24px 15px 100px}.luci-project-story figure,.luci-project-story .luci-project-hero,.luci-project-story .luci-project-frame,.luci-project-story .luci-project-frame:nth-child(2n+1){width:100%!important;height:auto}.luci-project-story img,.luci-project-story video,.luci-project-story .luci-project-hero img,.luci-project-story .luci-project-hero video,.luci-project-story .luci-project-frame img,.luci-project-story .luci-project-frame video{width:100%!important;height:auto!important;max-height:70vh!important;object-fit:contain}}
 @media(prefers-reduced-motion:reduce){.luci-template-modal[open]{animation:none;scroll-behavior:auto}}
-/* Projeto aberto: imagens menores, distribuídas, com número romano ao lado */
+/* Projeto aberto: imagens menores, distribuídas, com número (01, 02…) ao lado */
 .luci-project-story{counter-reset:luci-fig}
 .luci-project-story>figure{counter-increment:luci-fig;position:relative;background:none!important;overflow:visible!important}
-.luci-project-story>figure::before{content:counter(luci-fig,upper-roman);position:absolute;bottom:0;right:calc(100% + 10px);font:400 12px/1 "Fragment Mono",monospace;color:#111;white-space:nowrap}
+.luci-project-story>figure::before{content:counter(luci-fig,decimal-leading-zero);position:absolute;bottom:0;right:calc(100% + 10px);font:400 12px/1 "Fragment Mono",monospace;color:#111;white-space:nowrap}
 @media(min-width:810px){
 .luci-project-story{display:grid!important;grid-template-columns:repeat(12,minmax(0,1fr));column-gap:28px;row-gap:96px;align-items:end;padding:72px 40px 160px 64px!important}
 .luci-project-story>figure,.luci-project-story>figure.luci-project-hero,.luci-project-story>figure.luci-project-frame,.luci-project-story>figure.luci-project-frame:nth-child(2n+1){height:auto!important;width:fit-content!important;max-width:none!important;min-height:0!important;margin:0!important}
