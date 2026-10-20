@@ -99,6 +99,7 @@ export function withLioLogo(Component): ComponentType {
                 <HomeInfoToggle />
                 <NewPortfolioMedia />
                 <HomeBazaarMedia />
+                <HomeOrbisMedia />
                 <HomeMetaProject />
                 <HomeBvlgariReplacement />
                 <CleanVideoPresentation />
@@ -437,11 +438,13 @@ const BLOCK_CSS = `
 .lci-mut{color:var(--mut)}
 .lci-logo{display:flex;align-items:center;height:36px;padding-right:56px}
 .lci-logo img{display:block;width:auto;filter:var(--lf);opacity:.9}
-.lci-cta{margin:120px var(--pad) 0;display:flex;flex-direction:column;align-items:flex-start;gap:10px}
+.lci-cta{margin:56px var(--pad) 0;display:flex;flex-direction:column;align-items:flex-start;gap:12px}
+.lci-sub{margin:0;max-width:520px;color:var(--mut);font-size:16px;line-height:1.4}
+.lci-sub .lci-mail{color:var(--fg);background-size:100% 1px}
 .lci-q{margin:0;font-size:clamp(24px,2.2vw,32px);letter-spacing:-.02em;line-height:1.1}
 .lci-mail{color:var(--mut);text-decoration:none;background:linear-gradient(currentColor,currentColor) 0 100%/0 1px no-repeat;transition:background-size .4s,color .3s}
 .lci-mail:hover{color:var(--fg);background-size:100% 1px}
-@media (max-width:809px){.lci-logo{padding-right:40px}.lci-logo img{transform:scale(.85)}.lci-b{padding-top:56px}.lci-cta{margin-top:80px}.lci-row{grid-template-columns:1fr;row-gap:10px;padding-top:12px;padding-bottom:12px}}
+@media (max-width:809px){.lci-logo{padding-right:40px}.lci-logo img{transform:scale(.85)}.lci-b{padding-top:56px}.lci-cta{margin-top:40px}.lci-row{grid-template-columns:1fr;row-gap:10px;padding-top:12px;padding-bottom:12px}}
 @media (prefers-reduced-motion:reduce){.lci-track{animation:none}}
 `
 
@@ -517,10 +520,15 @@ export function LCIBlock(props: any) {
                 </div>
             </div>
             <div className="lci-cta">
-                <p className="lci-q">Tem um projeto em mente?</p>
-                <a className="lci-mail" href={"mailto:" + EMAIL}>
-                    {EMAIL}
-                </a>
+                <p className="lci-q">Vamos criar juntos?</p>
+                <p className="lci-sub">
+                    Conte sobre a sua marca, campanha ou ideia. Escreva pelo
+                    formulário abaixo ou para{" "}
+                    <a className="lci-mail" href={"mailto:" + EMAIL}>
+                        {EMAIL}
+                    </a>
+                    .
+                </p>
             </div>
         </section>
     )
@@ -3691,6 +3699,95 @@ video::-webkit-media-controls,video::-webkit-media-controls-enclosure{display:no
  [data-luci-home-gallery] [data-luci-home-card][data-luci-cropped] [data-framer-name="Content Wrapper"] video,
  [data-luci-home-gallery] [data-luci-home-card][data-luci-cropped] [data-framer-name="Content Wrapper"] img{position:absolute!important;inset:0!important;display:block!important;width:100%!important;height:100%!important;object-fit:cover!important;object-position:center!important}
  `}</style>
+    )
+}
+
+// Home: mockups novos da Orbis no fim da galeria do projeto
+const HOME_ORBIS_NEW = [
+    { src: "https://cdn.jsdelivr.net/gh/lucibellelemos-commits/meustudio@cf7905a8825d0d9cc855e816bfada4c54fae2f66/orbis/orbis-01.jpg", caption: "Orbis — Cartões" },
+    { src: "https://cdn.jsdelivr.net/gh/lucibellelemos-commits/meustudio@cf7905a8825d0d9cc855e816bfada4c54fae2f66/orbis/orbis-02.jpg", caption: "Orbis — Ecobag" },
+    { src: "https://cdn.jsdelivr.net/gh/lucibellelemos-commits/meustudio@cf7905a8825d0d9cc855e816bfada4c54fae2f66/orbis/orbis-03.jpg", caption: "Orbis — Abrigo de ônibus" },
+    { src: "https://cdn.jsdelivr.net/gh/lucibellelemos-commits/meustudio@cf7905a8825d0d9cc855e816bfada4c54fae2f66/orbis/orbis-04.jpg", caption: "Orbis — Painéis de rua" },
+    { src: "https://cdn.jsdelivr.net/gh/lucibellelemos-commits/meustudio@cf7905a8825d0d9cc855e816bfada4c54fae2f66/orbis/orbis-05.jpg", caption: "Orbis — Painel iluminado" },
+    { src: "https://cdn.jsdelivr.net/gh/lucibellelemos-commits/meustudio@cf7905a8825d0d9cc855e816bfada4c54fae2f66/orbis/orbis-06.jpg", caption: "Orbis — Moletom" },
+    { src: "https://cdn.jsdelivr.net/gh/lucibellelemos-commits/meustudio@cf7905a8825d0d9cc855e816bfada4c54fae2f66/orbis/orbis-07.jpg", caption: "Orbis — Cartazes iluminados" },
+]
+function HomeOrbisMedia() {
+    const [target, setTarget] = React.useState<HTMLElement | null>(null)
+    React.useEffect(() => {
+        if (window.location.pathname.replace(/\/$/, "") !== "") return
+        if (document.body.dataset.luciOrbisOwner) return
+        document.body.dataset.luciOrbisOwner = "true"
+        const find = () => {
+            const gallery = Array.from(
+                document.querySelectorAll<HTMLElement>(
+                    "[data-luci-home-gallery]"
+                )
+            ).find(
+                (node) =>
+                    node.textContent?.includes("ORB_02.JPG") ||
+                    node.textContent?.includes("ORB_04.JPG")
+            )
+            if (gallery)
+                setTarget((current) =>
+                    current === gallery ? current : gallery
+                )
+        }
+        find()
+        const observer = new MutationObserver(find)
+        observer.observe(document.body, {
+            childList: true,
+            subtree: true,
+            attributes: true,
+            attributeFilter: ["data-luci-home-gallery"],
+        })
+        return () => {
+            observer.disconnect()
+            delete document.body.dataset.luciOrbisOwner
+        }
+    }, [])
+    if (!target) return null
+    return createPortal(
+        <>
+            {HOME_ORBIS_NEW.map((media) => (
+                <article
+                    key={media.src}
+                    data-framer-name="Project Item Added Orbis"
+                    data-luci-home-card="regular"
+                    style={{ minWidth: 0, fontFamily: "monospace" }}
+                >
+                    <div
+                        data-framer-name="Content Wrapper"
+                        style={{ width: "100%", overflow: "hidden" }}
+                    >
+                        <img
+                            src={media.src}
+                            alt={media.caption}
+                            width={1800}
+                            height={1013}
+                            loading="lazy"
+                            style={{
+                                display: "block",
+                                width: "100%",
+                                height: "auto",
+                                objectFit: "contain",
+                            }}
+                        />
+                    </div>
+                    <p
+                        style={{
+                            fontSize: 12,
+                            lineHeight: 1.3,
+                            margin: "10px 0 0",
+                            textTransform: "uppercase",
+                        }}
+                    >
+                        {media.caption}
+                    </p>
+                </article>
+            ))}
+        </>,
+        target
     )
 }
 
