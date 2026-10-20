@@ -609,17 +609,18 @@ const BLOCK_CSS = `
 .lci-logo{display:flex;align-items:center;height:36px;padding-right:56px}
 .lci-logo img{display:block;width:auto;filter:var(--lf);opacity:.9}
 .lci-cta{margin:56px var(--pad) 0;display:flex;flex-direction:column;align-items:flex-start;gap:12px}
-.lci-sub{margin:0;max-width:520px;color:var(--mut);font-size:16px;line-height:1.4}
+.lci-sub{margin:0;max-width:480px;color:var(--mut);font-size:14px;line-height:1.4}
 .lci-sub .lci-mail{color:var(--fg);background-size:100% 1px}
-.lci-form{width:100%;max-width:560px;display:flex;flex-direction:column;gap:18px;margin-top:22px}
-.lci-in{width:100%;font:inherit;font-size:16px;font-weight:500;color:var(--fg);background:transparent;border:0;border-bottom:1px solid var(--line);border-radius:0;padding:8px 0;outline:none;resize:none;appearance:none}
+.lci-form{width:100%;max-width:480px;display:grid;grid-template-columns:1fr 1fr;gap:4px 20px;margin-top:14px}
+.lci-in{width:100%;font:inherit;font-size:14px;font-weight:500;color:var(--fg);background:transparent;border:0;border-bottom:1px solid var(--line);border-radius:0;padding:6px 0;outline:none;resize:none;appearance:none}
 .lci-in::placeholder{color:var(--mut)}
 .lci-in:focus{border-bottom-color:var(--fg)}
-.lci-ta{min-height:72px}
-.lci-actions{display:flex;flex-wrap:wrap;align-items:baseline;gap:8px 18px;margin-top:6px}
-.lci-send{font:inherit;font-size:16px;font-weight:500;color:var(--fg);background:none;border:0;padding:0;cursor:pointer;text-decoration:underline;text-underline-offset:4px}
-.lci-note{font-size:14px;color:var(--mut)}
+.lci-ta{grid-column:1/-1;min-height:44px}
+.lci-actions{grid-column:1/-1;display:flex;flex-wrap:wrap;align-items:baseline;gap:6px 14px;margin-top:12px}
+.lci-send{font:inherit;font-size:14px;font-weight:500;color:var(--fg);background:none;border:0;padding:0;cursor:pointer;text-decoration:underline;text-underline-offset:4px}
+.lci-note{font-size:12px;color:var(--mut)}
 .lci-note .lci-mail{color:var(--fg)}
+@media (max-width:809px){.lci-form{grid-template-columns:1fr}}
 .lci-q{margin:0;font-size:clamp(24px,2.2vw,32px);letter-spacing:-.02em;line-height:1.1}
 .lci-mail{color:var(--mut);text-decoration:none;background:linear-gradient(currentColor,currentColor) 0 100%/0 1px no-repeat;transition:background-size .4s,color .3s}
 .lci-mail:hover{color:var(--fg);background-size:100% 1px}
@@ -672,7 +673,7 @@ function LCIForm() {
                 className="lci-in lci-ta"
                 name="Mensagem"
                 placeholder="Mensagem"
-                rows={3}
+                rows={2}
                 value={msg}
                 onChange={(e) => setMsg(e.target.value)}
                 required
