@@ -129,7 +129,6 @@ export function withLioLogo(Component): ComponentType {
                 <ViewportVideos />
                 <OldPathRedirect />
                 <NoOrphans />
-                <ProjectRows />
                 <Component
                     {...props}
                     text="LUCI Studio"
@@ -1089,7 +1088,22 @@ const WORK_TEMPLATE_CSS = `
 .luci-project-story img,.luci-project-story video,.luci-project-story .luci-project-hero img,.luci-project-story .luci-project-hero video,.luci-project-story .luci-project-frame img,.luci-project-story .luci-project-frame video{height:100%!important;width:auto!important;max-width:100%;max-height:none!important;object-fit:cover;display:block}
 @media(max-width:809px){.luci-project-credits{padding:90px 0 40px}.luci-project-story{--h:auto;padding:24px 15px 100px}.luci-project-story figure,.luci-project-story .luci-project-hero,.luci-project-story .luci-project-frame,.luci-project-story .luci-project-frame:nth-child(2n+1){width:100%!important;height:auto}.luci-project-story img,.luci-project-story video,.luci-project-story .luci-project-hero img,.luci-project-story .luci-project-hero video,.luci-project-story .luci-project-frame img,.luci-project-story .luci-project-frame video{width:100%!important;height:auto!important;max-height:70vh!important;object-fit:contain}}
 @media(prefers-reduced-motion:reduce){.luci-template-modal[open]{animation:none;scroll-behavior:auto}}
-@media(min-width:810px){.luci-project-story::after{content:"";flex-grow:9999}.luci-project-story figure[data-luci-r]{flex:var(--r) 1 calc(var(--h) * var(--r))!important;width:auto!important;height:auto!important;aspect-ratio:var(--r)}.luci-project-story figure[data-luci-r] img,.luci-project-story figure[data-luci-r] video{width:100%!important;height:100%!important;max-width:none;object-fit:cover}}
+/* Projeto aberto: imagens menores, distribuídas, com número romano ao lado */
+.luci-project-story{counter-reset:luci-fig}
+.luci-project-story>figure{counter-increment:luci-fig;position:relative;background:none!important;overflow:visible!important}
+.luci-project-story>figure::before{content:counter(luci-fig,upper-roman);position:absolute;bottom:0;right:calc(100% + 10px);font:400 12px/1 "Fragment Mono",monospace;color:#111;white-space:nowrap}
+@media(min-width:810px){
+.luci-project-story{display:grid!important;grid-template-columns:repeat(12,minmax(0,1fr));column-gap:28px;row-gap:96px;align-items:end;padding:72px 40px 160px 64px!important}
+.luci-project-story>figure,.luci-project-story>figure.luci-project-hero,.luci-project-story>figure.luci-project-frame,.luci-project-story>figure.luci-project-frame:nth-child(2n+1){height:auto!important;width:fit-content!important;max-width:none!important;min-height:0!important;margin:0!important}
+.luci-project-story>figure img,.luci-project-story>figure video,.luci-project-story .luci-project-hero img,.luci-project-story .luci-project-hero video,.luci-project-story .luci-project-frame img,.luci-project-story .luci-project-frame video{width:auto!important;max-width:100%!important;height:auto!important;max-height:62vh!important;object-fit:contain!important}
+.luci-template-modal .luci-project-story>figure:nth-child(6n+1){grid-column:2/span 3;align-self:start}
+.luci-template-modal .luci-project-story>figure:nth-child(6n+2){grid-column:6/span 2;align-self:start}
+.luci-template-modal .luci-project-story>figure:nth-child(6n+3){grid-column:9/span 4;margin-top:180px!important}
+.luci-template-modal .luci-project-story>figure:nth-child(6n+4){grid-column:1/span 4}
+.luci-template-modal .luci-project-story>figure:nth-child(6n+5){grid-column:6/span 3;margin-top:140px!important}
+.luci-template-modal .luci-project-story>figure:nth-child(6n+6){grid-column:10/span 3;align-self:start}
+}
+@media(max-width:809px){.luci-project-story{padding-left:44px!important}.luci-project-story>figure{margin-bottom:28px!important}}
 `
 // Ordem de destaque na Work (os demais seguem na ordem atual)
 const WORK_PRIORITY = [
@@ -2312,6 +2326,7 @@ body[data-luci-info-owner] [data-luci-info-open] [data-framer-name="Icon Wrapper
     )
 }
 
+let homeColumns = 5
 function HomeGalleryControls() {
     React.useEffect(() => {
         if (
@@ -2327,6 +2342,8 @@ function HomeGalleryControls() {
                 .forEach((g) => {
                     if (hosts.has(g) || g.hasAttribute("data-luci-bvg-old"))
                         return
+                    // todas as galerias começam no menor tamanho (ou no último escolhido)
+                    g.dataset.luciColumns = String(homeColumns)
                     const block =
                         g.closest(
                             '[data-framer-name="2 Column - Mobile"], [data-framer-name="4 Column - Desktop"]'
@@ -2391,13 +2408,20 @@ function HomeGalleryControls() {
                         b.addEventListener("click", (e) => {
                             e.preventDefault()
                             e.stopPropagation()
-                            g.dataset.luciColumns = String(count)
-                            g.scrollLeft = 0
+                            // muda em todas as galerias da home
+                            homeColumns = count
+                            hosts.forEach((_, gallery) => {
+                                gallery.dataset.luciColumns = String(count)
+                                gallery.scrollLeft = 0
+                            })
                             window.dispatchEvent(new Event("resize"))
-                            update()
+                            hosts.forEach((h) =>
+                                h.dispatchEvent(new Event("luci-sync"))
+                            )
                         })
                         host.appendChild(b)
                         update()
+                        host.addEventListener("luci-sync", update)
                     })
                     if (native) {
                         native.style.setProperty("display", "none", "important")
@@ -3562,6 +3586,7 @@ const HOME_BAZAAR_NEW = [
 
 function HomeMetaProject() {
     const [target, setTarget] = React.useState<HTMLElement | null>(null)
+    const [native, setNative] = React.useState(false)
     React.useEffect(() => {
         if (window.location.pathname.replace(/\/$/, "") !== "") return
         if (document.body.dataset.luciMetaOwner) return
@@ -3589,6 +3614,41 @@ function HomeMetaProject() {
             host.style.width = "100%"
             host.style.minWidth = "0"
             anchor.insertAdjacentElement("afterend", host)
+            // barra igual às outras: copia a barra nativa e troca os textos
+            const native = anchor.querySelector<HTMLElement>(
+                '[data-framer-name="Project Bar"]'
+            )
+            if (native) {
+                const bar = native.cloneNode(true) as HTMLElement
+                bar.removeAttribute("data-luci-info-open")
+                bar.querySelectorAll("[data-luci-gallery-buttons]").forEach(
+                    (n) => n.remove()
+                )
+                bar.querySelectorAll("[id]").forEach((n) =>
+                    n.removeAttribute("id")
+                )
+                const set = (sel: string, text: string) => {
+                    const p = bar.querySelector(sel + " p")
+                    if (p) p.textContent = text
+                }
+                set('[data-framer-name="TItle"]', "Meta — Muse Charm")
+                set('[data-framer-name="Category"]', "Vídeo com IA")
+                const details = bar.querySelector('[data-framer-name="Details"]')
+                const year = details?.lastElementChild
+                if (year && !year.hasAttribute("data-framer-name"))
+                    year.remove()
+                const categoryComma = bar.querySelector(
+                    '[data-framer-name="Category"]'
+                )?.children[1]
+                categoryComma?.remove()
+                const info = bar.querySelector('[data-framer-name="Info"] p')
+                if (info)
+                    info.textContent =
+                        "Série de filmes com IA para o Muse Charm, da Meta: o acessório e o personagem ganham vida em cenas curtas de produto, com foco em textura, luz e movimento."
+                bar.style.marginBottom = "18px"
+                host.appendChild(bar)
+                setNative(true)
+            }
             setTarget(host)
         }
         find()
@@ -3608,7 +3668,7 @@ function HomeMetaProject() {
     if (!target) return null
     return createPortal(
         <>
-            <div
+            {!native && <div
                 data-framer-name="Project Bar Meta"
                 style={{
                     display: "flex",
@@ -3652,7 +3712,7 @@ function HomeMetaProject() {
                         </p>
                     </div>
                 </div>
-            </div>
+            </div>}
             <div
                 data-luci-home-gallery="regular"
                 style={{
