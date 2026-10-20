@@ -22,6 +22,10 @@ const SITE_FIX_CSS = `
 h1,h2,h3,h4,h5,h6,p,li,figcaption,.lci-q,.lci-sub{text-wrap:pretty}
 h1,h2,h3{text-wrap:balance}
 [data-luci-home-clone],[data-luci-home-clone] [data-framer-appear-id]{opacity:1!important;transform:none!important}
+[data-luci-home-gallery][data-luci-columns="5"] [data-luci-home-card] p{font-size:8px!important;line-height:1.25!important;margin-top:7px!important}
+[data-luci-home-gallery][data-luci-columns="5"] [data-luci-home-card] p[data-luci-label]::after{font-size:8px!important;line-height:1.25!important}
+[data-luci-home-gallery][data-luci-columns="2"] [data-luci-home-card] p{font-size:12px!important}
+[data-luci-home-gallery][data-luci-columns="2"] [data-luci-home-card] p[data-luci-label]::after{font-size:12px!important}
 [data-luci-gallery-title]{position:relative!important;padding-right:125px!important;box-sizing:border-box!important}
 [data-luci-home-card] p,[data-luci-pg-card] p{overflow:hidden!important;text-overflow:ellipsis!important;white-space:nowrap!important;max-width:100%}
 .luci-template-caption span{color:#6f6f6f}
@@ -128,6 +132,7 @@ export function withLioLogo(Component): ComponentType {
                 <CaptionLabels />
                 <ViewportVideos />
                 <OldPathRedirect />
+                <PlaygroundExtra />
                 <NoOrphans />
                 <Component
                     {...props}
@@ -366,6 +371,74 @@ function NoOrphans() {
         }
     }, [])
     return null
+}
+
+// Playground: vídeos novos no começo da galeria (copiando o card nativo)
+const PLAYGROUND_NEW = [
+    {
+        src: "https://cdn.jsdelivr.net/gh/lucibellelemos-commits/meustudio@c8adc160ed52373b85c151c8ce720ce9bee9750e/playground/boticario-painel.mp4",
+        poster: "https://cdn.jsdelivr.net/gh/lucibellelemos-commits/meustudio@c8adc160ed52373b85c151c8ce720ce9bee9750e/playground/boticario-painel.jpg",
+        caption: "O Boticário — Painel de partidas",
+    },
+    {
+        src: "https://cdn.jsdelivr.net/gh/lucibellelemos-commits/meustudio@c8adc160ed52373b85c151c8ce720ce9bee9750e/playground/cabelos-ia.mp4",
+        poster: "https://cdn.jsdelivr.net/gh/lucibellelemos-commits/meustudio@c8adc160ed52373b85c151c8ce720ce9bee9750e/playground/cabelos-ia.jpg",
+        caption: "Retratos — Cabelos com IA",
+    },
+]
+function PlaygroundExtra() {
+    React.useEffect(() => {
+        if (window.location.pathname.replace(/\/$/, "") !== "/playground") return
+        const add = () => {
+            const gallery = document.querySelector<HTMLElement>(
+                "[data-luci-pg-gallery]"
+            )
+            if (!gallery || gallery.querySelector("[data-luci-pg-extra]")) return
+            const model = Array.from(
+                gallery.querySelectorAll<HTMLElement>("[data-luci-pg-card]")
+            ).find((c) => c.querySelector("video") && c.querySelector("p"))
+            if (!model) return
+            PLAYGROUND_NEW.slice()
+                .reverse()
+                .forEach((media) => {
+                    const card = model.cloneNode(true) as HTMLElement
+                    card.setAttribute("data-luci-pg-extra", "")
+                    card.setAttribute("aria-label", "Ampliar " + media.caption)
+                    card.querySelectorAll("[id]").forEach((n) =>
+                        n.removeAttribute("id")
+                    )
+                    card.querySelectorAll("img").forEach((img) => {
+                        img.removeAttribute("srcset")
+                        img.src = media.poster
+                        img.alt = media.caption
+                    })
+                    const video = card.querySelector("video")!
+                    video.src = media.src
+                    video.poster = media.poster
+                    video.setAttribute("data-luci-autoplay", "")
+                    video.removeAttribute("autoplay")
+                    video.preload = "metadata"
+                    video.muted = true
+                    const caption = card.querySelector("p")!
+                    caption.removeAttribute("data-luci-label")
+                    caption.removeAttribute("style")
+                    caption.textContent = media.caption
+                    gallery.insertBefore(card, gallery.firstChild)
+                })
+        }
+        add()
+        const mo = new MutationObserver(add)
+        mo.observe(document.body, { childList: true, subtree: true })
+        return () => {
+            mo.disconnect()
+            document
+                .querySelectorAll("[data-luci-pg-extra]")
+                .forEach((n) => n.remove())
+        }
+    }, [])
+    return (
+        <style>{`[data-luci-pg-extra],[data-luci-pg-extra] [data-framer-appear-id]{opacity:1!important;transform:none!important}`}</style>
+    )
 }
 
 // Endereços antigos (/Info, /contact, /imprint) levam para os novos
@@ -1954,6 +2027,7 @@ function PortfolioStopMotion() {
 
 // Seleção revisada: frames recusados e proporções variadas apenas na home.
 const REJECTED_CAPTIONS = new Set([
+    "Vision — Filme de produto",
     "Vision — Caimento do tecido",
     "Vision — Detalhe do cetim",
     "UltraSoft — Fibras e volume",
@@ -3645,8 +3719,20 @@ function HomeMetaProject() {
                 if (info)
                     info.textContent =
                         "Série de filmes com IA para o Muse Charm, da Meta: o acessório e o personagem ganham vida em cenas curtas de produto, com foco em textura, luz e movimento."
-                bar.style.marginBottom = "18px"
-                host.appendChild(bar)
+                // igual às outras: o texto do + abre por cima, sem empurrar a galeria
+                const slot = document.createElement("div")
+                slot.dataset.luciMetaSlot = "true"
+                slot.style.position = "relative"
+                slot.style.height = "45px"
+                slot.style.marginBottom = "18px"
+                slot.style.zIndex = "3"
+                bar.style.position = "absolute"
+                bar.style.top = "0"
+                bar.style.left = "0"
+                bar.style.right = "0"
+                bar.style.background = getComputedStyle(native).backgroundColor
+                slot.appendChild(bar)
+                host.appendChild(slot)
                 setNative(true)
             }
             setTarget(host)
@@ -4009,6 +4095,12 @@ const HOME_UNNI_NEW: ExtraMedia[] = [
     },
 ]
 const HOME_BUDDEMEYER_NEW: ExtraMedia[] = [
+    {
+        src: "https://cdn.jsdelivr.net/gh/lucibellelemos-commits/meustudio@c8adc160ed52373b85c151c8ce720ce9bee9750e/buddemeyer/buddemeyer-vision.mp4",
+        poster: "https://cdn.jsdelivr.net/gh/lucibellelemos-commits/meustudio@c8adc160ed52373b85c151c8ce720ce9bee9750e/buddemeyer/buddemeyer-vision.jpg",
+        caption: "Vision — Filme",
+        video: true,
+    },
     {
         src: "https://cdn.jsdelivr.net/gh/lucibellelemos-commits/meustudio@4767de0e7b4c9fb51eee3d9b99b6dd9f2aa575a6/buddemeyer/buddemeyer-filme.mp4",
         poster: "https://cdn.jsdelivr.net/gh/lucibellelemos-commits/meustudio@4767de0e7b4c9fb51eee3d9b99b6dd9f2aa575a6/buddemeyer/buddemeyer-filme.jpg",
