@@ -3553,18 +3553,49 @@ function HomeMetaProject() {
     return createPortal(
         <>
             <div
+                data-framer-name="Project Bar Meta"
                 style={{
                     display: "flex",
-                    alignItems: "baseline",
-                    gap: 8,
+                    flexDirection: "column",
                     marginBottom: 18,
                     fontFamily: "Switzer, Arial, sans-serif",
-                    fontSize: 18,
+                    fontSize: 16,
+                    fontWeight: 500,
                     lineHeight: 1.3,
                 }}
             >
-                <span>Meta — Muse Charm</span>
-                <span style={{ color: "#999" }}>Vídeo com IA</span>
+                <div
+                    data-framer-name="Container"
+                    style={{ display: "flex", alignItems: "center", gap: 12 }}
+                >
+                    <div
+                        data-framer-name="Details"
+                        style={{ display: "flex", flexWrap: "wrap", gap: 4 }}
+                    >
+                        <p style={{ margin: 0, color: "#000" }}>
+                            Meta — Muse Charm
+                            <span style={{ color: "rgba(0,0,0,.4)" }}>,</span>
+                        </p>
+                        <p style={{ margin: 0, color: "rgba(0,0,0,.4)" }}>
+                            Vídeo com IA
+                        </p>
+                    </div>
+                    <div
+                        data-framer-name="Icon Wrapper"
+                        tabIndex={0}
+                        style={{ width: 24, height: 24, flex: "none" }}
+                    />
+                </div>
+                <div data-framer-name="Info">
+                    <div>
+                        <p style={{ fontWeight: 400, color: "#000" }}>
+                            Série de filmes com IA para o Muse Charm, da Meta:
+                            o acessório e o personagem ganham vida em cenas
+                            curtas de produto, com foco em textura, luz e
+                            movimento.
+                        </p>
+                    </div>
+                </div>
             </div>
             <div
                 data-luci-home-gallery="regular"
