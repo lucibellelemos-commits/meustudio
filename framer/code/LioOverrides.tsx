@@ -2991,7 +2991,11 @@ function HomeHoverGalleries() {
                         const width =
                             h > w
                                 ? baseWidth * 0.82
-                                : Math.min(targetH * (w / rh), baseWidth * 2.2)
+                                : Math.min(
+                                      targetH * (w / rh),
+                                      baseWidth * 2.2,
+                                      gallery.clientWidth * 0.9
+                                  )
                         node.style.setProperty(
                             "--luci-natural-width",
                             width + "px"
