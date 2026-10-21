@@ -43,6 +43,10 @@ export const withIntro = withText(
 
 // Ajustes gerais: celular, legendas e contraste
 const SITE_FIX_CSS = `
+/* padrão tipográfico: Switzer 500 (16px texto, 24px títulos) e Fragment Mono para legendas */
+@media(min-width:810px){.framer-styles-preset-pii5ps{font-size:16px!important;letter-spacing:-.01em!important}}
+.framer-styles-preset-pii5ps{font-weight:500!important}
+.luci-template-controls button,.luci-template-controls a{font:inherit!important;letter-spacing:inherit!important}
 /* entrada imediata: sem atraso nem deslize ao abrir as páginas */
 [data-framer-appear-id]{opacity:1!important;transform:none!important}
 h1,h2,h3,h4,h5,h6,p,li,figcaption,.lci-q,.lci-sub{text-wrap:pretty}
@@ -769,14 +773,14 @@ const BLOCK_CSS = `
 .lci-logo img{display:block;width:auto;filter:var(--lf);opacity:.9}
 .lci-cta{margin:56px var(--pad) 0;display:flex;flex-direction:column;align-items:flex-start;gap:18px}
 .lci-form{width:100%;max-width:880px;display:grid;grid-template-columns:1fr 1fr 2fr auto;gap:0 24px;align-items:end}
-.lci-in{width:100%;font:inherit;font-size:14px;font-weight:400;color:var(--fg);background:transparent;border:0;border-bottom:1px solid var(--line);border-radius:0;padding:8px 0;outline:none;resize:none;appearance:none;line-height:1.4}
+.lci-in{width:100%;font:inherit;font-size:16px;font-weight:500;letter-spacing:-.01em;color:var(--fg);background:transparent;border:0;border-bottom:1px solid var(--line);border-radius:0;padding:8px 0;outline:none;resize:none;appearance:none;line-height:1.4}
 .lci-in::placeholder{color:var(--mut)}
 .lci-in:focus{border-bottom-color:var(--fg)}
 .lci-ta{height:38px;overflow:hidden}
-.lci-send{font:inherit;font-size:14px;font-weight:400;color:var(--fg);background:none;border:0;border-bottom:1px solid var(--fg);padding:8px 0;cursor:pointer;white-space:nowrap;line-height:1.4}
+.lci-send{font:inherit;font-size:16px;font-weight:500;letter-spacing:-.01em;color:var(--fg);background:none;border:0;border-bottom:1px solid var(--fg);padding:8px 0;cursor:pointer;white-space:nowrap;line-height:1.4}
 .lci-send:hover{opacity:.6}
 @media (max-width:809px){.lci-form{grid-template-columns:1fr;gap:4px}.lci-send{justify-self:start;margin-top:14px}}
-.lci-q{margin:0;font-size:clamp(20px,1.7vw,26px);letter-spacing:-.02em;line-height:1.1}
+.lci-q{margin:0;font-size:24px;letter-spacing:-.02em;line-height:1.1}
 .lci-mail{color:var(--mut);text-decoration:none;background:linear-gradient(currentColor,currentColor) 0 100%/0 1px no-repeat;transition:background-size .4s,color .3s}
 .lci-mail:hover{color:var(--fg);background-size:100% 1px}
 @media (max-width:809px){.lci-logo{padding-right:40px}.lci-logo img{transform:scale(.85)}.lci-b{padding-top:16px;padding-bottom:64px}.lci-cta{margin-top:40px}.lci-row{grid-template-columns:1fr;row-gap:10px;padding-top:12px;padding-bottom:12px}}
@@ -997,13 +1001,13 @@ const WORK_CSS = `
 
 [data-luci-work-root] .lci-area>h2,[data-luci-work-root] .lci-area>p{display:none}
 [data-luci-work-root] .lci-area{padding:0}
-[data-luci-work-root] [data-framer-name="Project Title"] p{font-family:monospace!important;font-size:11px!important}
+[data-luci-work-root] [data-framer-name="Project Title"] p{font-family:"Fragment Mono",monospace!important;font-size:11px!important}
 [data-luci-work-media-gallery]{gap:20px!important}
 [data-luci-work-media-card]{max-width:calc(36vh * var(--luci-work-aspect,0.8))!important}
 [data-luci-work-root] .luci-work-batch-grid{gap:20px}
 [data-luci-work-root] .luci-work-batch figure{width:66%}
 [data-luci-work-root] .luci-work-batch img,[data-luci-work-root] .luci-work-batch video,[data-luci-work-root] .luci-new-motion video{max-height:36vh}
-[data-luci-work-root] .luci-work-batch h3,[data-luci-work-root] .luci-new-motion h3{font-family:monospace;font-size:11px;font-weight:400}
+[data-luci-work-root] .luci-work-batch h3,[data-luci-work-root] .luci-new-motion h3{font-family:"Fragment Mono",monospace;font-size:11px;font-weight:400}
 [data-luci-work-root] .luci-work-batch article>p,[data-luci-work-root] .luci-new-motion p{font-size:11px;max-width:440px;margin-inline:auto}
 @media(max-width:809px){
 [data-luci-work-root]{padding-top:140px!important}
@@ -1194,7 +1198,7 @@ const WORK_TEMPLATE_CSS = `
 [data-luci-work-root] [data-framer-name="Section Projects"]{display:none!important}
 .lci-work-intro:has(.luci-template){height:auto!important;width:100%!important;padding:0 15px 100px!important;box-sizing:border-box}
 .lci-work-intro .luci-template h1{position:static!important;width:auto!important;height:auto!important;overflow:visible!important;clip-path:none!important;font:500 clamp(64px,9.6vw,160px)/1 Switzer,Arial,sans-serif;letter-spacing:-.065em;margin:42px 0 110px;color:#000}
-.luci-template-controls{display:grid;grid-template-columns:1fr 1fr;gap:30px;margin-bottom:115px;font:15px/1.4 Switzer,Arial,sans-serif}
+.luci-template-controls{display:grid;grid-template-columns:1fr 1fr;gap:30px;margin-bottom:115px;font:500 16px/1.4 Switzer,Arial,sans-serif;letter-spacing:-.01em}
 .luci-template-control{display:grid;grid-template-columns:110px 1fr;align-items:start}
 .luci-template .luci-template-controls nav{position:static!important;transform:none!important;width:auto!important;display:flex!important;flex-direction:column!important;gap:0!important;align-items:start!important;background:none!important;padding:0!important}
 .lci-work-intro .luci-template button{font:inherit;color:#111;background:none;border:0;padding:0;cursor:pointer;text-align:left;letter-spacing:0}
@@ -3147,8 +3151,8 @@ const NEW_UNNI_MEDIA = {
 }
 
 const NEW_MEDIA_CSS = `
-.luci-new-pg{color:#fff;font-family:monospace;box-sizing:border-box}
-.luci-new-pg p{font-family:monospace!important;font-size:10px!important;line-height:1.3!important;color:#fff!important;margin:8px 0 0!important;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-transform:uppercase}
+.luci-new-pg{color:#fff;font-family:"Fragment Mono",monospace;box-sizing:border-box}
+.luci-new-pg p{font-family:"Fragment Mono",monospace!important;font-size:10px!important;line-height:1.3!important;color:#fff!important;margin:8px 0 0!important;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-transform:uppercase}
 .luci-new-pg [data-framer-name="Content Wrapper"]{display:flex;align-items:center;justify-content:center;width:100%;overflow:hidden}
 .luci-new-pg video,.luci-new-pg img{display:block;width:100%;height:100%;object-fit:contain}
 .luci-new-motion{font-family:Switzer,sans-serif;margin-top:40px;color:#000}
@@ -3473,7 +3477,7 @@ const WORK_BATCH_CSS = `
 .luci-work-batch figure{margin:0;min-width:0}
 .luci-work-batch-media{width:100%;aspect-ratio:4/5;overflow:hidden;background:#f3f3f3}
 .luci-work-batch video,.luci-work-batch img{display:block;width:100%;height:100%;object-fit:contain}
-.luci-work-batch figcaption{font-family:monospace;font-size:12px;line-height:1.35;color:#000;margin-top:10px;text-transform:uppercase}
+.luci-work-batch figcaption{font-family:"Fragment Mono",monospace;font-size:12px;line-height:1.35;color:#000;margin-top:10px;text-transform:uppercase}
 @media(max-width:809px){.luci-work-batch-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.luci-work-batch article{margin-bottom:44px}}
 @media(max-width:479px){.luci-work-batch-grid{grid-template-columns:1fr}.luci-work-batch-media{max-height:460px}}
 `
@@ -3519,7 +3523,7 @@ function WorkMediaGroup({ group }) {
                         gap: 16,
                         alignItems: "center",
                         marginTop: 20,
-                        fontFamily: "monospace",
+                        fontFamily: '"Fragment Mono", monospace',
                         fontSize: 12,
                     }}
                 >
@@ -3759,7 +3763,7 @@ function PlaygroundLightbox() {
                 style={{
                     margin: 0,
                     color: "white",
-                    fontFamily: "monospace",
+                    fontFamily: '"Fragment Mono", monospace',
                     fontSize: 13,
                     textAlign: "center",
                 }}
@@ -3999,7 +4003,7 @@ function HomeMetaProject() {
                         key={src}
                         data-framer-name="Project Item Added Meta"
                         data-luci-home-card="regular"
-                        style={{ minWidth: 0, fontFamily: "monospace" }}
+                        style={{ minWidth: 0, fontFamily: '"Fragment Mono", monospace' }}
                     >
                         <div
                             data-framer-name="Content Wrapper"
@@ -4108,7 +4112,7 @@ function HomeBvlgariReplacement() {
                     key={src}
                     data-framer-name="Project Item Added BVLGARI"
                     data-luci-home-card="regular"
-                    style={{ minWidth: 0, fontFamily: "monospace" }}
+                    style={{ minWidth: 0, fontFamily: '"Fragment Mono", monospace' }}
                 >
                     <div
                         data-framer-name="Content Wrapper"
@@ -4333,7 +4337,7 @@ function HomeExtraMedia(props: {
                     key={media.src}
                     data-framer-name={"Project Item Added " + props.owner}
                     data-luci-home-card="regular"
-                    style={{ minWidth: 0, fontFamily: "monospace" }}
+                    style={{ minWidth: 0, fontFamily: '"Fragment Mono", monospace' }}
                 >
                     <div
                         data-framer-name="Content Wrapper"
@@ -4432,7 +4436,7 @@ function HomeBazaarMedia() {
                     key={media.src}
                     data-framer-name="Project Item Added Bazaar"
                     data-luci-home-card="regular"
-                    style={{ minWidth: 0, fontFamily: "monospace" }}
+                    style={{ minWidth: 0, fontFamily: '"Fragment Mono", monospace' }}
                 >
                     <div
                         data-framer-name="Content Wrapper"
