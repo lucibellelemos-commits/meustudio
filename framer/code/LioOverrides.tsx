@@ -43,6 +43,8 @@ export const withIntro = withText(
 
 // Ajustes gerais: celular, legendas e contraste
 const SITE_FIX_CSS = `
+/* entrada imediata: sem atraso nem deslize ao abrir as páginas */
+[data-framer-appear-id]{opacity:1!important;transform:none!important}
 h1,h2,h3,h4,h5,h6,p,li,figcaption,.lci-q,.lci-sub{text-wrap:pretty}
 h1,h2,h3{text-wrap:balance}
 [data-luci-home-clone],[data-luci-home-clone] [data-framer-appear-id]{opacity:1!important;transform:none!important}
@@ -157,6 +159,7 @@ export function withLioLogo(Component): ComponentType {
                 <ViewportVideos />
                 <OldPathRedirect />
                 <PlaygroundExtra />
+                <SobreTrail />
                 <NoOrphans />
                 <Component
                     {...props}
@@ -167,6 +170,81 @@ export function withLioLogo(Component): ComponentType {
             </React.Fragment>
         )
     }
+}
+
+// Sobre: o rastro de imagens do mouse (template) passa a mostrar os projetos
+const SOBRE_TRAIL = [
+    "bazaar", "bvlgari", "havaianas", "esmebras", "unni",
+    "buddemeyer", "orbis", "index", "bravio", "spfw",
+].map(
+    (k) =>
+        "https://cdn.jsdelivr.net/gh/lucibellelemos-commits/meustudio@72cc720153f2eb0cecf6675f79423a888a70178c/sobre/" +
+        k +
+        ".jpg"
+)
+function SobreTrail() {
+    React.useEffect(() => {
+        if (!/^\/sobre\/?$/.test(window.location.pathname)) return
+        SOBRE_TRAIL.forEach((src) => {
+            const im = new Image()
+            im.src = src
+        })
+        const map = new Map<string, string>()
+        const swap = (el: HTMLElement) => {
+            const bg = el.style.backgroundImage
+            if (!bg || bg.includes("jsdelivr")) return
+            const m = bg.match(/url\(["']?([^"')]+)["']?\)/)
+            if (!m) return
+            const key = m[1].split("?")[0]
+            if (!map.has(key))
+                map.set(key, SOBRE_TRAIL[map.size % SOBRE_TRAIL.length])
+            el.style.backgroundImage = 'url("' + map.get(key) + '")'
+            el.style.backgroundSize = "cover"
+            el.style.backgroundPosition = "center"
+        }
+        const scanAll = () =>
+            document
+                .querySelectorAll<HTMLElement>(
+                    '[data-framer-name="Curson image trail"] [style*="background-image"], [data-framer-name="Curson image trail"][style*="background-image"]'
+                )
+                .forEach(swap)
+        scanAll()
+        // observador direto (sem agrupar) para a troca acontecer antes de pintar
+        const mo = new MutationObserver((records) => {
+            for (const r of records) {
+                const t = r.target as HTMLElement
+                if (!t.closest || !t.closest('[data-framer-name="Curson image trail"]')) {
+                    if (r.type === "childList") {
+                        r.addedNodes.forEach((n) => {
+                            if (
+                                n instanceof HTMLElement &&
+                                (n.matches('[data-framer-name="Curson image trail"]') ||
+                                    n.querySelector('[data-framer-name="Curson image trail"]'))
+                            )
+                                scanAll()
+                        })
+                    }
+                    continue
+                }
+                if (r.type === "attributes") swap(t)
+                else
+                    r.addedNodes.forEach((n) => {
+                        if (n instanceof HTMLElement) {
+                            if (n.style && n.style.backgroundImage) swap(n)
+                            n.querySelectorAll<HTMLElement>('[style*="background-image"]').forEach(swap)
+                        }
+                    })
+            }
+        })
+        mo.observe(document.body, {
+            childList: true,
+            subtree: true,
+            attributes: true,
+            attributeFilter: ["style"],
+        })
+        return () => mo.disconnect()
+    }, [])
+    return null
 }
 
 // Legendas que ainda vinham com nome de arquivo: mostra um rótulo legível
@@ -685,19 +763,15 @@ const BLOCK_CSS = `
 .lci-mut{color:var(--mut)}
 .lci-logo{display:flex;align-items:center;height:36px;padding-right:56px}
 .lci-logo img{display:block;width:auto;filter:var(--lf);opacity:.9}
-.lci-cta{margin:56px var(--pad) 0;display:flex;flex-direction:column;align-items:flex-start;gap:12px}
-.lci-sub{margin:0;max-width:480px;color:var(--mut);font-size:14px;line-height:1.4}
-.lci-sub .lci-mail{color:var(--fg);background-size:100% 1px}
-.lci-form{width:100%;max-width:480px;display:grid;grid-template-columns:1fr 1fr;gap:4px 20px;margin-top:14px}
-.lci-in{width:100%;font:inherit;font-size:14px;font-weight:500;color:var(--fg);background:transparent;border:0;border-bottom:1px solid var(--line);border-radius:0;padding:6px 0;outline:none;resize:none;appearance:none}
+.lci-cta{margin:56px var(--pad) 0;display:flex;flex-direction:column;align-items:flex-start;gap:18px}
+.lci-form{width:100%;max-width:880px;display:grid;grid-template-columns:1fr 1fr 2fr auto;gap:0 24px;align-items:end}
+.lci-in{width:100%;font:inherit;font-size:14px;font-weight:400;color:var(--fg);background:transparent;border:0;border-bottom:1px solid var(--line);border-radius:0;padding:8px 0;outline:none;resize:none;appearance:none;line-height:1.4}
 .lci-in::placeholder{color:var(--mut)}
 .lci-in:focus{border-bottom-color:var(--fg)}
-.lci-ta{grid-column:1/-1;min-height:44px}
-.lci-actions{grid-column:1/-1;display:flex;flex-wrap:wrap;align-items:baseline;gap:6px 14px;margin-top:12px}
-.lci-send{font:inherit;font-size:14px;font-weight:500;color:var(--fg);background:none;border:0;padding:0;cursor:pointer;text-decoration:underline;text-underline-offset:4px}
-.lci-note{font-size:12px;color:var(--mut)}
-.lci-note .lci-mail{color:var(--fg)}
-@media (max-width:809px){.lci-form{grid-template-columns:1fr}}
+.lci-ta{height:38px;overflow:hidden}
+.lci-send{font:inherit;font-size:14px;font-weight:400;color:var(--fg);background:none;border:0;border-bottom:1px solid var(--fg);padding:8px 0;cursor:pointer;white-space:nowrap;line-height:1.4}
+.lci-send:hover{opacity:.6}
+@media (max-width:809px){.lci-form{grid-template-columns:1fr;gap:4px}.lci-send{justify-self:start;margin-top:14px}}
 .lci-q{margin:0;font-size:clamp(20px,1.7vw,26px);letter-spacing:-.02em;line-height:1.1}
 .lci-mail{color:var(--mut);text-decoration:none;background:linear-gradient(currentColor,currentColor) 0 100%/0 1px no-repeat;transition:background-size .4s,color .3s}
 .lci-mail:hover{color:var(--fg);background-size:100% 1px}
@@ -750,26 +824,14 @@ function LCIForm() {
                 className="lci-in lci-ta"
                 name="Mensagem"
                 placeholder="Mensagem"
-                rows={2}
+                rows={1}
                 value={msg}
                 onChange={(e) => setMsg(e.target.value)}
                 required
             />
-            <div className="lci-actions">
-                <button className="lci-send" type="submit">
-                    Enviar
-                </button>
-                <span className="lci-note">
-                    {sent
-                        ? "Abrimos o seu e-mail com a mensagem pronta."
-                        : "ou escreva para "}
-                    {!sent && (
-                        <a className="lci-mail" href={"mailto:" + EMAIL}>
-                            {EMAIL}
-                        </a>
-                    )}
-                </span>
-            </div>
+            <button className="lci-send" type="submit">
+                {sent ? "Enviado" : "Enviar"}
+            </button>
         </form>
     )
 }
@@ -847,10 +909,6 @@ export function LCIBlock(props: any) {
             </div>
             <div className="lci-cta">
                 <p className="lci-q">Vamos criar juntos?</p>
-                <p className="lci-sub">
-                    Conte sobre a sua marca, campanha ou ideia. Respondemos
-                    por e-mail.
-                </p>
                 <LCIForm />
             </div>
         </section>
