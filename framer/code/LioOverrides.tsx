@@ -616,7 +616,11 @@ function ViewportVideos() {
                     r.left < window.innerWidth + 300
                 if (!near) {
                     if (!v.paused) v.pause()
-                    v.preload = "none"
+                    // só as cópias do loop ficam sem baixar nada; as originais
+                    // leem o tamanho (metadata) para os cards ficarem iguais
+                    if (v.closest("[data-luci-home-clone]")) v.preload = "none"
+                    else if (v.preload === "auto" || v.preload === "")
+                        v.preload = "metadata"
                 }
                 // sem capa: mostra o primeiro quadro (só antes de começar a baixar)
                 const src = v.getAttribute("src")
@@ -748,7 +752,7 @@ const CLIENTS: [string, string, number][] = [
 const EMAIL = "lucibellelemos@gmail.com"
 
 const BLOCK_CSS = `
-.lci-b{width:100%;box-sizing:border-box;padding:80px 0 8px;font-family:"Switzer","Switzer Placeholder",sans-serif;font-size:16px;font-weight:500;letter-spacing:-.01em;line-height:1.2;color:var(--fg);background:var(--bg)}
+.lci-b{width:100%;box-sizing:border-box;padding:24px 0 96px;font-family:"Switzer","Switzer Placeholder",sans-serif;font-size:16px;font-weight:500;letter-spacing:-.01em;line-height:1.2;color:var(--fg);background:var(--bg)}
 .lci-b *{box-sizing:border-box}
 .lci-row{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,3fr);align-items:center;column-gap:20px;margin:0 var(--pad);padding:14px 0;border-top:1px solid var(--line)}
 .lci-row{border-bottom:1px solid var(--line)}
@@ -775,7 +779,7 @@ const BLOCK_CSS = `
 .lci-q{margin:0;font-size:clamp(20px,1.7vw,26px);letter-spacing:-.02em;line-height:1.1}
 .lci-mail{color:var(--mut);text-decoration:none;background:linear-gradient(currentColor,currentColor) 0 100%/0 1px no-repeat;transition:background-size .4s,color .3s}
 .lci-mail:hover{color:var(--fg);background-size:100% 1px}
-@media (max-width:809px){.lci-logo{padding-right:40px}.lci-logo img{transform:scale(.85)}.lci-b{padding-top:56px}.lci-cta{margin-top:40px}.lci-row{grid-template-columns:1fr;row-gap:10px;padding-top:12px;padding-bottom:12px}}
+@media (max-width:809px){.lci-logo{padding-right:40px}.lci-logo img{transform:scale(.85)}.lci-b{padding-top:16px;padding-bottom:64px}.lci-cta{margin-top:40px}.lci-row{grid-template-columns:1fr;row-gap:10px;padding-top:12px;padding-bottom:12px}}
 @media (prefers-reduced-motion:reduce){.lci-track{animation:none}}
 `
 
@@ -1528,7 +1532,7 @@ function WorkTemplate() {
                         data-luci-autoplay=""
                         loop
                         playsInline
-                        preload="none"
+                        preload="metadata"
                         draggable={false}
                     />
                 ) : (
@@ -1670,7 +1674,7 @@ function WorkTemplate() {
                                             loop
                                             playsInline
                                             controls={false}
-                                            preload="none"
+                                            preload="metadata"
                                         />
                                     ) : (
                                         <img
@@ -2946,11 +2950,13 @@ function HomeHoverGalleries() {
                         const img = node.querySelector<HTMLImageElement>("img")
                         let w =
                             video?.videoWidth ||
+                            Number(video?.getAttribute("width")) ||
                             img?.naturalWidth ||
                             Number(img?.getAttribute("width")) ||
                             0
                         let h =
                             video?.videoHeight ||
+                            Number(video?.getAttribute("height")) ||
                             img?.naturalHeight ||
                             Number(img?.getAttribute("height")) ||
                             0
@@ -3200,7 +3206,7 @@ function NewPortfolioMedia() {
                                     data-luci-autoplay=""
                                     loop
                                     playsInline
-                                    preload="none"
+                                    preload="metadata"
                                 />
                             )}
                         </div>
@@ -3232,7 +3238,7 @@ function UnniStickerMotion() {
                     loop
                     playsInline
                     controls={false}
-                    preload="none"
+                    preload="metadata"
                 />
             </article>
         </>
@@ -3486,7 +3492,7 @@ function WorkMediaGroup({ group }) {
                                     loop
                                     playsInline
                                     controls={false}
-                                    preload="none"
+                                    preload="metadata"
                                 />
                             )}
                         </div>
@@ -3995,7 +4001,7 @@ function HomeMetaProject() {
                                 loop
                                 playsInline
                                 controls={false}
-                                preload="none"
+                                preload="metadata"
                                 style={{
                                     display: "block",
                                     width: "100%",
@@ -4105,7 +4111,7 @@ function HomeBvlgariReplacement() {
                                 loop
                                 playsInline
                                 controls={false}
-                                preload="none"
+                                preload="metadata"
                                 style={{
                                     display: "block",
                                     width: "100%",
@@ -4325,13 +4331,15 @@ function HomeExtraMedia(props: {
                             <video
                                 src={media.src}
                                 poster={media.poster}
+                                width={540}
+                                height={960}
                                 aria-label={media.caption}
                                 muted
                                 data-luci-autoplay=""
                                 loop
                                 playsInline
                                 controls={false}
-                                preload="none"
+                                preload="metadata"
                                 style={{
                                     display: "block",
                                     width: "100%",
@@ -4447,7 +4455,7 @@ function HomeBazaarMedia() {
                                 loop
                                 playsInline
                                 controls={false}
-                                preload="none"
+                                preload="metadata"
                                 style={{
                                     width: "100%",
                                     height: "auto",
@@ -4523,7 +4531,7 @@ function BritneyRemakeVideo() {
                 muted
                 loop
                 playsInline
-                preload="none"
+                preload="metadata"
             />
         </>,
         target
