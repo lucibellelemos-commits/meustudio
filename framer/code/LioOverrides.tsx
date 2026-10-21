@@ -1044,7 +1044,7 @@ body:has([data-luci-work-root]) button[aria-label="Edit Framer Content"]{display
 
 
 @media(min-width:810px) and (max-width:1199px){.lci-work-intro nav{width:220px}.lci-work-intro button,.lci-work-intro button[aria-pressed="true"]{font-size:16px}}
-@media(max-width:809px){.lci-work-intro button,.lci-work-intro button[aria-pressed="true"]{font-size:15px;font-weight:400;line-height:1.3;letter-spacing:0;text-transform:none}}
+@media(max-width:809px){.lci-work-intro button,.lci-work-intro button[aria-pressed="true"]{font-size:15px;font-weight:500;line-height:1.3;letter-spacing:-.01em;text-transform:none}}
 
 [data-luci-work-root] [data-framer-name="Project Container"]{padding:0!important;gap:0!important}
 [data-luci-project-number]{gap:0!important;width:var(--luci-project-width)!important;max-width:none!important;margin-inline:auto!important;position:relative!important;overflow:visible!important;flex:none!important}
@@ -1202,7 +1202,7 @@ const WORK_TEMPLATE_CSS = `
 .luci-template-control{display:grid;grid-template-columns:110px 1fr;align-items:start}
 .luci-template .luci-template-controls nav{position:static!important;transform:none!important;width:auto!important;display:flex!important;flex-direction:column!important;gap:0!important;align-items:start!important;background:none!important;padding:0!important}
 .lci-work-intro .luci-template button{font:inherit;color:#111;background:none;border:0;padding:0;cursor:pointer;text-align:left;letter-spacing:0}
-.luci-template-controls button,.luci-template-controls button[aria-pressed="true"]{font:15px/1.4 Switzer,Arial,sans-serif!important;color:#111!important;letter-spacing:0!important}
+.luci-template-controls button,.luci-template-controls button[aria-pressed="true"]{font:500 16px/1.4 Switzer,Arial,sans-serif!important;color:#111!important;letter-spacing:-.01em!important}
 .luci-template-controls button[aria-pressed="true"]{color:#aaa!important}
 .luci-template button:focus-visible{outline:1px solid #111;outline-offset:4px}
 .luci-template-gallery{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;align-items:start}.luci-template-column{min-width:0}
@@ -1211,7 +1211,7 @@ const WORK_TEMPLATE_CSS = `
 .luci-template-image img,.luci-template-image video{width:100%;height:auto;display:block;object-fit:cover}
 .luci-template-image::after{content:'+';position:absolute;inset:0;display:grid;place-items:center;font:200 90px/1 Switzer,sans-serif;color:#fff;mix-blend-mode:difference;opacity:0;transition:opacity .18s}
 .luci-template-image:hover::after{opacity:1}
-.luci-template-caption{font:15px/1.4 Switzer,Arial,sans-serif;display:flex;align-items:baseline;gap:7px;padding-top:10px}
+.luci-template-caption{font:500 16px/1.4 Switzer,Arial,sans-serif;letter-spacing:-.01em;display:flex;align-items:baseline;gap:7px;padding-top:10px}
 .luci-template-caption span{color:#888}
 .luci-template-caption .luci-template-details{margin-left:auto;font-size:10px;text-decoration:underline;opacity:0}
 .luci-template-card:hover .luci-template-details,.luci-template-details:focus-visible{opacity:1}
@@ -1232,7 +1232,7 @@ const WORK_TEMPLATE_CSS = `
 .luci-template-modal{padding:0;border:0;background:white;color:#111;width:min(960px,85vw);max-width:none;max-height:92vh;overflow:auto}
 .luci-template-modal::backdrop{background:rgba(255,255,255,.96)}
 .luci-template-modal img,.luci-template-modal video{display:block;width:100%;max-height:80vh;height:auto;object-fit:contain}
-.luci-template-modal header{display:flex;justify-content:space-between;gap:20px;padding:16px 0;font:15px Switzer,sans-serif}
+.luci-template-modal header{display:flex;justify-content:space-between;gap:20px;padding:16px 0;font:500 16px Switzer,sans-serif;letter-spacing:-.01em}
 .luci-template-modal h2{font:28px Switzer,sans-serif;margin:24px 0 12px}
 .luci-template-modal p{font:16px/1.6 Switzer,sans-serif;max-width:720px;white-space:pre-wrap;margin:0 0 40px}
 @media(max-width:809px){[data-luci-work-root]:has(.luci-template){padding-top:80px!important}.lci-work-intro .luci-template h1{font-size:clamp(50px,11vw,86px);margin:25px 0 65px}.luci-template-controls{gap:16px;margin-bottom:65px}.luci-template-control{grid-template-columns:65px 1fr}.luci-template-controls button,.luci-template-controls button[aria-pressed="true"]{font-size:13px!important}.luci-template-gallery{grid-template-columns:repeat(2,minmax(0,1fr))}.luci-template-gallery[data-view="grid"]{grid-template-columns:repeat(2,minmax(0,1fr))}.luci-template-caption{font-size:12px;flex-wrap:wrap}.luci-template-caption .luci-template-details{opacity:1}.luci-template-card{margin-bottom:40px}.luci-template-modal{width:90vw}.luci-template-gallery[data-view="list"] .luci-template-caption{font-size:14px!important}
@@ -3152,7 +3152,7 @@ const NEW_UNNI_MEDIA = {
 
 const NEW_MEDIA_CSS = `
 .luci-new-pg{color:#fff;font-family:"Fragment Mono",monospace;box-sizing:border-box}
-.luci-new-pg p{font-family:"Fragment Mono",monospace!important;font-size:10px!important;line-height:1.3!important;color:#fff!important;margin:8px 0 0!important;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-transform:uppercase}
+.luci-new-pg p{font-family:"Fragment Mono",monospace!important;font-size:11px!important;line-height:1.3!important;color:#fff!important;margin:8px 0 0!important;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-transform:uppercase}
 .luci-new-pg [data-framer-name="Content Wrapper"]{display:flex;align-items:center;justify-content:center;width:100%;overflow:hidden}
 .luci-new-pg video,.luci-new-pg img{display:block;width:100%;height:100%;object-fit:contain}
 .luci-new-motion{font-family:Switzer,sans-serif;margin-top:40px;color:#000}
