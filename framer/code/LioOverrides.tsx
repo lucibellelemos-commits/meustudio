@@ -4,6 +4,30 @@ import type { ComponentType } from "react"
 
 // Textos do LUCI Studio aplicados por override (template Nolan Barret)
 
+// Observadores do DOM agrupados: no máximo uma execução por quadro,
+// para o site não travar enquanto carrega.
+class LuciObserver {
+    private mo: MutationObserver
+    private frame = 0
+    constructor(cb: () => void) {
+        this.mo = new MutationObserver(() => {
+            if (this.frame) return
+            this.frame = window.requestAnimationFrame(() => {
+                this.frame = 0
+                cb()
+            })
+        })
+    }
+    observe(target: Node, options?: MutationObserverInit) {
+        this.mo.observe(target, options)
+    }
+    disconnect() {
+        if (this.frame) window.cancelAnimationFrame(this.frame)
+        this.frame = 0
+        this.mo.disconnect()
+    }
+}
+
 const withText =
     (text: string) =>
     (Component): ComponentType =>
@@ -217,7 +241,7 @@ function CaptionLabels() {
                 .forEach(measure)
         }
         apply()
-        const observer = new MutationObserver(() => {
+        const observer = new LuciObserver(() => {
             if (!frame) frame = window.setTimeout(apply, 60)
         })
         observer.observe(document.body, { childList: true, subtree: true })
@@ -276,7 +300,7 @@ function ProjectRows() {
                 .forEach(ratio)
         scan()
         let timer = 0
-        const mo = new MutationObserver(() => {
+        const mo = new LuciObserver(() => {
             if (!timer)
                 timer = window.setTimeout(() => {
                     timer = 0
@@ -353,7 +377,7 @@ function NoOrphans() {
                 })
         fix()
         let timer = 0
-        const mo = new MutationObserver(() => {
+        const mo = new LuciObserver(() => {
             if (!timer)
                 timer = window.setTimeout(() => {
                     timer = 0
@@ -417,7 +441,7 @@ function PlaygroundExtra() {
                     video.poster = media.poster
                     video.setAttribute("data-luci-autoplay", "")
                     video.removeAttribute("autoplay")
-                    video.preload = "metadata"
+                    video.preload = "none"
                     video.muted = true
                     const caption = card.querySelector("p")!
                     caption.removeAttribute("data-luci-label")
@@ -427,7 +451,7 @@ function PlaygroundExtra() {
                 })
         }
         add()
-        const mo = new MutationObserver(add)
+        const mo = new LuciObserver(add)
         mo.observe(document.body, { childList: true, subtree: true })
         return () => {
             mo.disconnect()
@@ -481,29 +505,48 @@ function ViewportVideos() {
             }
         }
         const seen = new WeakSet<HTMLVideoElement>()
+        // vídeo só baixa quando chega perto da tela; fora dela, pausa
         const io = new IntersectionObserver(
             (entries) => {
                 entries.forEach((entry) => {
                     const v = entry.target as HTMLVideoElement
                     if (entry.isIntersecting) {
+                        if (v.preload === "none") v.preload = "metadata"
                         if (wants(v) && v.paused) v.play().catch(() => {})
                     } else if (!v.paused) {
                         v.pause()
                     }
                 })
             },
-            { rootMargin: "200px 0px" }
+            { rootMargin: "300px 300px" }
         )
         const scan = () => {
             document.querySelectorAll<HTMLVideoElement>("video").forEach((v) => {
                 if (seen.has(v)) return
                 seen.add(v)
-                // sem capa: mostra o primeiro quadro em vez de um bloco vazio
+                // autoplay nativo baixa todos os vídeos de uma vez: troca pelo nosso
+                if (v.autoplay) {
+                    v.setAttribute("data-luci-autoplay", "")
+                    v.removeAttribute("autoplay")
+                    v.autoplay = false
+                }
+                const r = v.getBoundingClientRect()
+                const near =
+                    r.bottom > -300 &&
+                    r.top < window.innerHeight + 300 &&
+                    r.right > -300 &&
+                    r.left < window.innerWidth + 300
+                if (!near) {
+                    if (!v.paused) v.pause()
+                    v.preload = "none"
+                }
+                // sem capa: mostra o primeiro quadro (só antes de começar a baixar)
                 const src = v.getAttribute("src")
                 if (
                     src &&
                     !v.poster &&
-                    v.paused &&
+                    v.readyState === 0 &&
+                    v.networkState !== 2 &&
                     v.hasAttribute("data-luci-autoplay") &&
                     !src.includes("#t=")
                 )
@@ -521,7 +564,7 @@ function ViewportVideos() {
         }
         scan()
         let timer = 0
-        const mo = new MutationObserver(() => {
+        const mo = new LuciObserver(() => {
             if (!timer)
                 timer = window.setTimeout(() => {
                     timer = 0
@@ -544,7 +587,7 @@ function usePortfolioRoute() {
     React.useEffect(() => {
         const sync = () => setRoute(window.location.pathname.replace(/\/$/, ""))
         sync()
-        const observer = new MutationObserver(sync)
+        const observer = new LuciObserver(sync)
         observer.observe(document.body, { childList: true, subtree: true })
         window.addEventListener("popstate", sync)
         const timer = window.setInterval(sync, 250)
@@ -984,7 +1027,7 @@ function WorkSelection() {
                 })
         }
         apply()
-        const observer = new MutationObserver(apply)
+        const observer = new LuciObserver(apply)
         observer.observe(document.body, { childList: true, subtree: true })
         return () => {
             observer.disconnect()
@@ -1339,7 +1382,7 @@ function WorkTemplate() {
             }
         }
         collect()
-        const observer = new MutationObserver(collect)
+        const observer = new LuciObserver(collect)
         observer.observe(document.body, { childList: true, subtree: true })
         return () => observer.disconnect()
     }, [])
@@ -1393,7 +1436,7 @@ function WorkTemplate() {
                         data-luci-autoplay=""
                         loop
                         playsInline
-                        preload="metadata"
+                        preload="none"
                         draggable={false}
                     />
                 ) : (
@@ -1535,7 +1578,7 @@ function WorkTemplate() {
                                             loop
                                             playsInline
                                             controls={false}
-                                            preload="metadata"
+                                            preload="none"
                                         />
                                     ) : (
                                         <img
@@ -1742,7 +1785,7 @@ function WorkFilters({ style }: { style?: React.CSSProperties }) {
                 })
         }
         apply()
-        const observer = new MutationObserver(apply)
+        const observer = new LuciObserver(apply)
         observer.observe(document.body, { childList: true, subtree: true })
         return () => {
             observer.disconnect()
@@ -1835,7 +1878,7 @@ function WorkFilters({ style }: { style?: React.CSSProperties }) {
         }
         window.addEventListener("scroll", schedule, { passive: true })
         window.addEventListener("resize", schedule)
-        const observer = new MutationObserver(schedule)
+        const observer = new LuciObserver(schedule)
         observer.observe(document.body, { childList: true, subtree: true })
         schedule()
         return () => {
@@ -1993,7 +2036,7 @@ function PortfolioStopMotion() {
             })
         }
         apply()
-        const observer = new MutationObserver(apply)
+        const observer = new LuciObserver(apply)
         observer.observe(document.body, { childList: true, subtree: true })
         const reduced = window.matchMedia("(prefers-reduced-motion: reduce)")
         const timer = window.setInterval(() => {
@@ -2139,7 +2182,7 @@ function PortfolioCuration() {
                 })
         }
         apply()
-        const observer = new MutationObserver(apply)
+        const observer = new LuciObserver(apply)
         observer.observe(document.body, { childList: true, subtree: true })
         return () => {
             observer.disconnect()
@@ -2269,7 +2312,7 @@ function PlaygroundCuration() {
                 })
         }
         apply()
-        const observer = new MutationObserver(apply)
+        const observer = new LuciObserver(apply)
         observer.observe(document.body, { childList: true, subtree: true })
         window.addEventListener("resize", apply)
         return () => {
@@ -2370,7 +2413,7 @@ function HomeInfoToggle() {
             }
         }
         setup()
-        const ob = new MutationObserver(setup)
+        const ob = new LuciObserver(setup)
         ob.observe(document.body, { childList: true, subtree: true })
         document.addEventListener("pointerdown", toggle, true)
         document.addEventListener("click", blockNative, true)
@@ -2518,7 +2561,7 @@ function HomeGalleryControls() {
                     hosts.set(g, host)
                 })
         setup()
-        const ob = new MutationObserver(setup)
+        const ob = new LuciObserver(setup)
         ob.observe(document.body, { childList: true, subtree: true })
         return () => {
             ob.disconnect()
@@ -2771,6 +2814,24 @@ function HomeHoverGalleries() {
                                     .forEach((node) =>
                                         node.removeAttribute("id")
                                     )
+                                // cópias não baixam nada até chegarem perto da tela
+                                clone
+                                    .querySelectorAll("img")
+                                    .forEach((im) =>
+                                        im.setAttribute("loading", "lazy")
+                                    )
+                                clone
+                                    .querySelectorAll("video")
+                                    .forEach((vd) => {
+                                        if (vd.hasAttribute("autoplay")) {
+                                            vd.removeAttribute("autoplay")
+                                            vd.setAttribute(
+                                                "data-luci-autoplay",
+                                                ""
+                                            )
+                                        }
+                                        vd.setAttribute("preload", "none")
+                                    })
                                 gallery.appendChild(clone)
                             })
                     }
@@ -2884,7 +2945,7 @@ function HomeHoverGalleries() {
         document.addEventListener("load", prepare, true)
         window.addEventListener("resize", prepare)
         prepare()
-        const observer = new MutationObserver(prepare)
+        const observer = new LuciObserver(prepare)
         observer.observe(document.body, { childList: true, subtree: true })
 
         document.addEventListener("pointerover", pointer, true)
@@ -3007,7 +3068,7 @@ function NewPortfolioMedia() {
             return false
         }
         find()
-        const observer = new MutationObserver(find)
+        const observer = new LuciObserver(find)
         observer.observe(document.body, {
             childList: true,
             subtree: true,
@@ -3047,7 +3108,7 @@ function NewPortfolioMedia() {
                                     data-luci-autoplay=""
                                     loop
                                     playsInline
-                                    preload="metadata"
+                                    preload="none"
                                 />
                             )}
                         </div>
@@ -3079,7 +3140,7 @@ function UnniStickerMotion() {
                     loop
                     playsInline
                     controls={false}
-                    preload="metadata"
+                    preload="none"
                 />
             </article>
         </>
@@ -3333,7 +3394,7 @@ function WorkMediaGroup({ group }) {
                                     loop
                                     playsInline
                                     controls={false}
-                                    preload="metadata"
+                                    preload="none"
                                 />
                             )}
                         </div>
@@ -3475,7 +3536,7 @@ function PlaygroundLightbox() {
                     card.style.cursor = "zoom-in"
                 })
         prepare()
-        const observer = new MutationObserver(prepare)
+        const observer = new LuciObserver(prepare)
         observer.observe(document.body, { childList: true, subtree: true })
         document.addEventListener("click", open, true)
         document.addEventListener("keydown", open, true)
@@ -3747,7 +3808,7 @@ function HomeMetaProject() {
             setTarget(host)
         }
         find()
-        const observer = new MutationObserver(find)
+        const observer = new LuciObserver(find)
         observer.observe(document.body, {
             childList: true,
             subtree: true,
@@ -3842,7 +3903,7 @@ function HomeMetaProject() {
                                 loop
                                 playsInline
                                 controls={false}
-                                preload="metadata"
+                                preload="none"
                                 style={{
                                     display: "block",
                                     width: "100%",
@@ -3907,7 +3968,7 @@ function HomeBvlgariReplacement() {
             setTarget(host)
         }
         find()
-        const observer = new MutationObserver(find)
+        const observer = new LuciObserver(find)
         observer.observe(document.body, {
             childList: true,
             subtree: true,
@@ -3952,7 +4013,7 @@ function HomeBvlgariReplacement() {
                                 loop
                                 playsInline
                                 controls={false}
-                                preload="metadata"
+                                preload="none"
                                 style={{
                                     display: "block",
                                     width: "100%",
@@ -4028,7 +4089,7 @@ function SilentSiteMedia() {
             if (e.target instanceof HTMLMediaElement) silence(e.target)
         }
         all()
-        const ob = new MutationObserver(all)
+        const ob = new LuciObserver(all)
         ob.observe(document.body, {
             childList: true,
             subtree: true,
@@ -4061,7 +4122,7 @@ function CleanVideoPresentation() {
                     video.removeAttribute("controls")
                 })
         clean()
-        const observer = new MutationObserver(clean)
+        const observer = new LuciObserver(clean)
         observer.observe(document.body, {
             childList: true,
             subtree: true,
@@ -4142,7 +4203,7 @@ function HomeExtraMedia(props: {
                 )
         }
         find()
-        const observer = new MutationObserver(find)
+        const observer = new LuciObserver(find)
         observer.observe(document.body, {
             childList: true,
             subtree: true,
@@ -4178,7 +4239,7 @@ function HomeExtraMedia(props: {
                                 loop
                                 playsInline
                                 controls={false}
-                                preload="metadata"
+                                preload="none"
                                 style={{
                                     display: "block",
                                     width: "100%",
@@ -4239,7 +4300,7 @@ function HomeBazaarMedia() {
                 )
         }
         find()
-        const observer = new MutationObserver(find)
+        const observer = new LuciObserver(find)
         observer.observe(document.body, {
             childList: true,
             subtree: true,
@@ -4294,7 +4355,7 @@ function HomeBazaarMedia() {
                                 loop
                                 playsInline
                                 controls={false}
-                                preload="metadata"
+                                preload="none"
                                 style={{
                                     width: "100%",
                                     height: "auto",
@@ -4345,7 +4406,7 @@ function BritneyRemakeVideo() {
             }
         }
         find()
-        const observer = new MutationObserver(find)
+        const observer = new LuciObserver(find)
         observer.observe(document.body, {
             childList: true,
             subtree: true,
@@ -4370,7 +4431,7 @@ function BritneyRemakeVideo() {
                 muted
                 loop
                 playsInline
-                preload="metadata"
+                preload="none"
             />
         </>,
         target
