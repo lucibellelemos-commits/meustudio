@@ -572,7 +572,41 @@ function ViewportVideos() {
                 }, 100)
         })
         mo.observe(document.body, { childList: true, subtree: true })
+        // reforço: alguns vídeos ficam em caixas que o observador não enxerga;
+        // quando a rolagem para, toca os que estão de fato na tela
+        let settle = 0
+        const check = () => {
+            settle = 0
+            document
+                .querySelectorAll<HTMLVideoElement>("video[data-luci-autoplay]")
+                .forEach((v) => {
+                    if (!v.paused) return
+                    const r = v.getBoundingClientRect()
+                    if (
+                        r.width > 0 &&
+                        r.bottom > 0 &&
+                        r.top < window.innerHeight &&
+                        r.right > 0 &&
+                        r.left < window.innerWidth
+                    ) {
+                        if (v.preload === "none") v.preload = "metadata"
+                        v.play().catch(() => {})
+                    }
+                })
+        }
+        const onScroll = () => {
+            if (settle) window.clearTimeout(settle)
+            settle = window.setTimeout(check, 250)
+        }
+        document.addEventListener("scroll", onScroll, {
+            capture: true,
+            passive: true,
+        })
+        const first = window.setTimeout(check, 1500)
         return () => {
+            document.removeEventListener("scroll", onScroll, true)
+            if (settle) window.clearTimeout(settle)
+            window.clearTimeout(first)
             io.disconnect()
             mo.disconnect()
             if (timer) window.clearTimeout(timer)
