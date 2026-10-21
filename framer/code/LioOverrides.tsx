@@ -43,6 +43,8 @@ export const withIntro = withText(
 
 // Ajustes gerais: celular, legendas e contraste
 const SITE_FIX_CSS = `
+/* mono do novo visual também nos textos do Framer */
+[style*="Fragment Mono"]{--framer-font-family:"Cutive Mono",ui-monospace,monospace!important;font-family:"Cutive Mono",ui-monospace,monospace!important}
 /* padrão tipográfico: Switzer 500 (16px texto, 24px títulos) e Fragment Mono para legendas */
 @media(min-width:810px){.framer-styles-preset-pii5ps{font-size:16px!important;letter-spacing:-.01em!important}}
 .framer-styles-preset-pii5ps{font-weight:500!important}
@@ -167,6 +169,8 @@ export function withLioLogo(Component): ComponentType {
                 <PlaygroundExtra />
                 <SobreTrail />
                 <ImageDownscale />
+                <MonoFont />
+                <HomeIntro />
                 <NoOrphans />
                 <Component
                     {...props}
@@ -299,6 +303,100 @@ function ImageDownscale() {
         return () => mo.disconnect()
     }, [])
     return null
+}
+
+// Fonte mono do novo visual (parecida com a do estúdio de referência)
+function MonoFont() {
+    React.useEffect(() => {
+        if (document.getElementById("luci-cutive-mono")) return
+        const link = document.createElement("link")
+        link.id = "luci-cutive-mono"
+        link.rel = "stylesheet"
+        link.href =
+            "https://fonts.googleapis.com/css2?family=Cutive+Mono&display=swap"
+        document.head.appendChild(link)
+    }, [])
+    return null
+}
+
+// Topo da home: nome, links grandes em mono, sobre e clientes (em colunas)
+const HOME_INTRO_CSS = `
+body[data-luci-home-intro] [data-framer-name="Main"]>[data-framer-name="Header"]>[data-framer-name="Heading"]{display:none!important}
+body[data-luci-home-intro] [data-framer-name="Main"]>[data-framer-name="Header"]{height:auto!important;min-height:0!important;padding:0!important;display:block!important}
+.luci-hi{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));column-gap:28px;padding:150px 15px 90px;box-sizing:border-box;width:100%;color:#111;text-align:left}
+.luci-hi-name{font:500 14px/1.35 Switzer,Arial,sans-serif;letter-spacing:-.01em;margin:0}
+.luci-hi-name span,.luci-hi p{font:400 14px/1.4 "Cutive Mono",ui-monospace,monospace;letter-spacing:0;color:#111}
+.luci-hi-name span{display:block}
+.luci-hi nav{display:flex;flex-direction:column;align-items:flex-start;gap:2px}
+.luci-hi nav a{font:400 clamp(36px,3.4vw,52px)/1.12 "Cutive Mono",ui-monospace,monospace;color:#111;text-decoration:underline;text-decoration-thickness:1px;text-underline-offset:.16em;letter-spacing:-.01em}
+.luci-hi nav a:hover{color:#888}
+.luci-hi h2{font:500 14px/1.35 Switzer,Arial,sans-serif;letter-spacing:-.01em;margin:0 0 4px}
+.luci-hi p{margin:0;max-width:34ch}
+@media(max-width:809px){.luci-hi{grid-template-columns:1fr 1fr;row-gap:36px;padding:110px 15px 56px}.luci-hi nav a{font-size:34px}.luci-hi-about,.luci-hi-clients{grid-column:span 1}}
+`
+function HomeIntro() {
+    const [host, setHost] = React.useState<HTMLElement | null>(null)
+    React.useEffect(() => {
+        if (window.location.pathname.replace(/\/$/, "") !== "") return
+        document.body.setAttribute("data-luci-home-intro", "")
+        const find = () => {
+            const header = document.querySelector<HTMLElement>(
+                '[data-framer-name="Main"]>[data-framer-name="Header"]'
+            )
+            if (!header) return
+            let slot = header.querySelector<HTMLElement>("[data-luci-hi-slot]")
+            if (!slot) {
+                slot = document.createElement("div")
+                slot.setAttribute("data-luci-hi-slot", "")
+                header.appendChild(slot)
+            }
+            setHost((h) => (h === slot ? h : slot))
+        }
+        find()
+        const mo = new LuciObserver(find)
+        mo.observe(document.body, { childList: true, subtree: true })
+        return () => {
+            mo.disconnect()
+            document.body.removeAttribute("data-luci-home-intro")
+        }
+    }, [])
+    return (
+        <>
+            <style>{HOME_INTRO_CSS}</style>
+            {host &&
+                createPortal(
+                    <section className="luci-hi" aria-label="LUCI Studio">
+                        <p className="luci-hi-name">
+                            LUCI Studio
+                            <span>São Paulo — Recife</span>
+                        </p>
+                        <nav aria-label="Seções">
+                            <a href="./work">Work</a>
+                            <a href="./sobre">Sobre</a>
+                            <a href="./playground">Playground</a>
+                        </nav>
+                        <div className="luci-hi-about">
+                            <h2>Sobre</h2>
+                            <p>
+                                Estúdio de design gráfico e interativo. Criamos
+                                marcas, imagens e filmes para moda, beleza,
+                                cultura e tecnologia, unindo direção de arte,
+                                motion e inteligência artificial.
+                            </p>
+                        </div>
+                        <div className="luci-hi-clients">
+                            <h2>Clientes</h2>
+                            <p>
+                                Google, Harper’s Bazaar, BVLGARI, Havaianas,
+                                Itaú, Meta, Nubank, SPFW, Eudora, Buddemeyer e
+                                Lupo.
+                            </p>
+                        </div>
+                    </section>,
+                    host
+                )}
+        </>
+    )
 }
 
 // Legendas que ainda vinham com nome de arquivo: mostra um rótulo legível
@@ -813,14 +911,14 @@ const BLOCK_CSS = `
 .lci-b *{box-sizing:border-box}
 .lci-row{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,3fr);align-items:center;column-gap:20px;margin:0 var(--pad);padding:14px 0;border-top:1px solid var(--line)}
 .lci-row{border-bottom:1px solid var(--line)}
-.lci-lab{font-family:"Fragment Mono",monospace;font-size:10px;font-weight:400;letter-spacing:0;line-height:1;text-transform:uppercase;color:var(--fg)}
+.lci-lab{font-family:"Cutive Mono",monospace;font-size:10px;font-weight:400;letter-spacing:0;line-height:1;text-transform:uppercase;color:var(--fg)}
 .lci-mq{position:relative;min-width:0;overflow:hidden;-webkit-mask-image:linear-gradient(90deg,transparent,#000 5%,#000 95%,transparent);mask-image:linear-gradient(90deg,transparent,#000 5%,#000 95%,transparent)}
 .lci-track{display:flex;align-items:center;width:max-content;animation:lci-x var(--dur) linear infinite}
 .lci-track.rev{animation-direction:reverse}
 .lci-mq:hover .lci-track{animation-play-state:paused}
 @keyframes lci-x{from{transform:translateX(0)}to{transform:translateX(-50%)}}
 .lci-it{display:flex;align-items:center;gap:6px;padding-right:32px;white-space:nowrap}
-.lci-ic{width:16px;height:16px;border-radius:4px;border:1px solid currentColor;display:inline-flex;align-items:center;justify-content:center;font-family:"Fragment Mono",monospace;font-size:7px;font-weight:400;letter-spacing:0}
+.lci-ic{width:16px;height:16px;border-radius:4px;border:1px solid currentColor;display:inline-flex;align-items:center;justify-content:center;font-family:"Cutive Mono",monospace;font-size:7px;font-weight:400;letter-spacing:0}
 .lci-mut{color:var(--mut)}
 .lci-logo{display:flex;align-items:center;height:36px;padding-right:56px}
 .lci-logo img{display:block;width:auto;filter:var(--lf);opacity:.9}
@@ -1054,13 +1152,13 @@ const WORK_CSS = `
 
 [data-luci-work-root] .lci-area>h2,[data-luci-work-root] .lci-area>p{display:none}
 [data-luci-work-root] .lci-area{padding:0}
-[data-luci-work-root] [data-framer-name="Project Title"] p{font-family:"Fragment Mono",monospace!important;font-size:11px!important}
+[data-luci-work-root] [data-framer-name="Project Title"] p{font-family:"Cutive Mono",monospace!important;font-size:11px!important}
 [data-luci-work-media-gallery]{gap:20px!important}
 [data-luci-work-media-card]{max-width:calc(36vh * var(--luci-work-aspect,0.8))!important}
 [data-luci-work-root] .luci-work-batch-grid{gap:20px}
 [data-luci-work-root] .luci-work-batch figure{width:66%}
 [data-luci-work-root] .luci-work-batch img,[data-luci-work-root] .luci-work-batch video,[data-luci-work-root] .luci-new-motion video{max-height:36vh}
-[data-luci-work-root] .luci-work-batch h3,[data-luci-work-root] .luci-new-motion h3{font-family:"Fragment Mono",monospace;font-size:11px;font-weight:400}
+[data-luci-work-root] .luci-work-batch h3,[data-luci-work-root] .luci-new-motion h3{font-family:"Cutive Mono",monospace;font-size:11px;font-weight:400}
 [data-luci-work-root] .luci-work-batch article>p,[data-luci-work-root] .luci-new-motion p{font-size:11px;max-width:440px;margin-inline:auto}
 @media(max-width:809px){
 [data-luci-work-root]{padding-top:140px!important}
@@ -1246,6 +1344,50 @@ type WorkEntry = {
     video: boolean
     ratio: number
 }
+// primeira frase da descrição, curta (legenda da Work)
+function shortDescription(text: string) {
+    const t = (text || "").replace(/\s+/g, " ").trim()
+    if (!t) return ""
+    const m = t.match(/^.*?[.!?](?=\s|$)/)
+    const first = m ? m[0] : t
+    return first.length > 120 ? first.slice(0, 117).trim() + "…" : first
+}
+
+// Work no estilo do estúdio de referência: título mono com contagem,
+// temas à esquerda e grade de duas colunas com imagens grandes
+const CVB_WORK_CSS = `
+.lci-work-intro .luci-cvb{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,3fr);column-gap:36px;align-items:start}
+.lci-work-intro .luci-cvb .luci-cvb-side{position:sticky;top:110px;align-self:start}
+.lci-work-intro .luci-cvb h1{font:400 clamp(48px,4.4vw,72px)/1 "Cutive Mono",ui-monospace,monospace!important;letter-spacing:-.02em!important;margin:0 0 40px!important}
+.lci-work-intro .luci-cvb h1>span{position:relative;display:inline-block}
+.lci-work-intro .luci-cvb h1 sup{position:absolute;top:-.1em;left:100%;margin-left:.15em;font:500 14px/1 Switzer,Arial,sans-serif;letter-spacing:0}
+.luci-cvb-filters{display:flex;flex-direction:column;align-items:flex-start;gap:6px}
+.lci-work-intro .luci-cvb .luci-cvb-filters button{font:400 15px/1.3 "Cutive Mono",ui-monospace,monospace!important;color:#111!important;letter-spacing:0!important;text-decoration:none;position:relative;padding-right:18px}
+.lci-work-intro .luci-cvb .luci-cvb-filters button sup{font:500 9px/1 Switzer,Arial,sans-serif;margin-left:3px;color:#999;vertical-align:super}
+.lci-work-intro .luci-cvb .luci-cvb-filters button[aria-pressed="true"]{text-decoration:underline;text-underline-offset:4px;text-decoration-thickness:1px}
+.lci-work-intro .luci-cvb .luci-cvb-filters button:not([aria-pressed="true"]):hover{color:#888!important}
+.luci-template-gallery.luci-cvb-grid{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:110px 28px!important;align-items:end!important;columns:auto}
+.luci-cvb-grid .luci-template-card{margin:0!important;display:block;width:100%}
+.luci-cvb-grid .luci-template-image{aspect-ratio:auto!important;border-radius:8px;overflow:hidden;background:#f2f2f2}
+.luci-cvb-grid .luci-template-image img,.luci-cvb-grid .luci-template-image video{position:static!important;width:100%!important;height:auto!important;max-height:78vh;object-fit:cover;display:block}
+.luci-cvb-grid .luci-template-image::after{display:none}
+.luci-cvb-grid .luci-template-hover{display:none!important}
+.luci-cvb-cap{display:grid!important;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:20px;align-items:start;padding-top:14px!important;min-height:0!important}
+.lci-work-intro .luci-cvb .luci-cvb-cap>button{font:500 14px/1.35 Switzer,Arial,sans-serif!important;letter-spacing:-.01em!important;color:#111;text-align:left}
+.luci-cvb-cap p{margin:0;font:400 14px/1.35 "Cutive Mono",ui-monospace,monospace;color:#111}
+.lci-work-intro .luci-cvb .luci-cvb-more{display:flex;align-items:center;gap:6px;margin-top:14px;font:500 13px/1 Switzer,Arial,sans-serif!important;color:#111;opacity:1}
+.luci-cvb-more i{font-style:normal;font-size:11px}
+.lci-work-intro .luci-cvb .luci-cvb-more:hover{color:#888!important}
+@media(max-width:809px){
+.lci-work-intro .luci-cvb{grid-template-columns:1fr;row-gap:40px}
+.lci-work-intro .luci-cvb .luci-cvb-side{position:static}
+.lci-work-intro .luci-cvb h1{font-size:48px!important;margin-bottom:24px!important}
+.luci-cvb-filters{flex-direction:row;flex-wrap:wrap;gap:6px 16px}
+.luci-template-gallery.luci-cvb-grid{grid-template-columns:1fr!important;gap:56px!important}
+.luci-cvb-cap{grid-template-columns:1fr;gap:6px}
+}
+`
+
 const WORK_TEMPLATE_CSS = `
 [data-luci-work-root]:has(.luci-template){padding-top:110px!important}
 [data-luci-work-root] [data-framer-name="Section Projects"]{display:none!important}
@@ -1339,7 +1481,7 @@ const WORK_TEMPLATE_CSS = `
 .luci-story-close::before,.luci-story-close::after{content:'';position:absolute;top:50%;left:50%;width:18px;height:1px;background:currentColor;transform:translate(-50%,-50%) rotate(45deg);transition:transform .3s ease}
 .luci-story-close::after{transform:translate(-50%,-50%) rotate(-45deg)}
 .luci-story-close:hover::before{transform:translate(-50%,-50%) rotate(135deg)}.luci-story-close:hover::after{transform:translate(-50%,-50%) rotate(45deg)}
-.luci-project-meta{display:block;font:10px/1.4 "Fragment Mono",monospace;text-transform:uppercase;color:#111;margin:4px 0 14px}
+.luci-project-meta{display:block;font:10px/1.4 "Cutive Mono",monospace;text-transform:uppercase;color:#111;margin:4px 0 14px}
 .luci-project-story figure{margin:0 auto 12px}
 .luci-project-story .luci-project-film.luci-project-hero{background:#000}
 .luci-project-story .luci-project-frame{width:84%;max-width:1600px}
@@ -1361,7 +1503,7 @@ const WORK_TEMPLATE_CSS = `
 /* Projeto aberto: imagens menores, distribuídas, com número (01, 02…) ao lado */
 .luci-project-story{counter-reset:luci-fig}
 .luci-project-story>figure{counter-increment:luci-fig;position:relative;background:none!important;overflow:visible!important}
-.luci-project-story>figure::before{content:counter(luci-fig,decimal-leading-zero);position:absolute;bottom:0;right:calc(100% + 10px);font:400 12px/1 "Fragment Mono",monospace;color:#111;white-space:nowrap}
+.luci-project-story>figure::before{content:counter(luci-fig,decimal-leading-zero);position:absolute;bottom:0;right:calc(100% + 10px);font:400 12px/1 "Cutive Mono",monospace;color:#111;white-space:nowrap}
 @media(min-width:810px){
 .luci-project-story{display:grid!important;grid-template-columns:repeat(12,minmax(0,1fr));column-gap:28px;row-gap:96px;align-items:end;padding:72px 40px 160px 64px!important}
 .luci-project-story>figure,.luci-project-story>figure.luci-project-hero,.luci-project-story>figure.luci-project-frame,.luci-project-story>figure.luci-project-frame:nth-child(2n+1){height:auto!important;width:fit-content!important;max-width:none!important;min-height:0!important;margin:0!important}
@@ -1606,62 +1748,55 @@ function WorkTemplate() {
                 aria-label={"Ver projeto " + entry.title}
                 onClick={() => setOpened(entry)}
             />
-            <div className="luci-template-caption">
+            <div className="luci-template-caption luci-cvb-cap">
                 <button onClick={() => setOpened(entry)}>{entry.title}</button>
-                <span>
-                    <i className="luci-template-dot">· </i>
-                    {AREA_DATA.find(([id]) => id === entry.area)?.[1]}
-                </span>
-                <button
-                    className="luci-template-details"
-                    onClick={() => setOpened(entry)}
-                >
-                    DETALHES
-                </button>
+                <p>
+                    {shortDescription(entry.description) ||
+                        AREA_DATA.find(([id]) => id === entry.area)?.[1]}
+                    <button
+                        className="luci-cvb-more"
+                        onClick={() => setOpened(entry)}
+                    >
+                        <i aria-hidden="true">●</i> Ver projeto
+                    </button>
+                </p>
             </div>
         </article>
     )
     return (
-        <section className="luci-template">
-            <style>{WORK_TEMPLATE_CSS}</style>
-            <h1>{label}</h1>
-            <div className="luci-template-controls">
-                <div className="luci-template-control">
-                    <span>Serviços</span>
-                    <nav aria-label="Filtrar projetos por serviço">
-                        {[
-                            ["all", "Todos"],
-                            ...AREA_DATA.map(([id, name]) => [id, name]),
-                        ].map(([id, name]) => (
-                            <button
-                                key={id}
-                                aria-pressed={area === id}
-                                onClick={() => setArea(id)}
-                            >
-                                {name}
-                            </button>
-                        ))}
-                    </nav>
-                </div>
-                <div className="luci-template-control">
-                    <span>Visualização</span>
-                    <nav aria-label="Visualização da galeria">
-                        {[
-                            ["grid", "Grid"],
-                            ["list", "Lista"],
-                        ].map(([id, name]) => (
-                            <button
-                                key={id}
-                                aria-pressed={view === id}
-                                onClick={() => setView(id)}
-                            >
-                                {name}
-                            </button>
-                        ))}
-                    </nav>
-                </div>
-            </div>
-            <div className="luci-template-gallery" data-view={view}>
+        <section className="luci-template luci-cvb">
+            <style>{WORK_TEMPLATE_CSS + CVB_WORK_CSS}</style>
+            <aside className="luci-cvb-side">
+                <h1>
+                    <span>
+                        Work<sup>{items.length}</sup>
+                    </span>
+                </h1>
+                <nav
+                    className="luci-cvb-filters"
+                    aria-label="Filtrar projetos por tema"
+                >
+                    {[
+                        ["all", "Todos"],
+                        ...AREA_DATA.map(([id, name]) => [id, name]),
+                    ].map(([id, name]) => (
+                        <button
+                            key={id}
+                            aria-pressed={area === id}
+                            onClick={() => setArea(id)}
+                        >
+                            {name}
+                            <sup>
+                                {id === "all"
+                                    ? entries.length
+                                    : entries.filter((e) => e.area === id)
+                                          .length}
+                            </sup>
+                        </button>
+                    ))}
+                </nav>
+            </aside>
+            <div className="luci-template-gallery luci-cvb-grid" data-view="cvb">
                 {items.map(card)}
             </div>
             <dialog
@@ -3271,8 +3406,8 @@ const NEW_UNNI_MEDIA = {
 }
 
 const NEW_MEDIA_CSS = `
-.luci-new-pg{color:#fff;font-family:"Fragment Mono",monospace;box-sizing:border-box}
-.luci-new-pg p{font-family:"Fragment Mono",monospace!important;font-size:11px!important;line-height:1.3!important;color:#fff!important;margin:8px 0 0!important;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-transform:uppercase}
+.luci-new-pg{color:#fff;font-family:"Cutive Mono",monospace;box-sizing:border-box}
+.luci-new-pg p{font-family:"Cutive Mono",monospace!important;font-size:11px!important;line-height:1.3!important;color:#fff!important;margin:8px 0 0!important;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-transform:uppercase}
 .luci-new-pg [data-framer-name="Content Wrapper"]{display:flex;align-items:center;justify-content:center;width:100%;overflow:hidden}
 .luci-new-pg video,.luci-new-pg img{display:block;width:100%;height:100%;object-fit:contain}
 .luci-new-motion{font-family:Switzer,sans-serif;margin-top:40px;color:#000}
@@ -3597,7 +3732,7 @@ const WORK_BATCH_CSS = `
 .luci-work-batch figure{margin:0;min-width:0}
 .luci-work-batch-media{width:100%;aspect-ratio:4/5;overflow:hidden;background:#f3f3f3}
 .luci-work-batch video,.luci-work-batch img{display:block;width:100%;height:100%;object-fit:contain}
-.luci-work-batch figcaption{font-family:"Fragment Mono",monospace;font-size:12px;line-height:1.35;color:#000;margin-top:10px;text-transform:uppercase}
+.luci-work-batch figcaption{font-family:"Cutive Mono",monospace;font-size:12px;line-height:1.35;color:#000;margin-top:10px;text-transform:uppercase}
 @media(max-width:809px){.luci-work-batch-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.luci-work-batch article{margin-bottom:44px}}
 @media(max-width:479px){.luci-work-batch-grid{grid-template-columns:1fr}.luci-work-batch-media{max-height:460px}}
 `
@@ -3643,7 +3778,7 @@ function WorkMediaGroup({ group }) {
                         gap: 16,
                         alignItems: "center",
                         marginTop: 20,
-                        fontFamily: '"Fragment Mono", monospace',
+                        fontFamily: '"Cutive Mono", monospace',
                         fontSize: 12,
                     }}
                 >
@@ -3935,7 +4070,7 @@ function PlaygroundLightbox() {
                 style={{
                     margin: 0,
                     color: "white",
-                    fontFamily: '"Fragment Mono", monospace',
+                    fontFamily: '"Cutive Mono", monospace',
                     fontSize: 11,
                     textTransform: "uppercase",
                     textAlign: "center",
@@ -4179,7 +4314,7 @@ function HomeMetaProject() {
                         key={src}
                         data-framer-name="Project Item Added Meta"
                         data-luci-home-card="regular"
-                        style={{ minWidth: 0, fontFamily: '"Fragment Mono", monospace' }}
+                        style={{ minWidth: 0, fontFamily: '"Cutive Mono", monospace' }}
                     >
                         <div
                             data-framer-name="Content Wrapper"
@@ -4288,7 +4423,7 @@ function HomeBvlgariReplacement() {
                     key={src}
                     data-framer-name="Project Item Added BVLGARI"
                     data-luci-home-card="regular"
-                    style={{ minWidth: 0, fontFamily: '"Fragment Mono", monospace' }}
+                    style={{ minWidth: 0, fontFamily: '"Cutive Mono", monospace' }}
                 >
                     <div
                         data-framer-name="Content Wrapper"
@@ -4513,7 +4648,7 @@ function HomeExtraMedia(props: {
                     key={media.src}
                     data-framer-name={"Project Item Added " + props.owner}
                     data-luci-home-card="regular"
-                    style={{ minWidth: 0, fontFamily: '"Fragment Mono", monospace' }}
+                    style={{ minWidth: 0, fontFamily: '"Cutive Mono", monospace' }}
                 >
                     <div
                         data-framer-name="Content Wrapper"
@@ -4612,7 +4747,7 @@ function HomeBazaarMedia() {
                     key={media.src}
                     data-framer-name="Project Item Added Bazaar"
                     data-luci-home-card="regular"
-                    style={{ minWidth: 0, fontFamily: '"Fragment Mono", monospace' }}
+                    style={{ minWidth: 0, fontFamily: '"Cutive Mono", monospace' }}
                 >
                     <div
                         data-framer-name="Content Wrapper"
