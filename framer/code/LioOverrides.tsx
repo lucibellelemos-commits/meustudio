@@ -790,7 +790,7 @@ const TOOLS = [
 ]
 
 const LOGO_BASE =
-    "https://cdn.jsdelivr.net/gh/lucibellelemos-commits/meustudio@a9e7c421fdff6c76ed97e66fc3f0e07cc186447d/clientes/preto/"
+    "https://cdn.jsdelivr.net/gh/lucibellelemos-commits/meustudio@0f48cbb37f6d65b2298f9bb792019de616ae9a3e/clientes/preto/"
 
 // [nome, arquivo, altura em px] — alturas ajustadas para equilibrar o peso visual
 const CLIENTS: [string, string, number][] = [
@@ -3697,14 +3697,45 @@ function NewWorkBatch({ area }: { area: string }) {
 
 function PlaygroundLightbox() {
     const [media, setMedia] = React.useState<any>(null)
+    const [closing, setClosing] = React.useState(false)
+    const [needsTap, setNeedsTap] = React.useState(false)
+    const [frame, setFrame] = React.useState(0)
     const origin = React.useRef<HTMLElement | null>(null)
     const closeButton = React.useRef<HTMLButtonElement | null>(null)
+    const videoRef = React.useRef<HTMLVideoElement | null>(null)
     const close = React.useCallback(() => {
-        setMedia(null)
-        requestAnimationFrame(() =>
-            origin.current?.focus({ preventScroll: true })
-        )
+        // saída suave: anima e só depois desmonta
+        setClosing(true)
+        window.setTimeout(() => {
+            setMedia(null)
+            setClosing(false)
+            requestAnimationFrame(() =>
+                origin.current?.focus({ preventScroll: true })
+            )
+        }, 260)
     }, [])
+    // o vídeo começa a tocar ainda dentro do toque (o iPhone bloqueia o autoplay
+    // em modo de pouca bateria) e continua de onde estava no card
+    React.useLayoutEffect(() => {
+        setNeedsTap(false)
+        setFrame(0)
+        const v = videoRef.current
+        if (!media || !media.video || !v) return
+        try {
+            if (media.start) v.currentTime = media.start
+        } catch {}
+        const p = v.play()
+        if (p) p.catch(() => setNeedsTap(true))
+    }, [media])
+    // animação quadro a quadro (ex.: Mescla) também anima ampliada
+    React.useEffect(() => {
+        if (!media?.frames || media.frames.length < 2) return
+        const t = window.setInterval(
+            () => setFrame((f) => (f + 1) % media.frames.length),
+            900
+        )
+        return () => window.clearInterval(t)
+    }, [media])
     React.useEffect(() => {
         if (!window.location.pathname.includes("playground")) return
         if (document.body.dataset.luciLightboxOwner) return
@@ -3723,18 +3754,27 @@ function PlaygroundLightbox() {
             const video = card.querySelector("video")
             const image = card.querySelector("img")
             const src = video
-                ? video.currentSrc ||
-                  video.src ||
-                  video.querySelector("source")?.src
+                ? (
+                      video.currentSrc ||
+                      video.src ||
+                      video.querySelector("source")?.src ||
+                      ""
+                  ).split("#")[0]
                 : image?.currentSrc || image?.src
             if (!src) return
             event.preventDefault()
             event.stopPropagation()
             origin.current = card
+            const stop = image?.getAttribute("data-lci-stop-motion")
+            const frames = stop
+                ? STOP_MOTION_PROJECTS.find((c) => c.label === stop)?.frames
+                : undefined
             setMedia({
                 src,
                 video: !!video,
                 poster: video?.poster,
+                start: video && video.readyState > 1 ? video.currentTime : 0,
+                frames,
                 caption:
                     card.querySelector("p")?.textContent ||
                     image?.alt ||
@@ -3807,6 +3847,16 @@ function PlaygroundLightbox() {
         }
     }, [media, close])
     if (!media || typeof document === "undefined") return null
+    const mediaStyle: React.CSSProperties = {
+        maxWidth: "92vw",
+        maxHeight: "80vh",
+        width: "auto",
+        height: "auto",
+        objectFit: "contain",
+        animation: closing
+            ? "luciLbMediaOut .26s cubic-bezier(.4,0,1,1) both"
+            : "luciLbMediaIn .55s cubic-bezier(.16,1,.3,1) both",
+    }
     return createPortal(
         <div
             data-luci-lightbox=""
@@ -3820,15 +3870,19 @@ function PlaygroundLightbox() {
                 position: "fixed",
                 inset: 0,
                 zIndex: 2147483000,
-                background: "rgba(0,0,0,.86)",
+                background: "rgba(0,0,0,.88)",
                 display: "flex",
                 flexDirection: "column",
                 alignItems: "center",
                 justifyContent: "center",
                 padding: "56px 24px 24px",
                 gap: 16,
+                animation: closing
+                    ? "luciLbOut .26s ease-in both"
+                    : "luciLbIn .4s ease-out both",
             }}
         >
+            <style>{`@keyframes luciLbIn{from{opacity:0}to{opacity:1}}@keyframes luciLbOut{from{opacity:1}to{opacity:0}}@keyframes luciLbMediaIn{from{opacity:0;transform:translateY(14px) scale(.97)}to{opacity:1;transform:none}}@keyframes luciLbMediaOut{from{opacity:1;transform:none}to{opacity:0;transform:scale(.98)}}@media (prefers-reduced-motion:reduce){[data-luci-lightbox],[data-luci-lightbox] *{animation:none!important}}`}</style>
             <button
                 ref={closeButton}
                 onClick={close}
@@ -3849,34 +3903,32 @@ function PlaygroundLightbox() {
             </button>
             {media.video ? (
                 <video
+                    ref={videoRef}
                     key={media.src}
                     src={media.src}
                     poster={media.poster}
-                    controls={false}
+                    controls={needsTap}
                     autoPlay
                     muted
                     loop
                     playsInline
+                    preload="auto"
                     tabIndex={0}
-                    style={{
-                        maxWidth: "92vw",
-                        maxHeight: "80vh",
-                        width: "auto",
-                        height: "auto",
-                        objectFit: "contain",
+                    onClick={(e) => {
+                        const v = e.currentTarget
+                        if (v.paused) v.play().catch(() => {})
                     }}
+                    style={mediaStyle}
                 />
             ) : (
                 <img
-                    src={media.src}
+                    src={
+                        media.frames
+                            ? media.frames[frame % media.frames.length]
+                            : media.src
+                    }
                     alt={media.caption}
-                    style={{
-                        maxWidth: "92vw",
-                        maxHeight: "80vh",
-                        width: "auto",
-                        height: "auto",
-                        objectFit: "contain",
-                    }}
+                    style={mediaStyle}
                 />
             )}
             <p
@@ -3884,8 +3936,12 @@ function PlaygroundLightbox() {
                     margin: 0,
                     color: "white",
                     fontFamily: '"Fragment Mono", monospace',
-                    fontSize: 13,
+                    fontSize: 11,
+                    textTransform: "uppercase",
                     textAlign: "center",
+                    animation: closing
+                        ? "luciLbOut .2s ease-in both"
+                        : "luciLbIn .5s .15s ease-out both",
                 }}
             >
                 {media.caption}
@@ -4381,13 +4437,13 @@ video::-webkit-media-controls,video::-webkit-media-controls-enclosure{display:no
 
 // Home: mockups novos da Orbis no fim da galeria do projeto
 const HOME_ORBIS_NEW: ExtraMedia[] = [
-    { src: "https://cdn.jsdelivr.net/gh/lucibellelemos-commits/meustudio@cf7905a8825d0d9cc855e816bfada4c54fae2f66/orbis/orbis-01.jpg", caption: "Orbis — Cartões" },
-    { src: "https://cdn.jsdelivr.net/gh/lucibellelemos-commits/meustudio@cf7905a8825d0d9cc855e816bfada4c54fae2f66/orbis/orbis-02.jpg", caption: "Orbis — Ecobag" },
-    { src: "https://cdn.jsdelivr.net/gh/lucibellelemos-commits/meustudio@cf7905a8825d0d9cc855e816bfada4c54fae2f66/orbis/orbis-03.jpg", caption: "Orbis — Abrigo de ônibus" },
-    { src: "https://cdn.jsdelivr.net/gh/lucibellelemos-commits/meustudio@cf7905a8825d0d9cc855e816bfada4c54fae2f66/orbis/orbis-04.jpg", caption: "Orbis — Painéis de rua" },
-    { src: "https://cdn.jsdelivr.net/gh/lucibellelemos-commits/meustudio@cf7905a8825d0d9cc855e816bfada4c54fae2f66/orbis/orbis-05.jpg", caption: "Orbis — Painel iluminado" },
-    { src: "https://cdn.jsdelivr.net/gh/lucibellelemos-commits/meustudio@cf7905a8825d0d9cc855e816bfada4c54fae2f66/orbis/orbis-06.jpg", caption: "Orbis — Moletom" },
-    { src: "https://cdn.jsdelivr.net/gh/lucibellelemos-commits/meustudio@cf7905a8825d0d9cc855e816bfada4c54fae2f66/orbis/orbis-07.jpg", caption: "Orbis — Cartazes iluminados" },
+    { src: "https://cdn.jsdelivr.net/gh/lucibellelemos-commits/meustudio@0f48cbb37f6d65b2298f9bb792019de616ae9a3e/orbis/sm/orbis-01.jpg", caption: "Orbis — Cartões" },
+    { src: "https://cdn.jsdelivr.net/gh/lucibellelemos-commits/meustudio@0f48cbb37f6d65b2298f9bb792019de616ae9a3e/orbis/sm/orbis-02.jpg", caption: "Orbis — Ecobag" },
+    { src: "https://cdn.jsdelivr.net/gh/lucibellelemos-commits/meustudio@0f48cbb37f6d65b2298f9bb792019de616ae9a3e/orbis/sm/orbis-03.jpg", caption: "Orbis — Abrigo de ônibus" },
+    { src: "https://cdn.jsdelivr.net/gh/lucibellelemos-commits/meustudio@0f48cbb37f6d65b2298f9bb792019de616ae9a3e/orbis/sm/orbis-04.jpg", caption: "Orbis — Painéis de rua" },
+    { src: "https://cdn.jsdelivr.net/gh/lucibellelemos-commits/meustudio@0f48cbb37f6d65b2298f9bb792019de616ae9a3e/orbis/sm/orbis-05.jpg", caption: "Orbis — Painel iluminado" },
+    { src: "https://cdn.jsdelivr.net/gh/lucibellelemos-commits/meustudio@0f48cbb37f6d65b2298f9bb792019de616ae9a3e/orbis/sm/orbis-06.jpg", caption: "Orbis — Moletom" },
+    { src: "https://cdn.jsdelivr.net/gh/lucibellelemos-commits/meustudio@0f48cbb37f6d65b2298f9bb792019de616ae9a3e/orbis/sm/orbis-07.jpg", caption: "Orbis — Cartazes iluminados" },
 ]
 type ExtraMedia = { src: string; caption: string; video?: boolean; poster?: string }
 const HOME_UNNI_NEW: ExtraMedia[] = [
