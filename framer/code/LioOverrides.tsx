@@ -600,7 +600,10 @@ function ViewportVideos() {
                     }
                 })
             },
-            { rootMargin: "300px 300px" }
+            {
+                rootMargin:
+                    window.innerWidth <= 809 ? "0px" : "300px 300px",
+            }
         )
         const scan = () => {
             document.querySelectorAll<HTMLVideoElement>("video").forEach((v) => {
@@ -2544,7 +2547,7 @@ body[data-luci-info-owner] [data-luci-info-open] [data-framer-name="Icon Wrapper
     )
 }
 
-let homeColumns = 5
+let homeColumns = 3
 function HomeGalleryControls() {
     React.useEffect(() => {
         if (
@@ -2560,7 +2563,7 @@ function HomeGalleryControls() {
                 .forEach((g) => {
                     if (hosts.has(g) || g.hasAttribute("data-luci-bvg-old"))
                         return
-                    // todas as galerias começam no menor tamanho (ou no último escolhido)
+                    // todas as galerias começam no tamanho médio (ou no último escolhido)
                     g.dataset.luciColumns = String(homeColumns)
                     const block =
                         g.closest(
@@ -2899,7 +2902,9 @@ function HomeHoverGalleries() {
                         gallery
                             .querySelectorAll("[data-luci-home-clone]")
                             .forEach((node) => node.remove())
-                        const copies = Math.max(2, Math.ceil(8 / cards.length))
+                        // uma cópia basta quando o projeto já tem bastante card (menos peso no celular)
+                        const copies =
+                            cards.length >= 6 ? 1 : Math.ceil(8 / cards.length)
                         for (let repeat = 0; repeat < copies; repeat++)
                             cards.forEach((card) => {
                                 const clone = card.cloneNode(
@@ -3054,10 +3059,30 @@ function HomeHoverGalleries() {
             if (travel > 0 && gallery.scrollLeft >= travel)
                 gallery.scrollLeft %= travel
         }
-        document.addEventListener("scroll", wrapScroll, true)
-        document.addEventListener("loadedmetadata", prepare, true)
-        document.addEventListener("load", prepare, true)
-        window.addEventListener("resize", prepare)
+        document.addEventListener("scroll", wrapScroll, {
+            capture: true,
+            passive: true,
+        })
+        // cada imagem/vídeo que carrega pedia um recálculo completo da home;
+        // agora junta tudo em no máximo um por quadro
+        let soon = 0
+        const prepareSoon = () => {
+            if (soon) return
+            soon = requestAnimationFrame(() => {
+                soon = 0
+                prepare()
+            })
+        }
+        // no celular a barra do navegador muda a altura ao rolar: só largura importa
+        let lastW = window.innerWidth
+        const onResize = (e: Event) => {
+            if (e.isTrusted && window.innerWidth === lastW) return
+            lastW = window.innerWidth
+            prepareSoon()
+        }
+        document.addEventListener("loadedmetadata", prepareSoon, true)
+        document.addEventListener("load", prepareSoon, true)
+        window.addEventListener("resize", onResize)
         prepare()
         const observer = new LuciObserver(prepare)
         observer.observe(document.body, { childList: true, subtree: true })
@@ -3083,9 +3108,10 @@ function HomeHoverGalleries() {
             stop()
             observer.disconnect()
             document.removeEventListener("scroll", wrapScroll, true)
-            document.removeEventListener("loadedmetadata", prepare, true)
-            document.removeEventListener("load", prepare, true)
-            window.removeEventListener("resize", prepare)
+            document.removeEventListener("loadedmetadata", prepareSoon, true)
+            document.removeEventListener("load", prepareSoon, true)
+            window.removeEventListener("resize", onResize)
+            if (soon) cancelAnimationFrame(soon)
             document.removeEventListener("pointerover", pointer, true)
             document.removeEventListener("pointermove", pointer, true)
             document.removeEventListener("pointerdown", down, true)
