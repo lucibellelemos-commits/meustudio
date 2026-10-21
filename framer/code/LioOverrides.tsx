@@ -2984,9 +2984,17 @@ function HomeHoverGalleries() {
                             "--luci-natural-ratio",
                             w + " / " + (cropped ? h * 0.7 : h)
                         )
+                        // mesma altura em todas as galerias: horizontais
+                        // ficam mais largas em vez de mais baixas
+                        const rh = cropped ? h * 0.7 : h
+                        const targetH = baseWidth * 0.82 * 1.25
+                        const width =
+                            h > w
+                                ? baseWidth * 0.82
+                                : Math.min(targetH * (w / rh), baseWidth * 2.2)
                         node.style.setProperty(
                             "--luci-natural-width",
-                            baseWidth * (h > w ? 0.82 : 1) + "px"
+                            width + "px"
                         )
                     })
                     const first = cards[0]
