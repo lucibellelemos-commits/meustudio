@@ -49,6 +49,8 @@ const SITE_FIX_CSS = `
 .luci-template-controls button,.luci-template-controls a{font:inherit!important;letter-spacing:inherit!important}
 /* entrada imediata: sem atraso nem deslize ao abrir as páginas */
 [data-framer-appear-id]{opacity:1!important;transform:none!important}
+/* sem camadas extras de animação: menos memória de vídeo no celular */
+[data-framer-appear-id],[data-luci-home-card],[data-luci-home-card] *,[data-framer-name^="Project Item"],[data-framer-name^="Project Item"] *{will-change:auto!important}
 h1,h2,h3,h4,h5,h6,p,li,figcaption,.lci-q,.lci-sub{text-wrap:pretty}
 h1,h2,h3{text-wrap:balance}
 [data-luci-home-clone],[data-luci-home-clone] [data-framer-appear-id]{opacity:1!important;transform:none!important}
@@ -164,6 +166,7 @@ export function withLioLogo(Component): ComponentType {
                 <OldPathRedirect />
                 <PlaygroundExtra />
                 <SobreTrail />
+                <ImageDownscale />
                 <NoOrphans />
                 <Component
                     {...props}
@@ -245,6 +248,53 @@ function SobreTrail() {
             subtree: true,
             attributes: true,
             attributeFilter: ["style"],
+        })
+        return () => mo.disconnect()
+    }, [])
+    return null
+}
+
+// Imagens trocadas pelo código vinham em tamanho cheio (até 2160 px) para
+// aparecer pequenas: pede ao Framer uma versão reduzida (menos memória no celular)
+function ImageDownscale() {
+    React.useEffect(() => {
+        const fix = (img: HTMLImageElement) => {
+            if (img.srcset) return
+            const src = img.getAttribute("src") || ""
+            if (
+                !src.includes("framerusercontent.com/images/") ||
+                src.includes("scale-down-to")
+            )
+                return
+            const size = window.innerWidth <= 809 ? 1024 : 2048
+            const next =
+                src + (src.includes("?") ? "&" : "?") + "scale-down-to=" + size
+            img.setAttribute("src", next)
+        }
+        const scan = () =>
+            document
+                .querySelectorAll<HTMLImageElement>(
+                    'img[src*="framerusercontent.com/images/"]:not([srcset])'
+                )
+                .forEach(fix)
+        scan()
+        const mo = new MutationObserver((records) => {
+            for (const r of records) {
+                if (r.type === "attributes") {
+                    if (r.target instanceof HTMLImageElement) fix(r.target)
+                } else
+                    r.addedNodes.forEach((n) => {
+                        if (n instanceof HTMLImageElement) fix(n)
+                        else if (n instanceof HTMLElement)
+                            n.querySelectorAll("img").forEach(fix)
+                    })
+            }
+        })
+        mo.observe(document.body, {
+            childList: true,
+            subtree: true,
+            attributes: true,
+            attributeFilter: ["src"],
         })
         return () => mo.disconnect()
     }, [])
@@ -2547,6 +2597,40 @@ body[data-luci-info-owner] [data-luci-info-open] [data-framer-name="Icon Wrapper
     )
 }
 
+// Intercala cards de imagem e de vídeo, espalhando o grupo menor entre o maior
+function alternateMedia(cards: HTMLElement[]): HTMLElement[] {
+    const isVideo = (c: HTMLElement) => !!c.querySelector("video")
+    const vids = cards.filter(isVideo)
+    const imgs = cards.filter((c) => !isVideo(c))
+    if (!vids.length || !imgs.length) return cards
+    const [big, small] =
+        vids.length > imgs.length
+            ? [vids, imgs]
+            : imgs.length > vids.length
+              ? [imgs, vids]
+              : isVideo(cards[0])
+                ? [vids, imgs]
+                : [imgs, vids]
+    if (big.length === small.length) {
+        const out: HTMLElement[] = []
+        big.forEach((c, i) => out.push(c, small[i]))
+        return out
+    }
+    // espalha o grupo menor nos intervalos do maior
+    const out: HTMLElement[] = []
+    const gaps = big.length - 1 || 1
+    let placed = 0
+    big.forEach((c, i) => {
+        out.push(c)
+        const due = Math.round(((i + 1) * small.length) / gaps)
+        while (placed < small.length && placed < due && i < big.length - 1) {
+            out.push(small[placed++])
+        }
+    })
+    while (placed < small.length) out.push(small[placed++])
+    return out
+}
+
 let homeColumns = 3
 function HomeGalleryControls() {
     React.useEffect(() => {
@@ -2891,12 +2975,22 @@ function HomeHoverGalleries() {
                         )
                             node.remove()
                     })
-                    const cards = Array.from(gallery.children).filter(
+                    let cards = Array.from(gallery.children).filter(
                         (node) =>
                             node.hasAttribute("data-luci-home-card") &&
                             !node.hasAttribute("data-luci-home-clone") &&
                             !node.hasAttribute("data-luci-rejected")
                     ) as HTMLElement[]
+                    // alterna imagem e vídeo: nunca dois vídeos colados
+                    const ordered = alternateMedia(cards)
+                    if (ordered.some((c, i) => c !== cards[i])) {
+                        const ref = gallery.querySelector(
+                            "[data-luci-home-clone]"
+                        )
+                        ordered.forEach((c) => gallery.insertBefore(c, ref))
+                        cards = ordered
+                        counts.delete(gallery)
+                    }
                     if (cards.length && counts.get(gallery) !== cards.length) {
                         counts.set(gallery, cards.length)
                         gallery
