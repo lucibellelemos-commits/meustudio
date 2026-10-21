@@ -324,7 +324,7 @@ const HOME_INTRO_CSS = `
 body[data-luci-home-intro] [data-framer-name="Main"]>[data-framer-name="Header"]>[data-framer-name="Heading"]{display:none!important}
 body[data-luci-home-intro] [data-framer-name="Main"]>[data-framer-name="Header"]{height:auto!important;min-height:0!important;padding:0!important;display:block!important}
 .luci-hi{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));column-gap:28px;padding:150px 15px 90px;box-sizing:border-box;width:100%;color:#111;text-align:left}
-.luci-hi-name{font:500 14px/1.35 Switzer,Arial,sans-serif;letter-spacing:-.01em;margin:0}
+.luci-hi .luci-hi-name{font:500 14px/1.35 Switzer,Arial,sans-serif;letter-spacing:-.01em;margin:0}
 .luci-hi-name span,.luci-hi p{font:400 14px/1.4 "Cutive Mono",ui-monospace,monospace;letter-spacing:0;color:#111}
 .luci-hi-name span{display:block}
 .luci-hi nav{display:flex;flex-direction:column;align-items:flex-start;gap:2px}
@@ -1361,7 +1361,7 @@ const CVB_WORK_CSS = `
 .lci-work-intro .luci-cvb h1{font:400 clamp(48px,4.4vw,72px)/1 "Cutive Mono",ui-monospace,monospace!important;letter-spacing:-.02em!important;margin:0 0 40px!important}
 .lci-work-intro .luci-cvb h1>span{position:relative;display:inline-block}
 .lci-work-intro .luci-cvb h1 sup{position:absolute;top:-.1em;left:100%;margin-left:.15em;font:500 14px/1 Switzer,Arial,sans-serif;letter-spacing:0}
-.luci-cvb-filters{display:flex;flex-direction:column;align-items:flex-start;gap:6px}
+.lci-work-intro .luci-cvb .luci-cvb-filters{position:static!important;left:auto!important;right:auto!important;top:auto!important;transform:none!important;width:auto!important;background:none!important;padding:0!important;margin:0!important;box-shadow:none!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important;display:flex!important;flex-direction:column!important;align-items:flex-start!important;gap:6px!important;z-index:auto!important}
 .lci-work-intro .luci-cvb .luci-cvb-filters button{font:400 15px/1.3 "Cutive Mono",ui-monospace,monospace!important;color:#111!important;letter-spacing:0!important;text-decoration:none;position:relative;padding-right:18px}
 .lci-work-intro .luci-cvb .luci-cvb-filters button sup{font:500 9px/1 Switzer,Arial,sans-serif;margin-left:3px;color:#999;vertical-align:super}
 .lci-work-intro .luci-cvb .luci-cvb-filters button[aria-pressed="true"]{text-decoration:underline;text-underline-offset:4px;text-decoration-thickness:1px}
@@ -1382,7 +1382,7 @@ const CVB_WORK_CSS = `
 .lci-work-intro .luci-cvb{grid-template-columns:1fr;row-gap:40px}
 .lci-work-intro .luci-cvb .luci-cvb-side{position:static}
 .lci-work-intro .luci-cvb h1{font-size:48px!important;margin-bottom:24px!important}
-.luci-cvb-filters{flex-direction:row;flex-wrap:wrap;gap:6px 16px}
+.lci-work-intro .luci-cvb .luci-cvb-filters{flex-direction:row!important;flex-wrap:wrap!important;gap:6px 16px!important}
 .luci-template-gallery.luci-cvb-grid{grid-template-columns:1fr!important;gap:56px!important}
 .luci-cvb-cap{grid-template-columns:1fr;gap:6px}
 }
