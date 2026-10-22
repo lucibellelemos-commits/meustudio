@@ -1274,9 +1274,9 @@ const CVB_WORK_CSS = `
 .luci-cvb-grid .luci-template-image img,.luci-cvb-grid .luci-template-image video{position:static!important;width:100%!important;height:auto!important;max-height:78vh;object-fit:cover;display:block;border-radius:0!important}
 .luci-cvb-grid .luci-template-image::after{display:none}
 .luci-cvb-grid .luci-template-hover{display:none!important}
-.luci-cvb-cap{display:grid!important;grid-template-columns:minmax(0,1fr) minmax(0,2.2fr);gap:16px;align-items:start;padding-top:10px!important;min-height:0!important}
-.lci-work-intro .luci-cvb .luci-cvb-cap>button{font:500 10px/1.35 Switzer,Arial,sans-serif!important;letter-spacing:-.01em!important;color:#111;text-align:left}
-.luci-cvb-cap p{margin:0;font:500 10px/1.35 Switzer,Arial,sans-serif;letter-spacing:-.01em;color:#888}
+.luci-cvb-cap{display:grid!important;grid-template-columns:minmax(0,.8fr) minmax(0,3fr);gap:14px;align-items:start;padding-top:10px!important;min-height:0!important}
+.lci-work-intro .luci-cvb .luci-cvb-cap>button{font:500 9px/1.35 Switzer,Arial,sans-serif!important;letter-spacing:-.01em!important;color:#111;text-align:left}
+.luci-cvb-cap p{margin:0;font:500 9px/1.35 Switzer,Arial,sans-serif;letter-spacing:0;color:rgba(17,17,17,.45)}
 .lci-work-intro .luci-cvb .luci-cvb-more{display:flex;align-items:center;gap:6px;margin-top:8px;font:400 8px/1 "Fragment Mono",monospace!important;text-transform:uppercase;letter-spacing:0!important;color:#111;opacity:1}
 .luci-cvb-more i{font-style:normal;font-size:6px}
 .lci-work-intro .luci-cvb .luci-cvb-more:hover{color:#888!important}
@@ -1286,8 +1286,8 @@ const CVB_WORK_CSS = `
 .lci-work-intro .luci-cvb h1{font-size:48px!important;margin-bottom:20px!important}
 .lci-work-intro .luci-cvb .luci-cvb-filters{flex-direction:row!important;flex-wrap:wrap!important;gap:4px 16px!important}
 .luci-template-gallery.luci-cvb-grid{grid-template-columns:1fr!important;gap:56px!important}
-.luci-cvb-cap{grid-template-columns:minmax(0,1fr) minmax(0,2fr);gap:12px}
-.lci-work-intro .luci-cvb .luci-cvb-cap>button,.luci-cvb-cap p{font-size:10px!important}
+.luci-cvb-cap{grid-template-columns:minmax(0,.8fr) minmax(0,2.6fr);gap:10px}
+.lci-work-intro .luci-cvb .luci-cvb-cap>button,.luci-cvb-cap p{font-size:9px!important}
 }
 `
 
