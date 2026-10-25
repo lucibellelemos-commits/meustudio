@@ -644,6 +644,7 @@ function ViewportVideos() {
         const mobile = window.innerWidth <= 809
         const MAX_PLAYING = 2
         const ratios = new Map<HTMLVideoElement, number>()
+        const manual = new Set<HTMLVideoElement>()
         const enforce = () => {
             const ranked = Array.from(ratios.entries())
                 .filter(([v, r]) => r > 0.15 && wants(v) && v.isConnected)
@@ -662,9 +663,10 @@ function ViewportVideos() {
                 entries.forEach((entry) => {
                     const v = entry.target as HTMLVideoElement
                     if (mobile) {
-                        if (entry.isIntersecting)
+                        if (entry.isIntersecting) {
                             ratios.set(v, entry.intersectionRatio)
-                        else ratios.delete(v)
+                            manual.delete(v)
+                        } else if (!manual.has(v)) ratios.delete(v)
                         if (!entry.isIntersecting && !v.paused) v.pause()
                         return
                     }
@@ -744,6 +746,8 @@ function ViewportVideos() {
             settle = 0
             if (mobile) {
                 // vídeos que o observador não enxerga: mede a parte visível
+                manual.forEach((v) => ratios.delete(v))
+                manual.clear()
                 document
                     .querySelectorAll<HTMLVideoElement>("video[data-luci-autoplay]")
                     .forEach((v) => {
@@ -752,7 +756,10 @@ function ViewportVideos() {
                         if (!r.width || !r.height) return
                         const w = Math.min(r.right, window.innerWidth) - Math.max(r.left, 0)
                         const h = Math.min(r.bottom, window.innerHeight) - Math.max(r.top, 0)
-                        if (w > 0 && h > 0) ratios.set(v, (w * h) / (r.width * r.height))
+                        if (w > 0 && h > 0) {
+                            ratios.set(v, (w * h) / (r.width * r.height))
+                            manual.add(v)
+                        }
                     })
                 return enforce()
             }
