@@ -43,6 +43,8 @@ export const withIntro = withText(
 
 // Ajustes gerais: celular, legendas e contraste
 const SITE_FIX_CSS = `
+/* celular: título sem animação letra a letra e sem camadas extras */
+@media(max-width:809px){h1 span,h1 span *{opacity:1!important;transform:none!important;will-change:auto!important}[data-luci-home-gallery]{overscroll-behavior-x:contain;-webkit-overflow-scrolling:touch}[data-luci-home-card]{contain:layout paint}}
 /* padrão tipográfico: Switzer 500 (16px texto, 24px títulos) e Fragment Mono para legendas */
 @media(min-width:810px){.framer-styles-preset-pii5ps{font-size:16px!important;letter-spacing:-.01em!important}}
 .framer-styles-preset-pii5ps{font-weight:500!important}
@@ -638,10 +640,34 @@ function ViewportVideos() {
         }
         const seen = new WeakSet<HTMLVideoElement>()
         // vídeo só baixa quando chega perto da tela; fora dela, pausa
+        // no celular, no máximo 2 vídeos tocando ao mesmo tempo (os mais visíveis)
+        const mobile = window.innerWidth <= 809
+        const MAX_PLAYING = 2
+        const ratios = new Map<HTMLVideoElement, number>()
+        const enforce = () => {
+            const ranked = Array.from(ratios.entries())
+                .filter(([v, r]) => r > 0.15 && wants(v) && v.isConnected)
+                .sort((a, b) => b[1] - a[1])
+                .map(([v]) => v)
+            const allowed = new Set(ranked.slice(0, MAX_PLAYING))
+            ratios.forEach((r, v) => {
+                if (allowed.has(v)) {
+                    if (v.preload === "none") v.preload = "metadata"
+                    if (v.paused) v.play().catch(() => {})
+                } else if (!v.paused) v.pause()
+            })
+        }
         const io = new IntersectionObserver(
             (entries) => {
                 entries.forEach((entry) => {
                     const v = entry.target as HTMLVideoElement
+                    if (mobile) {
+                        if (entry.isIntersecting)
+                            ratios.set(v, entry.intersectionRatio)
+                        else ratios.delete(v)
+                        if (!entry.isIntersecting && !v.paused) v.pause()
+                        return
+                    }
                     if (entry.isIntersecting) {
                         if (v.preload === "none") v.preload = "metadata"
                         if (wants(v) && v.paused) v.play().catch(() => {})
@@ -649,11 +675,11 @@ function ViewportVideos() {
                         v.pause()
                     }
                 })
+                if (mobile) enforce()
             },
-            {
-                rootMargin:
-                    window.innerWidth <= 809 ? "0px" : "300px 300px",
-            }
+            mobile
+                ? { rootMargin: "0px", threshold: [0, 0.25, 0.5, 0.75, 1] }
+                : { rootMargin: "300px 300px" }
         )
         const scan = () => {
             document.querySelectorAll<HTMLVideoElement>("video").forEach((v) => {
@@ -716,6 +742,20 @@ function ViewportVideos() {
         let settle = 0
         const check = () => {
             settle = 0
+            if (mobile) {
+                // vídeos que o observador não enxerga: mede a parte visível
+                document
+                    .querySelectorAll<HTMLVideoElement>("video[data-luci-autoplay]")
+                    .forEach((v) => {
+                        if (ratios.has(v)) return
+                        const r = v.getBoundingClientRect()
+                        if (!r.width || !r.height) return
+                        const w = Math.min(r.right, window.innerWidth) - Math.max(r.left, 0)
+                        const h = Math.min(r.bottom, window.innerHeight) - Math.max(r.top, 0)
+                        if (w > 0 && h > 0) ratios.set(v, (w * h) / (r.width * r.height))
+                    })
+                return enforce()
+            }
             document
                 .querySelectorAll<HTMLVideoElement>("video[data-luci-autoplay]")
                 .forEach((v) => {
@@ -1092,7 +1132,7 @@ const WORK_CSS = `
 
 .luci-project-info>button{display:none}
 .luci-project-info[data-luci-details-active]>button{display:block;position:fixed;right:28px;top:50%;transform:translateY(-50%);z-index:1000;font-size:12px;padding:12px 0;background:white}
-body:has([data-luci-work-root]) button[aria-label="Edit Framer Content"]{display:none!important}
+body[data-luci-work-page] button[aria-label="Edit Framer Content"]{display:none!important}
 @media(max-width:809px){.luci-project-info[data-luci-details-active]>button{right:15px;font-size:11px}}
 
 
@@ -1856,6 +1896,7 @@ function WorkFilters({ style }: { style?: React.CSSProperties }) {
                     const main = container.closest<HTMLElement>("main")
                     if (main) {
                         main.setAttribute("data-luci-work-root", "")
+                        document.body.setAttribute("data-luci-work-page", "")
                         roots.add(main)
                     }
                     container
@@ -1991,6 +2032,7 @@ function WorkFilters({ style }: { style?: React.CSSProperties }) {
                 item.removeAttribute("data-luci-work-filter-hidden")
             })
             roots.forEach((root) => root.removeAttribute("data-luci-work-root"))
+            document.body.removeAttribute("data-luci-work-page")
             mediaTags.forEach((item) => {
                 item.removeAttribute("data-luci-work-media-gallery")
                 item.removeAttribute("data-luci-work-media-card")
@@ -3057,17 +3099,30 @@ function HomeHoverGalleries() {
                                     .forEach((im) =>
                                         im.setAttribute("loading", "lazy")
                                     )
+                                // nas cópias, vídeo vira só a capa: menos memória e
+                                // nenhum vídeo extra tocando no celular
                                 clone
                                     .querySelectorAll("video")
                                     .forEach((vd) => {
-                                        if (vd.hasAttribute("autoplay")) {
+                                        const poster = vd.getAttribute("poster")
+                                        if (poster) {
+                                            const im = document.createElement("img")
+                                            im.src = poster
+                                            im.alt = ""
+                                            im.loading = "lazy"
+                                            im.decoding = "async"
+                                            im.className = vd.className
+                                            im.setAttribute("style", vd.getAttribute("style") || "")
+                                            im.style.objectFit = "cover"
+                                            im.style.width = "100%"
+                                            im.style.height = "100%"
+                                            im.style.display = "block"
+                                            vd.replaceWith(im)
+                                        } else {
                                             vd.removeAttribute("autoplay")
-                                            vd.setAttribute(
-                                                "data-luci-autoplay",
-                                                ""
-                                            )
+                                            vd.setAttribute("data-luci-autoplay", "")
+                                            vd.setAttribute("preload", "none")
                                         }
-                                        vd.setAttribute("preload", "none")
                                     })
                                 gallery.appendChild(clone)
                             })
