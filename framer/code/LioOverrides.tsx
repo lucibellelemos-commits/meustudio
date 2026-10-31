@@ -4468,6 +4468,8 @@ function HomeSpacingSync() {
         const run = () => {
             const hosts = Array.from(document.querySelectorAll<HTMLElement>(HOSTS))
             if (!hosts.length) return
+            // barras ficam presas no topo ao rolar: só mede com a página no início
+            if (window.scrollY > 4) return
             const visible = (e: Element) => e.getBoundingClientRect().height > 0
             const bars = Array.from(
                 document.querySelectorAll<HTMLElement>('[data-framer-name="Project Bar"]')
