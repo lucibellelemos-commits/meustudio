@@ -4801,9 +4801,7 @@ function HomeBormamProject() {
             bar.style.background = getComputedStyle(native).backgroundColor
             slot.appendChild(bar)
             host.appendChild(slot)
-            const g = document.createElement("div")
-            host.appendChild(g)
-            setTarget(g)
+            setTarget(host)
         }
         find()
         const observer = new LuciObserver(find)
