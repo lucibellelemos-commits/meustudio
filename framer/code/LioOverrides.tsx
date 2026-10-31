@@ -43,6 +43,8 @@ export const withIntro = withText(
 
 // Ajustes gerais: celular, legendas e contraste
 const SITE_FIX_CSS = `
+/* home: sem legendas embaixo das imagens dos projetos */
+[data-luci-home-card]>p,[data-luci-home-card] p{display:none!important}
 /* playground: sem a imagem antiga atrás dos vídeos; o vídeo preenche o card */
 [data-luci-pg-card]:has(video) img{visibility:hidden!important}
 [data-luci-pg-card] video{object-fit:cover!important;background:#000}
