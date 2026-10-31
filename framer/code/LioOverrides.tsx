@@ -382,9 +382,9 @@ function ContactTitle() {
         return () => mo.disconnect()
     }, [])
     return (
-        <style>{`[data-luci-contact-title]{font:500 clamp(40px,4.6vw,76px)/1.02 Switzer,Arial,sans-serif!important;letter-spacing:-.045em!important;max-width:11ch;text-wrap:balance;margin:0!important;color:#111}
+        <style>{`h1[data-luci-contact-title].framer-text,[data-luci-contact-title]{font:500 clamp(52px,8.2vw,148px)/.96 Switzer,Arial,sans-serif!important;letter-spacing:-.045em!important;max-width:12ch!important;text-wrap:balance;margin:0!important;color:#111!important}
 [data-luci-contact-title] *{font:inherit!important;letter-spacing:inherit!important}
-@media(max-width:809px){[data-luci-contact-title]{font-size:40px!important;max-width:none}}`}</style>
+@media(max-width:809px){h1[data-luci-contact-title].framer-text,[data-luci-contact-title]{font-size:50px!important;max-width:none!important}}`}</style>
     )
 }
 
