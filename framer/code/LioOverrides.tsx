@@ -166,6 +166,7 @@ export function withLioLogo(Component): ComponentType {
                 />
                 <HomeMetaProject />
                 <HomeBormamProject />
+                <HomeKrisnaProject />
                 <HomeSpacingSync />
                 <LinkedInFix />
                 <ContactTitle />
@@ -1627,9 +1628,39 @@ const BORMAM_ENTRY: WorkEntry = {
     ratio: 0.8,
 }
 
+// Projeto Krisna: identidade visual da KRISNA e da The Technique
+const KRISNA_BASE =
+    "https://cdn.jsdelivr.net/gh/lucibellelemos-commits/meustudio@44773322a6a88543e56723d2fc2e7e97eb0f6882/krisna/"
+const KRISNA_ITEMS: [string, string, number, number][] = [
+    ["01-capa.jpg", "Krisna — Capa", 1080, 1350],
+    ["02-site.jpg", "Krisna — Site", 1080, 1350],
+    ["03-logo-vertical.jpg", "Krisna — Logotipo vertical", 1080, 1350],
+    ["04-showcase.jpg", "Krisna — Showcase", 1080, 1350],
+    ["05-the-technique.jpg", "The Technique — Inscrição", 1080, 1350],
+    ["06-turma.jpg", "The Technique — Turma", 900, 1350],
+]
+const KRISNA_TEXT =
+    "Identidade visual da KRISNA, maquiadora e hair stylist de beleza editorial, e da The Technique, sua formação presencial de maquiagem. Sistema em preto, branco e cinza com acento lavanda, tipografia Geist e Geist Mono e um site para beleza editorial, cabelo e educação."
+const KRISNA_ENTRY: WorkEntry = {
+    media: KRISNA_ITEMS.map(([file]) => ({
+        src: KRISNA_BASE + file,
+        poster: "",
+        video: false,
+    })),
+    key: "branding:Krisna",
+    title: "Krisna — The Technique",
+    area: "branding",
+    description: KRISNA_TEXT,
+    src: KRISNA_BASE + KRISNA_ITEMS[0][0],
+    poster: "",
+    video: false,
+    ratio: 0.8,
+}
+
 const WORK_PRIORITY = [
     "Harper’s Bazaar — Retoque 3D",
     "Porsche × Louis Vuitton",
+    "Krisna — The Technique",
     "Kleber Matheus Studio — Index Conectada",
     "Itaú — Estudo visual",
     "Bormam 1920",
@@ -1781,6 +1812,7 @@ function WorkTemplate() {
                     })
                 })
             if (!keys.has(BORMAM_ENTRY.key)) found.push(BORMAM_ENTRY)
+            if (!keys.has(KRISNA_ENTRY.key)) found.push(KRISNA_ENTRY)
             const next = JSON.stringify(found)
             if (next !== signature) {
                 signature = next
@@ -4461,7 +4493,8 @@ const HOME_BAZAAR_NEW = [
 function HomeSpacingSync() {
     React.useEffect(() => {
         if (window.location.pathname.replace(/\/$/, "") !== "") return
-        const HOSTS = "[data-luci-meta-project],[data-luci-bormam-project]"
+        const HOSTS =
+            "[data-luci-meta-project],[data-luci-bormam-project],[data-luci-krisna-project]"
         const median = (v: number[]) => {
             const a = v.filter((n) => isFinite(n)).sort((x, y) => x - y)
             return a.length ? a[Math.floor(a.length / 2)] : NaN
@@ -4865,6 +4898,107 @@ function HomeBormamProject() {
                             textTransform: "uppercase",
                         }}
                     >
+                        {caption}
+                    </p>
+                </article>
+            ))}
+        </div>,
+        target
+    )
+}
+
+// Krisna na home, em 3º lugar (logo depois de Meta)
+function HomeKrisnaProject() {
+    const [target, setTarget] = React.useState<HTMLElement | null>(null)
+    React.useEffect(() => {
+        if (window.location.pathname.replace(/\/$/, "") !== "") return
+        if (document.body.dataset.luciKrisnaOwner) return
+        document.body.dataset.luciKrisnaOwner = "true"
+        let host: HTMLElement | null = null
+        const find = () => {
+            if (host?.isConnected) return
+            const meta = document.querySelector<HTMLElement>("[data-luci-meta-project]")
+            const native = Array.from(
+                document.querySelectorAll<HTMLElement>('[data-framer-name="Project Bar"]')
+            ).find(
+                (b) =>
+                    !b.closest("[data-luci-meta-project],[data-luci-bormam-project],[data-luci-home-clone]") &&
+                    b.getBoundingClientRect().height > 0
+            )
+            if (!meta || !native) return
+            host = document.createElement("div")
+            host.dataset.luciKrisnaProject = "true"
+            host.style.width = "100%"
+            host.style.minWidth = "0"
+            meta.insertAdjacentElement("afterend", host)
+            const bar = native.cloneNode(true) as HTMLElement
+            bar.removeAttribute("data-luci-info-open")
+            bar.querySelectorAll("[data-luci-gallery-buttons]").forEach((n) => n.remove())
+            bar.querySelectorAll("[id]").forEach((n) => n.removeAttribute("id"))
+            const set = (sel: string, text: string) => {
+                const el = bar.querySelector(sel + " p")
+                if (el) el.textContent = text
+            }
+            set('[data-framer-name="TItle"]', "Krisna")
+            set('[data-framer-name="Category"]', "Branding")
+            const details = bar.querySelector('[data-framer-name="Details"]')
+            const yearP = details?.lastElementChild?.querySelector("p")
+            if (yearP && /\d{4}/.test(yearP.textContent || "")) yearP.textContent = "2026"
+            const info = bar.querySelector('[data-framer-name="Info"] p')
+            if (info) info.textContent = KRISNA_TEXT
+            const slot = document.createElement("div")
+            slot.dataset.luciMetaSlot = "true"
+            slot.style.position = "sticky"
+            slot.style.height = "45px"
+            slot.style.marginBottom = "18px"
+            slot.style.zIndex = "8"
+            const sticky = native.parentElement
+            const top = sticky ? getComputedStyle(sticky).top : "0px"
+            slot.style.top = top && top !== "auto" ? top : "0px"
+            bar.style.position = "absolute"
+            bar.style.top = "0"
+            bar.style.left = "0"
+            bar.style.right = "0"
+            bar.style.background = getComputedStyle(native).backgroundColor
+            slot.appendChild(bar)
+            host.appendChild(slot)
+            setTarget(host)
+        }
+        find()
+        const observer = new LuciObserver(find)
+        observer.observe(document.body, { childList: true, subtree: true })
+        return () => {
+            observer.disconnect()
+            host?.remove()
+            delete document.body.dataset.luciKrisnaOwner
+        }
+    }, [])
+    if (!target) return null
+    return createPortal(
+        <div
+            data-luci-home-gallery="regular"
+            style={{ display: "flex", gap: 20, width: "100%", overflowX: "auto", alignItems: "flex-start" }}
+        >
+            {KRISNA_ITEMS.map(([file, caption, w, h]) => (
+                <article
+                    key={file}
+                    data-framer-name="Project Item Added Krisna"
+                    data-luci-home-card="regular"
+                    style={{ minWidth: 0, fontFamily: '"Fragment Mono", monospace' }}
+                >
+                    <div data-framer-name="Content Wrapper" style={{ width: "100%", overflow: "hidden" }}>
+                        <img
+                            src={KRISNA_BASE + file}
+                            alt={caption}
+                            width={w}
+                            height={h}
+                            loading="lazy"
+                            decoding="async"
+                            draggable={false}
+                            style={{ display: "block", width: "100%", height: "auto", objectFit: "cover" }}
+                        />
+                    </div>
+                    <p style={{ fontSize: 12, lineHeight: 1.3, margin: "10px 0 0", textTransform: "uppercase" }}>
                         {caption}
                     </p>
                 </article>
