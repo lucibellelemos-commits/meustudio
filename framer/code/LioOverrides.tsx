@@ -727,10 +727,29 @@ function ViewportVideos() {
         // vídeo só baixa quando chega perto da tela; fora dela, pausa
         // no celular, no máximo 2 vídeos tocando ao mesmo tempo (os mais visíveis)
         const mobile = window.innerWidth <= 809
-        const MAX_PLAYING = 2
+        // celular fraco ou economia de dados: só 1 vídeo por vez
+        const nav = navigator as any
+        const weak =
+            mobile &&
+            (nav.connection?.saveData ||
+                /(^|-)2g$/.test(nav.connection?.effectiveType || "") ||
+                (nav.deviceMemory && nav.deviceMemory <= 3))
+        const MAX_PLAYING = weak ? 1 : 2
         const ratios = new Map<HTMLVideoElement, number>()
         const manual = new Set<HTMLVideoElement>()
+        // aba em segundo plano: pausa tudo (economiza bateria e CPU)
+        const onHidden = () => {
+            if (document.hidden)
+                document
+                    .querySelectorAll<HTMLVideoElement>("video")
+                    .forEach((v) => {
+                        if (!v.paused) v.pause()
+                    })
+            else if (mobile) enforce()
+        }
+        document.addEventListener("visibilitychange", onHidden)
         const enforce = () => {
+            if (document.hidden) return
             const ranked = Array.from(ratios.entries())
                 .filter(([v, r]) => r > 0.35 && wants(v) && v.isConnected)
                 .sort((a, b) => b[1] - a[1])
@@ -885,6 +904,7 @@ function ViewportVideos() {
         })
         const first = window.setTimeout(check, 1500)
         return () => {
+            document.removeEventListener("visibilitychange", onHidden)
             document.removeEventListener("scroll", onScroll, true)
             if (settle) window.clearTimeout(settle)
             window.clearTimeout(first)
