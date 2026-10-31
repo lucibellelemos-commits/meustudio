@@ -43,6 +43,9 @@ export const withIntro = withText(
 
 // Ajustes gerais: celular, legendas e contraste
 const SITE_FIX_CSS = `
+/* playground: sem a imagem antiga atrás dos vídeos; o vídeo preenche o card */
+[data-luci-pg-card]:has(video) img{visibility:hidden!important}
+[data-luci-pg-card] video{object-fit:cover!important;background:#000}
 /* nunca mostrar os controles de vídeo do navegador (iPhone) */
 video::-webkit-media-controls,video::-webkit-media-controls-panel,video::-webkit-media-controls-start-playback-button,video::-webkit-media-controls-overlay-play-button,video::-webkit-media-controls-enclosure{display:none!important;-webkit-appearance:none!important;opacity:0!important}
 /* celular: título sem animação letra a letra e sem camadas extras */
@@ -3853,6 +3856,9 @@ function PlaygroundLightbox() {
     const [closing, setClosing] = React.useState(false)
     const [needsTap, setNeedsTap] = React.useState(false)
     const [frame, setFrame] = React.useState(0)
+    // prévia ao passar o mouse (computador)
+    const [peek, setPeek] = React.useState<any>(null)
+    const [peekOn, setPeekOn] = React.useState(false)
     const origin = React.useRef<HTMLElement | null>(null)
     const closeButton = React.useRef<HTMLButtonElement | null>(null)
     const videoRef = React.useRef<HTMLVideoElement | null>(null)
@@ -3882,13 +3888,14 @@ function PlaygroundLightbox() {
     }, [media])
     // animação quadro a quadro (ex.: Mescla) também anima ampliada
     React.useEffect(() => {
-        if (!media?.frames || media.frames.length < 2) return
+        const frames = media?.frames || (peekOn ? peek?.frames : undefined)
+        if (!frames || frames.length < 2) return
         const t = window.setInterval(
-            () => setFrame((f) => (f + 1) % media.frames.length),
+            () => setFrame((f) => (f + 1) % frames.length),
             900
         )
         return () => window.clearInterval(t)
-    }, [media])
+    }, [media, peek, peekOn])
     React.useEffect(() => {
         if (!window.location.pathname.includes("playground")) return
         if (document.body.dataset.luciLightboxOwner) return
@@ -3918,6 +3925,7 @@ function PlaygroundLightbox() {
             event.preventDefault()
             event.stopPropagation()
             origin.current = card
+            setPeekOn(false)
             const stop = image?.getAttribute("data-lci-stop-motion")
             const frames = stop
                 ? STOP_MOTION_PROJECTS.find((c) => c.label === stop)?.frames
@@ -3967,8 +3975,59 @@ function PlaygroundLightbox() {
         observer.observe(document.body, { childList: true, subtree: true })
         document.addEventListener("click", open, true)
         document.addEventListener("keydown", open, true)
+        const fine = matchMedia("(hover: hover) and (pointer: fine)").matches
+        let current: HTMLElement | null = null
+        let timer = 0
+        const mediaOf = (card: HTMLElement) => {
+            const video = card.querySelector("video")
+            const image = card.querySelector("img")
+            const src = video
+                ? (video.currentSrc || video.src || "").split("#")[0]
+                : image?.currentSrc || image?.src
+            if (!src) return null
+            const stop = image?.getAttribute("data-lci-stop-motion")
+            return {
+                src,
+                video: !!video,
+                poster: video?.poster,
+                start: video && video.readyState > 1 ? video.currentTime : 0,
+                frames: stop
+                    ? STOP_MOTION_PROJECTS.find((c) => c.label === stop)?.frames
+                    : undefined,
+                caption: card.querySelector("p")?.textContent || "Playground",
+            }
+        }
+        const over = (event: PointerEvent) => {
+            if (!fine || event.pointerType !== "mouse") return
+            const card = (event.target as HTMLElement)?.closest<HTMLElement>(
+                "[data-luci-pg-card]"
+            )
+            if (!card || card === current) return
+            current = card
+            window.clearTimeout(timer)
+            timer = window.setTimeout(() => {
+                const m = mediaOf(card)
+                if (!m) return
+                setPeek(m)
+                setPeekOn(true)
+            }, 90)
+        }
+        const out = (event: PointerEvent) => {
+            if (!fine || !current) return
+            const to = event.relatedTarget as HTMLElement | null
+            if (to && current.contains(to)) return
+            if (to?.closest?.("[data-luci-pg-card]")) return
+            current = null
+            window.clearTimeout(timer)
+            setPeekOn(false)
+        }
+        document.addEventListener("pointerover", over, true)
+        document.addEventListener("pointerout", out, true)
         return () => {
             observer.disconnect()
+            window.clearTimeout(timer)
+            document.removeEventListener("pointerover", over, true)
+            document.removeEventListener("pointerout", out, true)
             document.removeEventListener("click", open, true)
             document.removeEventListener("keydown", open, true)
             delete document.body.dataset.luciLightboxOwner
@@ -3999,7 +4058,99 @@ function PlaygroundLightbox() {
             document.removeEventListener("keydown", keys)
         }
     }, [media, close])
-    if (!media || typeof document === "undefined") return null
+    const peekLayer =
+        peek && !media && typeof document !== "undefined"
+            ? createPortal(
+                  <div
+                      data-luci-peek=""
+                      aria-hidden="true"
+                      style={{
+                          position: "fixed",
+                          inset: 0,
+                          zIndex: 2147482000,
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          pointerEvents: "none",
+                          opacity: peekOn ? 1 : 0,
+                          transition: "opacity .45s cubic-bezier(.16,1,.3,1)",
+                      }}
+                  >
+                      <div
+                          style={{
+                              display: "flex",
+                              flexDirection: "column",
+                              alignItems: "center",
+                              gap: 12,
+                              transform: peekOn
+                                  ? "translateY(0) scale(1)"
+                                  : "translateY(10px) scale(.96)",
+                              transition:
+                                  "transform .6s cubic-bezier(.16,1,.3,1)",
+                          }}
+                      >
+                          {peek.video ? (
+                              <video
+                                  key={peek.src}
+                                  src={peek.src}
+                                  poster={peek.poster}
+                                  autoPlay
+                                  muted
+                                  loop
+                                  playsInline
+                                  preload="auto"
+                                  onLoadedMetadata={(e) => {
+                                      try {
+                                          if (peek.start)
+                                              e.currentTarget.currentTime =
+                                                  peek.start
+                                      } catch {}
+                                  }}
+                                  style={{
+                                      display: "block",
+                                      maxWidth: "42vw",
+                                      maxHeight: "62vh",
+                                      width: "auto",
+                                      height: "auto",
+                                      boxShadow: "0 30px 80px rgba(0,0,0,.45)",
+                                  }}
+                              />
+                          ) : (
+                              <img
+                                  src={
+                                      peek.frames
+                                          ? peek.frames[frame % peek.frames.length]
+                                          : peek.src
+                                  }
+                                  alt=""
+                                  style={{
+                                      display: "block",
+                                      maxWidth: "42vw",
+                                      maxHeight: "62vh",
+                                      width: "auto",
+                                      height: "auto",
+                                      boxShadow: "0 30px 80px rgba(0,0,0,.45)",
+                                  }}
+                              />
+                          )}
+                          <p
+                              style={{
+                                  margin: 0,
+                                  color: "#fff",
+                                  fontFamily: '"Fragment Mono", monospace',
+                                  fontSize: 11,
+                                  textTransform: "uppercase",
+                                  mixBlendMode: "difference",
+                              }}
+                          >
+                              {peek.caption}
+                          </p>
+                      </div>
+                  </div>,
+                  document.body
+              )
+            : null
+    if (!media || typeof document === "undefined") return peekLayer
     const mediaStyle: React.CSSProperties = {
         maxWidth: "92vw",
         maxHeight: "80vh",
