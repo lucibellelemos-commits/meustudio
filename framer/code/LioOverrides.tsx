@@ -43,6 +43,8 @@ export const withIntro = withText(
 
 // Ajustes gerais: celular, legendas e contraste
 const SITE_FIX_CSS = `
+/* playground: ao passar o mouse, os outros projetos escurecem */
+@media (hover:hover) and (pointer:fine){[data-luci-pg-card]{transition:opacity .45s cubic-bezier(.16,1,.3,1)}[data-luci-pg-gallery]:has([data-luci-pg-card]:hover) [data-luci-pg-card]:not(:hover){opacity:.28}}
 /* home: sem legendas embaixo das imagens dos projetos */
 [data-luci-home-card]>p,[data-luci-home-card] p{display:none!important}
 /* playground: sem a imagem antiga atrás dos vídeos; o vídeo preenche o card */
@@ -4452,6 +4454,37 @@ const HOME_BAZAAR_NEW = [
     },
 ]
 
+// Projetos inseridos (Meta, Bormam) copiam os espaços exatos de um projeto nativo:
+// distância título→imagens e espaço até o próximo projeto (computador e celular)
+function syncProjectSpacing(
+    host: HTMLElement,
+    slot: HTMLElement,
+    anchor: HTMLElement,
+    nativeBar: HTMLElement
+) {
+    const run = () => {
+        const gallery = anchor.querySelector<HTMLElement>("[data-luci-home-gallery]")
+        if (!gallery || !host.isConnected) return
+        const a = anchor.getBoundingClientRect()
+        const b = nativeBar.getBoundingClientRect()
+        const g = gallery.getBoundingClientRect()
+        if (!g.height || !b.height) return
+        slot.style.height = Math.round(b.height) + "px"
+        slot.style.marginBottom = Math.round(g.top - b.bottom) + "px"
+        host.style.paddingBottom = Math.max(0, Math.round(a.bottom - g.bottom)) + "px"
+        host.style.paddingTop = Math.max(0, Math.round(b.top - a.top)) + "px"
+    }
+    requestAnimationFrame(run)
+    window.setTimeout(run, 600)
+    window.setTimeout(run, 2000)
+    let w = window.innerWidth
+    window.addEventListener("resize", () => {
+        if (window.innerWidth === w) return
+        w = window.innerWidth
+        window.setTimeout(run, 200)
+    })
+}
+
 function HomeMetaProject() {
     const [target, setTarget] = React.useState<HTMLElement | null>(null)
     const [native, setNative] = React.useState(false)
@@ -4535,6 +4568,7 @@ function HomeMetaProject() {
                 bar.style.background = getComputedStyle(native).backgroundColor
                 slot.appendChild(bar)
                 host.appendChild(slot)
+                syncProjectSpacing(host, slot, anchor, native)
                 setNative(true)
             }
             setTarget(host)
@@ -4723,6 +4757,7 @@ function HomeBormamProject() {
             bar.style.background = getComputedStyle(native).backgroundColor
             slot.appendChild(bar)
             host.appendChild(slot)
+            syncProjectSpacing(host, slot, anchor, native)
             const g = document.createElement("div")
             host.appendChild(g)
             setTarget(g)
