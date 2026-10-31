@@ -163,6 +163,7 @@ export function withLioLogo(Component): ComponentType {
                 <HomeMetaProject />
                 <HomeBormamProject />
                 <LinkedInFix />
+                <ContactTitle />
                 <HomeBvlgariReplacement />
                 <CleanVideoPresentation />
                 <SilentSiteMedia />
@@ -346,6 +347,37 @@ function LinkedInFix() {
         return () => mo.disconnect()
     }, [])
     return null
+}
+
+// Contato: título maior e em forma de pergunta
+const CONTACT_TITLE = "Vamos conversar sobre o seu projeto?"
+function ContactTitle() {
+    React.useEffect(() => {
+        if (!/^\/contato\/?$/.test(window.location.pathname)) return
+        const fix = () => {
+            const el = Array.from(
+                document.querySelectorAll<HTMLElement>("h1,h2,h3,p")
+            ).find((n) => {
+                const t = (n.textContent || "").replace(/\s+/g, " ").trim()
+                return (
+                    t === "Vamos conversar sobre o seu projeto" ||
+                    (t === CONTACT_TITLE && !n.hasAttribute("data-luci-contact-title"))
+                )
+            })
+            if (!el) return
+            el.textContent = CONTACT_TITLE
+            el.setAttribute("data-luci-contact-title", "")
+        }
+        fix()
+        const mo = new LuciObserver(fix)
+        mo.observe(document.body, { childList: true, subtree: true })
+        return () => mo.disconnect()
+    }, [])
+    return (
+        <style>{`[data-luci-contact-title]{font:500 clamp(40px,4.6vw,76px)/1.02 Switzer,Arial,sans-serif!important;letter-spacing:-.045em!important;max-width:11ch;text-wrap:balance;margin:0!important;color:#111}
+[data-luci-contact-title] *{font:inherit!important;letter-spacing:inherit!important}
+@media(max-width:809px){[data-luci-contact-title]{font-size:40px!important;max-width:none}}`}</style>
+    )
 }
 
 // Legendas que ainda vinham com nome de arquivo: mostra um rótulo legível
