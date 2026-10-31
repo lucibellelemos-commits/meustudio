@@ -647,7 +647,7 @@ function ViewportVideos() {
         const manual = new Set<HTMLVideoElement>()
         const enforce = () => {
             const ranked = Array.from(ratios.entries())
-                .filter(([v, r]) => r > 0.15 && wants(v) && v.isConnected)
+                .filter(([v, r]) => r > 0.35 && wants(v) && v.isConnected)
                 .sort((a, b) => b[1] - a[1])
                 .map(([v]) => v)
             const allowed = new Set(ranked.slice(0, MAX_PLAYING))
@@ -2595,7 +2595,7 @@ body[data-luci-hover-owner] [data-framer-name="Sticky Area"] [data-framer-name="
 @media(max-width:809px){[data-luci-home-gallery]{--luci-gallery-gap:10px;}}
 @media(prefers-reduced-motion:reduce){[data-luci-home-gallery]{scroll-behavior:auto}}
 
-[data-luci-home-gallery]{cursor:grab;touch-action:pan-y}
+[data-luci-home-gallery]{cursor:grab;touch-action:pan-x pan-y}
 [data-luci-home-gallery] img{-webkit-user-drag:none;user-select:none}
 [data-luci-home-gallery][data-luci-dragging]{cursor:grabbing;user-select:none}
 `
@@ -2936,6 +2936,8 @@ function HomeHoverGalleries() {
         } | null = null
         let suppressClick = false
         const down = (event: PointerEvent) => {
+            // arrastar por código só com mouse; no toque o celular rola sozinho (nativo, com inércia)
+            if (event.pointerType !== "mouse") return
             const gallery = find(event.target)
             if (!gallery || event.button !== 0) return
             stop()
@@ -3084,8 +3086,13 @@ function HomeHoverGalleries() {
                             .querySelectorAll("[data-luci-home-clone]")
                             .forEach((node) => node.remove())
                         // uma cópia basta quando o projeto já tem bastante card (menos peso no celular)
-                        const copies =
-                            cards.length >= 6 ? 1 : Math.ceil(8 / cards.length)
+                        // no celular (toque) não há volta infinita: menos cards e rolagem nativa
+                        const touch = matchMedia("(pointer: coarse)").matches
+                        const copies = touch
+                            ? 0
+                            : cards.length >= 6
+                              ? 1
+                              : Math.ceil(8 / cards.length)
                         for (let repeat = 0; repeat < copies; repeat++)
                             cards.forEach((card) => {
                                 const clone = card.cloneNode(
