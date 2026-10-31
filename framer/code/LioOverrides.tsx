@@ -1309,6 +1309,42 @@ type WorkEntry = {
     video: boolean
     ratio: number
 }
+// Número que conta do 0 até o valor (e de um valor ao outro ao trocar o tema)
+function CountUp({ value, delay = 0 }: { value: number; delay?: number }) {
+    const [shown, setShown] = React.useState(0)
+    const from = React.useRef(0)
+    React.useEffect(() => {
+        const start = from.current
+        const end = value
+        if (start === end) return
+        if (matchMedia("(prefers-reduced-motion: reduce)").matches) {
+            from.current = end
+            setShown(end)
+            return
+        }
+        let raf = 0
+        let t0 = 0
+        const dur = 900 + Math.min(600, Math.abs(end - start) * 25)
+        const timer = window.setTimeout(() => {
+            const step = (t: number) => {
+                if (!t0) t0 = t
+                const k = Math.min(1, (t - t0) / dur)
+                const e = 1 - Math.pow(1 - k, 3)
+                const v = Math.round(start + (end - start) * e)
+                setShown(v)
+                from.current = v
+                if (k < 1) raf = requestAnimationFrame(step)
+            }
+            raf = requestAnimationFrame(step)
+        }, delay)
+        return () => {
+            window.clearTimeout(timer)
+            cancelAnimationFrame(raf)
+        }
+    }, [value, delay])
+    return <>{shown}</>
+}
+
 // primeira frase da descrição, curta (legenda da Work)
 function shortDescription(text: string) {
     const t = (text || "").replace(/\s+/g, " ").trim()
@@ -1768,7 +1804,10 @@ function WorkTemplate() {
             <aside className="luci-cvb-side">
                 <h1>
                     <span>
-                        Work<sup>{items.length}</sup>
+                        Work
+                        <sup>
+                            <CountUp value={items.length} />
+                        </sup>
                     </span>
                 </h1>
                 <nav
@@ -1786,10 +1825,16 @@ function WorkTemplate() {
                         >
                             {name}
                             <sup>
-                                {id === "all"
-                                    ? entries.length
-                                    : entries.filter((e) => e.area === id)
-                                          .length}
+                                <CountUp
+                                    value={
+                                        id === "all"
+                                            ? entries.length
+                                            : entries.filter(
+                                                  (e) => e.area === id
+                                              ).length
+                                    }
+                                    delay={120}
+                                />
                             </sup>
                         </button>
                     ))}
