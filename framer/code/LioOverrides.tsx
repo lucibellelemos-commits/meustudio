@@ -43,6 +43,8 @@ export const withIntro = withText(
 
 // Ajustes gerais: celular, legendas e contraste
 const SITE_FIX_CSS = `
+/* nunca mostrar os controles de vídeo do navegador (iPhone) */
+video::-webkit-media-controls,video::-webkit-media-controls-panel,video::-webkit-media-controls-start-playback-button,video::-webkit-media-controls-overlay-play-button,video::-webkit-media-controls-enclosure{display:none!important;-webkit-appearance:none!important;opacity:0!important}
 /* celular: título sem animação letra a letra e sem camadas extras */
 @media(max-width:809px){h1 span,h1 span *{opacity:1!important;transform:none!important;will-change:auto!important}[data-luci-home-gallery]{overscroll-behavior-x:contain;-webkit-overflow-scrolling:touch}[data-luci-home-card]{contain:layout paint}}
 /* padrão tipográfico: Switzer 500 (16px texto, 24px títulos) e Fragment Mono para legendas */
@@ -688,6 +690,16 @@ function ViewportVideos() {
             document.querySelectorAll<HTMLVideoElement>("video").forEach((v) => {
                 if (seen.has(v)) return
                 seen.add(v)
+                // sem controles nativos, sem tela cheia nem picture-in-picture (iPhone)
+                v.controls = false
+                v.removeAttribute("controls")
+                v.muted = true
+                v.setAttribute("muted", "")
+                v.setAttribute("playsinline", "")
+                v.setAttribute("webkit-playsinline", "")
+                v.setAttribute("disablepictureinpicture", "")
+                v.setAttribute("disableremoteplayback", "")
+                v.setAttribute("x-webkit-airplay", "deny")
                 // autoplay nativo baixa todos os vídeos de uma vez: troca pelo nosso
                 if (v.autoplay) {
                     v.setAttribute("data-luci-autoplay", "")
