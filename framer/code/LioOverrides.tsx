@@ -2,6 +2,31 @@ import * as React from "react"
 import { createPortal } from "react-dom"
 import type { ComponentType } from "react"
 
+// ═══════════════════════════════════════════════════════════════════════
+// LUCI Studio — overrides do site (Framer)
+//
+// Tudo entra pelo withLioLogo, que monta os componentes abaixo conforme a
+// página. Mapa do arquivo, na ordem em que aparece:
+//
+//  1. Base ............ LuciObserver (observa o DOM 1x por quadro), CSS global
+//  2. Site todo ....... ImageDownscale, LinkedInFix, CaptionLabels, NoOrphans,
+//                       OldPathRedirect, SilentSiteMedia, CleanVideoPresentation
+//  3. Vídeos .......... lighterVideo (versões leves), ViewportVideos (só toca
+//                       o que está na tela; no celular, no máximo 2 por vez)
+//  4. Sobre / Contato . SobreTrail, ContactTitle, LCIForm, LCIBlock
+//  5. Work ............ WorkSelection, CountUp, WorkTemplate, WorkFilters,
+//                       WorkMediaGroup, NewWorkBatch
+//  6. Playground ...... PlaygroundExtra, PlaygroundCuration, PlaygroundLightbox,
+//                       PortfolioStopMotion
+//  7. Home ............ HomeInfoToggle, HomeGalleryControls, HomeHoverGalleries,
+//                       HomeSpacingSync, HomeMetaProject, HomeKrisnaProject,
+//                       HomeBormamProject, HomeBvlgariReplacement,
+//                       HomeExtraMedia, HomeBazaarMedia, UnniStickerMotion
+//
+// Para publicar: cole este arquivo no Framer (LioOverrides), salve e
+// clique em Publish → Update.
+// ═══════════════════════════════════════════════════════════════════════
+
 // Textos do LUCI Studio aplicados por override (template Nolan Barret)
 
 // Observadores do DOM agrupados: no máximo uma execução por quadro,
@@ -101,40 +126,6 @@ const DOTS_CSS = `
 .lci-dots i.d{display:block}
 @media (max-width:809px){.lci-dots i.d{display:none}}
 `
-
-// Linha de bolinhas no topo do site, alinhada às margens da logo
-function GridDots() {
-    const [g, setG] = React.useState(15)
-    React.useEffect(() => {
-        const fit = () => {
-            const logo = document.querySelector(
-                '[aria-label="LUCI Studio"]'
-            ) as HTMLElement | null
-            if (logo) setG(Math.round(logo.getBoundingClientRect().left))
-        }
-        fit()
-        const t = setTimeout(fit, 500)
-        window.addEventListener("resize", fit)
-        return () => {
-            clearTimeout(t)
-            window.removeEventListener("resize", fit)
-        }
-    }, [])
-    // 7 bolinhas no desktop, 4 no celular (as marcadas com "d" somem)
-    const cls = ["", "d", "", "d", "", "d", ""]
-    return (
-        <div
-            className="lci-dots"
-            style={{ ["--g" as any]: g + "px" }}
-            aria-hidden
-        >
-            <style>{DOTS_CSS}</style>
-            {cls.map((c, i) => (
-                <i key={i} className={c} />
-            ))}
-        </div>
-    )
-}
 
 // Logo "LUCI Studio®" numa linha no lugar do nome do template (mantém a cor de cada variante)
 export function withLioLogo(Component): ComponentType {
@@ -480,62 +471,6 @@ function CaptionLabels() {
     return <style>{CAPTION_LABELS_CSS}</style>
 }
 
-// Projeto aberto: cada linha de imagens ocupa a largura toda (alturas iguais na linha)
-function ProjectRows() {
-    React.useEffect(() => {
-        if (document.body.dataset.luciRowsOwner) return
-        document.body.dataset.luciRowsOwner = "true"
-        const ratio = (fig: HTMLElement) => {
-            if (fig.hasAttribute("data-luci-r")) return
-            const img = fig.querySelector("img")
-            const video = fig.querySelector("video")
-            const set = (w: number, h: number) => {
-                if (!w || !h) return
-                fig.style.setProperty("--r", String(Math.round((w / h) * 1000) / 1000))
-                fig.setAttribute("data-luci-r", "")
-            }
-            if (img) {
-                if (img.complete && img.naturalWidth)
-                    set(img.naturalWidth, img.naturalHeight)
-                else
-                    img.addEventListener(
-                        "load",
-                        () => set(img.naturalWidth, img.naturalHeight),
-                        { once: true }
-                    )
-            } else if (video) {
-                if (video.videoWidth) set(video.videoWidth, video.videoHeight)
-                else
-                    video.addEventListener(
-                        "loadedmetadata",
-                        () => set(video.videoWidth, video.videoHeight),
-                        { once: true }
-                    )
-            }
-        }
-        const scan = () =>
-            document
-                .querySelectorAll<HTMLElement>(".luci-project-story > figure")
-                .forEach(ratio)
-        scan()
-        let timer = 0
-        const mo = new LuciObserver(() => {
-            if (!timer)
-                timer = window.setTimeout(() => {
-                    timer = 0
-                    scan()
-                }, 80)
-        })
-        mo.observe(document.body, { childList: true, subtree: true })
-        return () => {
-            mo.disconnect()
-            if (timer) window.clearTimeout(timer)
-            delete document.body.dataset.luciRowsOwner
-        }
-    }, [])
-    return null
-}
-
 // Sem palavra sozinha na última linha: liga as duas últimas palavras dos
 // títulos (funciona também quando o texto é animado letra por letra)
 function NoOrphans() {
@@ -619,12 +554,12 @@ function NoOrphans() {
 // Playground: vídeos novos no começo da galeria (copiando o card nativo)
 const PLAYGROUND_NEW = [
     {
-        src: "https://cdn.jsdelivr.net/gh/lucibellelemos-commits/meustudio@c8adc160ed52373b85c151c8ce720ce9bee9750e/playground/boticario-painel.mp4",
+        src: "https://cdn.jsdelivr.net/gh/lucibellelemos-commits/meustudio@0e50aa54f9040e2bd842ef1c1893176785597453/v/playground-boticario-painel.mp4",
         poster: "https://cdn.jsdelivr.net/gh/lucibellelemos-commits/meustudio@c8adc160ed52373b85c151c8ce720ce9bee9750e/playground/boticario-painel.jpg",
         caption: "O Boticário — Painel de partidas",
     },
     {
-        src: "https://cdn.jsdelivr.net/gh/lucibellelemos-commits/meustudio@c8adc160ed52373b85c151c8ce720ce9bee9750e/playground/cabelos-ia.mp4",
+        src: "https://cdn.jsdelivr.net/gh/lucibellelemos-commits/meustudio@0e50aa54f9040e2bd842ef1c1893176785597453/v/playground-cabelos-ia.mp4",
         poster: "https://cdn.jsdelivr.net/gh/lucibellelemos-commits/meustudio@c8adc160ed52373b85c151c8ce720ce9bee9750e/playground/cabelos-ia.jpg",
         caption: "Retratos — Cabelos com IA",
     },
@@ -703,6 +638,55 @@ function OldPathRedirect() {
 }
 
 // Vídeos só tocam (e baixam) quando aparecem na tela; pausam ao sair.
+// ── Vídeos mais leves ────────────────────────────────────────────────
+// Versões recomprimidas (H.264, sem áudio, início rápido), cerca de um terço
+// menores e visualmente iguais. Ficam no ramo "media" do repositório,
+// servidas pelo jsDelivr. Todo <video> que aponte para o original é trocado.
+const MEDIA_BASE =
+    "https://cdn.jsdelivr.net/gh/lucibellelemos-commits/meustudio@0e50aa54f9040e2bd842ef1c1893176785597453/v/"
+const LIGHT_FRAMER_VIDEOS = new Set([
+    "LGpU5YxcRLoZlyh4DQ7GpXicS4",
+    "6RyO2mSr8frcIiXwNi4fuoocqQ",
+    "9C0wwdZbhzL0MQ0395gYL41YU",
+    "1OQWHp2NOYuxiZ7An1H1JcdZlc",
+    "nQbQiLvZE2qJhU3xvBDpupSx4",
+    "zdToxXCwk9FafZ81hbpEFM0QThU",
+    "ygtKH1tmEFZp9e9ed4H2YeIhV74",
+    "3SDurlcoUFU97JEAG9JBcfbEzVU",
+    "6t3XxJr0S3NUHnrlMq3CGH5rOpM",
+    "4RWUx50WoLHWPVh7TagQyKeSws",
+    "a6ZUcCEJbM1fPcAQiseK4d8LxTY",
+    "jx0anlyrrmNtDRXej3IzcD3PnkI",
+    "WWPAZBve9BSWyHMj1pG28OL36P4",
+])
+const LIGHT_REPO_VIDEOS = /meustudio@[0-9a-f]{40}\/(playground\/cabelos-ia|playground\/boticario-painel|buddemeyer\/buddemeyer-vision|unni\/unni-adesivos-02|buddemeyer\/buddemeyer-filme)\.mp4/
+function lighterVideo(url: string): string {
+    const [base, hash] = url.split("#")
+    let out = ""
+    const framer = base.match(/framerusercontent\.com\/assets\/([A-Za-z0-9]+)\.mp4/)
+    if (framer && LIGHT_FRAMER_VIDEOS.has(framer[1]))
+        out = MEDIA_BASE + framer[1] + ".mp4"
+    const repo = base.match(LIGHT_REPO_VIDEOS)
+    if (repo) out = MEDIA_BASE + repo[1].replace("/", "-") + ".mp4"
+    return out ? out + (hash ? "#" + hash : "") : url
+}
+function swapToLighterSource(v: HTMLVideoElement) {
+    let changed = false
+    const swap = (n: Element) => {
+        const src = n.getAttribute("src")
+        if (!src) return
+        const next = lighterVideo(src)
+        if (next !== src) {
+            n.setAttribute("src", next)
+            changed = true
+        }
+    }
+    swap(v)
+    const sources = v.querySelectorAll("source")
+    sources.forEach(swap)
+    if (changed && sources.length) v.load()
+}
+
 function ViewportVideos() {
     React.useEffect(() => {
         if (document.body.dataset.luciViewportOwner) return
@@ -792,6 +776,7 @@ function ViewportVideos() {
                 if (seen.has(v)) return
                 seen.add(v)
                 // sem controles nativos, sem tela cheia nem picture-in-picture (iPhone)
+                swapToLighterSource(v)
                 v.controls = false
                 v.removeAttribute("controls")
                 v.muted = true
@@ -936,20 +921,6 @@ function usePortfolioRoute() {
 }
 
 // ---------- Bloco "Ferramentas / Clientes / Tem um projeto em mente?" ----------
-
-const TOOLS = [
-    ["Ai", "Illustrator"],
-    ["Ps", "Photoshop"],
-    ["Ae", "After Effects"],
-    ["Fg", "Figma"],
-    ["Fr", "Framer"],
-    ["Rm", "Readymag"],
-    ["Hf", "Higgsfield"],
-    ["Oa", "OpenArt"],
-    ["Ax", "Axis"],
-    ["Gp", "ChatGPT"],
-    ["", "+ modelos de IA"],
-]
 
 const LOGO_BASE =
     "https://cdn.jsdelivr.net/gh/lucibellelemos-commits/meustudio@0f48cbb37f6d65b2298f9bb792019de616ae9a3e/clientes/preto/"
@@ -3819,7 +3790,7 @@ const WORK_BATCH_MEDIA = {
                 {
                     caption: "Harper’s Bazaar — Imagens e tipografia",
                     poster: "https://framerusercontent.com/images/LAtZvUf5CC3jHb5w7pWDvPMR6bE.jpg?width=720&height=1280",
-                    src: "https://framerusercontent.com/assets/jx0anlyrrmNtDRXej3IzcD3PnkI.mp4",
+                    src: "https://cdn.jsdelivr.net/gh/lucibellelemos-commits/meustudio@0e50aa54f9040e2bd842ef1c1893176785597453/v/jx0anlyrrmNtDRXej3IzcD3PnkI.mp4",
                 },
             ],
         },
@@ -4486,7 +4457,7 @@ const HOME_BAZAAR_NEW = [
         caption: "Bazaar — Teaser",
     },
     {
-        src: "https://framerusercontent.com/assets/jx0anlyrrmNtDRXej3IzcD3PnkI.mp4",
+        src: "https://cdn.jsdelivr.net/gh/lucibellelemos-commits/meustudio@0e50aa54f9040e2bd842ef1c1893176785597453/v/jx0anlyrrmNtDRXej3IzcD3PnkI.mp4",
         poster: "https://framerusercontent.com/images/LAtZvUf5CC3jHb5w7pWDvPMR6bE.jpg?width=720&height=1280",
         caption: "Bazaar — Imagens e tipografia",
     },
@@ -5110,7 +5081,7 @@ function HomeBvlgariReplacement() {
         <>
             <style>{"[data-luci-bvg-old]{display:none!important}"}</style>
             {[
-                "https://framerusercontent.com/assets/6t3XxJr0S3NUHnrlMq3CGH5rOpM.mp4",
+                "https://cdn.jsdelivr.net/gh/lucibellelemos-commits/meustudio@0e50aa54f9040e2bd842ef1c1893176785597453/v/6t3XxJr0S3NUHnrlMq3CGH5rOpM.mp4",
                 "https://framerusercontent.com/assets/7cfKh5U9AobXksQkQDj9QANXwD0.mp4",
                 "https://framerusercontent.com/images/XDQWC2A4GahUgVtGPHdnQQheJE.jpg",
                 "https://framerusercontent.com/images/Kxyem7l6N29Oixv4d2ctFpu2KEc.jpg?width=2160&height=2880",
@@ -5281,7 +5252,7 @@ const HOME_ORBIS_NEW: ExtraMedia[] = [
 type ExtraMedia = { src: string; caption: string; video?: boolean; poster?: string }
 const HOME_UNNI_NEW: ExtraMedia[] = [
     {
-        src: "https://cdn.jsdelivr.net/gh/lucibellelemos-commits/meustudio@88bce082b19b9e68ee8b689fbaa986cf376d6c01/unni/unni-adesivos-02.mp4",
+        src: "https://cdn.jsdelivr.net/gh/lucibellelemos-commits/meustudio@0e50aa54f9040e2bd842ef1c1893176785597453/v/unni-unni-adesivos-02.mp4",
         poster: "https://cdn.jsdelivr.net/gh/lucibellelemos-commits/meustudio@88bce082b19b9e68ee8b689fbaa986cf376d6c01/unni/unni-adesivos-02.jpg",
         caption: "Unni Studio — Adesivos",
         video: true,
@@ -5289,13 +5260,13 @@ const HOME_UNNI_NEW: ExtraMedia[] = [
 ]
 const HOME_BUDDEMEYER_NEW: ExtraMedia[] = [
     {
-        src: "https://cdn.jsdelivr.net/gh/lucibellelemos-commits/meustudio@c8adc160ed52373b85c151c8ce720ce9bee9750e/buddemeyer/buddemeyer-vision.mp4",
+        src: "https://cdn.jsdelivr.net/gh/lucibellelemos-commits/meustudio@0e50aa54f9040e2bd842ef1c1893176785597453/v/buddemeyer-buddemeyer-vision.mp4",
         poster: "https://cdn.jsdelivr.net/gh/lucibellelemos-commits/meustudio@c8adc160ed52373b85c151c8ce720ce9bee9750e/buddemeyer/buddemeyer-vision.jpg",
         caption: "Vision — Filme",
         video: true,
     },
     {
-        src: "https://cdn.jsdelivr.net/gh/lucibellelemos-commits/meustudio@4767de0e7b4c9fb51eee3d9b99b6dd9f2aa575a6/buddemeyer/buddemeyer-filme.mp4",
+        src: "https://cdn.jsdelivr.net/gh/lucibellelemos-commits/meustudio@0e50aa54f9040e2bd842ef1c1893176785597453/v/buddemeyer-buddemeyer-filme.mp4",
         poster: "https://cdn.jsdelivr.net/gh/lucibellelemos-commits/meustudio@4767de0e7b4c9fb51eee3d9b99b6dd9f2aa575a6/buddemeyer/buddemeyer-filme.jpg",
         caption: "UltraSoft — Filme",
         video: true,
