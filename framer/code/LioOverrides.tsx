@@ -162,6 +162,7 @@ export function withLioLogo(Component): ComponentType {
                 />
                 <HomeMetaProject />
                 <HomeBormamProject />
+                <LinkedInFix />
                 <HomeBvlgariReplacement />
                 <CleanVideoPresentation />
                 <SilentSiteMedia />
@@ -304,6 +305,44 @@ function ImageDownscale() {
             attributes: true,
             attributeFilter: ["src"],
         })
+        return () => mo.disconnect()
+    }, [])
+    return null
+}
+
+// LinkedIn: endereço correto em todos os links e textos do site
+const LINKEDIN_URL = "https://www.linkedin.com/in/lucibelle-lemos-731935200/"
+function LinkedInFix() {
+    React.useEffect(() => {
+        const fix = () => {
+            document
+                .querySelectorAll<HTMLAnchorElement>('a[href*="linkedin.com"]')
+                .forEach((a) => {
+                    if (a.getAttribute("href") !== LINKEDIN_URL) {
+                        a.setAttribute("href", LINKEDIN_URL)
+                        a.setAttribute("target", "_blank")
+                        a.setAttribute("rel", "noopener")
+                    }
+                })
+            document.querySelectorAll("p").forEach((p) => {
+                if (p.closest("a") || p.children.length) return
+                const t = p.textContent || ""
+                if (/^LinkedIn\s*—\s*\/lucibellelemos$/.test(t.trim())) {
+                    const a = document.createElement("a")
+                    a.href = LINKEDIN_URL
+                    a.target = "_blank"
+                    a.rel = "noopener"
+                    a.textContent = "LinkedIn — /lucibelle-lemos"
+                    a.style.color = "inherit"
+                    a.style.textDecoration = "none"
+                    p.textContent = ""
+                    p.appendChild(a)
+                }
+            })
+        }
+        fix()
+        const mo = new LuciObserver(fix)
+        mo.observe(document.body, { childList: true, subtree: true })
         return () => mo.disconnect()
     }, [])
     return null
