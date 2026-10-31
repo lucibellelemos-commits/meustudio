@@ -1630,12 +1630,12 @@ const BORMAM_ENTRY: WorkEntry = {
 
 // Projeto Krisna: identidade visual da KRISNA e da The Technique
 const KRISNA_BASE =
-    "https://cdn.jsdelivr.net/gh/lucibellelemos-commits/meustudio@44773322a6a88543e56723d2fc2e7e97eb0f6882/krisna/"
+    "https://cdn.jsdelivr.net/gh/lucibellelemos-commits/meustudio@169309ba7b2aaf10381df85f7f46c0c22793f153/krisna/"
 const KRISNA_ITEMS: [string, string, number, number][] = [
     ["01-capa.jpg", "Krisna — Capa", 1080, 1350],
     ["02-site.jpg", "Krisna — Site", 1080, 1350],
     ["03-logo-vertical.jpg", "Krisna — Logotipo vertical", 1080, 1350],
-    ["04-showcase.jpg", "Krisna — Showcase", 1080, 1350],
+    ["04-vitrine.jpg", "Krisna — Showcase", 1080, 1350],
     ["05-the-technique.jpg", "The Technique — Inscrição", 1080, 1350],
     ["06-turma.jpg", "The Technique — Turma", 900, 1350],
 ]
