@@ -166,6 +166,7 @@ export function withLioLogo(Component): ComponentType {
                 />
                 <HomeMetaProject />
                 <HomeBormamProject />
+                <HomeSpacingSync />
                 <LinkedInFix />
                 <ContactTitle />
                 <HomeBvlgariReplacement />
@@ -4454,35 +4455,77 @@ const HOME_BAZAAR_NEW = [
     },
 ]
 
-// Projetos inseridos (Meta, Bormam) copiam os espaços exatos de um projeto nativo:
-// distância título→imagens e espaço até o próximo projeto (computador e celular)
-function syncProjectSpacing(
-    host: HTMLElement,
-    slot: HTMLElement,
-    anchor: HTMLElement,
-    nativeBar: HTMLElement
-) {
-    const run = () => {
-        const gallery = anchor.querySelector<HTMLElement>("[data-luci-home-gallery]")
-        if (!gallery || !host.isConnected) return
-        const a = anchor.getBoundingClientRect()
-        const b = nativeBar.getBoundingClientRect()
-        const g = gallery.getBoundingClientRect()
-        if (!g.height || !b.height) return
-        slot.style.height = Math.round(b.height) + "px"
-        slot.style.marginBottom = Math.round(g.top - b.bottom) + "px"
-        host.style.paddingBottom = Math.max(0, Math.round(a.bottom - g.bottom)) + "px"
-        host.style.paddingTop = Math.max(0, Math.round(b.top - a.top)) + "px"
-    }
-    requestAnimationFrame(run)
-    window.setTimeout(run, 600)
-    window.setTimeout(run, 2000)
-    let w = window.innerWidth
-    window.addEventListener("resize", () => {
-        if (window.innerWidth === w) return
-        w = window.innerWidth
-        window.setTimeout(run, 200)
-    })
+// Espaços iguais entre todos os projetos da home (computador e celular):
+// mede os projetos nativos e aplica as mesmas medidas aos inseridos (Meta, Bormam)
+function HomeSpacingSync() {
+    React.useEffect(() => {
+        if (window.location.pathname.replace(/\/$/, "") !== "") return
+        const HOSTS = "[data-luci-meta-project],[data-luci-bormam-project]"
+        const median = (v: number[]) => {
+            const a = v.filter((n) => isFinite(n)).sort((x, y) => x - y)
+            return a.length ? a[Math.floor(a.length / 2)] : NaN
+        }
+        const run = () => {
+            const hosts = Array.from(document.querySelectorAll<HTMLElement>(HOSTS))
+            if (!hosts.length) return
+            const visible = (e: Element) => e.getBoundingClientRect().height > 0
+            const bars = Array.from(
+                document.querySelectorAll<HTMLElement>('[data-framer-name="Project Bar"]')
+            ).filter((b) => !b.closest(HOSTS) && !b.closest("[data-luci-home-clone]") && visible(b))
+            const gals = Array.from(
+                document.querySelectorAll<HTMLElement>("[data-luci-home-gallery]")
+            ).filter((g) => !g.closest(HOSTS) && !g.hasAttribute("data-luci-bvg-old") && visible(g))
+            if (!bars.length || !gals.length) return
+            const items = [
+                ...bars.map((e) => ({ t: "b", r: e.getBoundingClientRect() })),
+                ...gals.map((e) => ({ t: "g", r: e.getBoundingClientRect() })),
+            ].sort((a, b) => a.r.top - b.r.top)
+            const b2g: number[] = []
+            const g2b: number[] = []
+            items.forEach((it, i) => {
+                const next = items[i + 1]
+                if (!next) return
+                if (it.t === "b" && next.t === "g") b2g.push(next.r.top - it.r.bottom)
+                if (it.t === "g" && next.t === "b") g2b.push(next.r.top - it.r.bottom)
+            })
+            const barH = median(bars.map((b) => b.getBoundingClientRect().height))
+            const toGal = median(b2g)
+            const toNext = median(g2b)
+            if (!isFinite(barH) || !isFinite(toGal) || !isFinite(toNext)) return
+            hosts.forEach((host) => {
+                const slot = host.querySelector<HTMLElement>("[data-luci-meta-slot]")
+                if (slot) {
+                    slot.style.height = Math.round(barH) + "px"
+                    slot.style.marginBottom = Math.round(toGal) + "px"
+                }
+                host.style.paddingBottom = Math.max(0, Math.round(toNext)) + "px"
+            })
+        }
+        let raf = 0
+        const soon = () => {
+            if (raf) return
+            raf = requestAnimationFrame(() => {
+                raf = 0
+                run()
+            })
+        }
+        const timers = [300, 1200, 3000].map((t) => window.setTimeout(run, t))
+        const mo = new LuciObserver(soon)
+        mo.observe(document.body, { childList: true, subtree: true })
+        let w = window.innerWidth
+        const onResize = () => {
+            if (window.innerWidth === w) return
+            w = window.innerWidth
+            window.setTimeout(run, 250)
+        }
+        window.addEventListener("resize", onResize)
+        return () => {
+            mo.disconnect()
+            timers.forEach((t) => window.clearTimeout(t))
+            window.removeEventListener("resize", onResize)
+        }
+    }, [])
+    return null
 }
 
 function HomeMetaProject() {
@@ -4568,7 +4611,6 @@ function HomeMetaProject() {
                 bar.style.background = getComputedStyle(native).backgroundColor
                 slot.appendChild(bar)
                 host.appendChild(slot)
-                syncProjectSpacing(host, slot, anchor, native)
                 setNative(true)
             }
             setTarget(host)
@@ -4757,7 +4799,6 @@ function HomeBormamProject() {
             bar.style.background = getComputedStyle(native).backgroundColor
             slot.appendChild(bar)
             host.appendChild(slot)
-            syncProjectSpacing(host, slot, anchor, native)
             const g = document.createElement("div")
             host.appendChild(g)
             setTarget(g)
