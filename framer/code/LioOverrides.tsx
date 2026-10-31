@@ -43,6 +43,8 @@ export const withIntro = withText(
 
 // Ajustes gerais: celular, legendas e contraste
 const SITE_FIX_CSS = `
+/* imagens removidas a pedido */
+[data-luci-home-card]:has(img[src*="cj0Kt1sC0Y3rbLyUEFiFi2nSa2c"]),[data-luci-pg-card]:has(img[src*="cj0Kt1sC0Y3rbLyUEFiFi2nSa2c"]),.luci-template-card:has(img[src*="cj0Kt1sC0Y3rbLyUEFiFi2nSa2c"]){display:none!important}
 /* playground: ao passar o mouse, os outros projetos escurecem */
 @media (hover:hover) and (pointer:fine){[data-luci-pg-card]{transition:opacity .45s cubic-bezier(.16,1,.3,1)}[data-luci-pg-gallery]:has([data-luci-pg-card]:hover) [data-luci-pg-card]:not(:hover){opacity:.28}}
 /* home: sem legendas embaixo das imagens dos projetos */
@@ -1864,6 +1866,23 @@ function WorkTemplate() {
                     }
                     out.push(pool.splice(k, 1)[0])
                 }
+                // sobrou vídeo colado no fim? encaixa entre duas imagens
+                for (let guard = 0; guard < out.length; guard++) {
+                    const v = out.findIndex(
+                        (x, i) => i > 0 && x.video && out[i - 1].video
+                    )
+                    if (v < 0) break
+                    const slot = out.findIndex(
+                        (x, i) =>
+                            i > 0 &&
+                            !x.video &&
+                            !out[i - 1].video &&
+                            Math.abs(i - v) > 1
+                    )
+                    if (slot < 0) break
+                    const [mv] = out.splice(v, 1)
+                    out.splice(slot > v ? slot - 1 : slot, 0, mv)
+                }
                 return { done: true, list: out }
             },
             { done: false, list: [] as WorkEntry[] }
@@ -2907,6 +2926,9 @@ body[data-luci-info-owner] [data-luci-info-open] [data-framer-name="Icon Wrapper
 }
 
 // Intercala cards de imagem e de vídeo, espalhando o grupo menor entre o maior
+// imagens que a Luci pediu para remover do site
+const REMOVED_MEDIA = /cj0Kt1sC0Y3rbLyUEFiFi2nSa2c/
+
 function alternateMedia(cards: HTMLElement[]): HTMLElement[] {
     const isVideo = (c: HTMLElement) => !!c.querySelector("video")
     const vids = cards.filter(isVideo)
@@ -3280,9 +3302,12 @@ function HomeHoverGalleries() {
                     Array.from(gallery.children).forEach((node) => {
                         if (
                             node.hasAttribute("data-luci-home-card") &&
-                            /^(Bazaar — Tipografia|Bolsas — Retouching 3D)$/i.test(
+                            (/^(Bazaar — Tipografia|Bolsas — Retouching 3D)$/i.test(
                                 node.textContent?.trim() || ""
-                            )
+                            ) ||
+                                REMOVED_MEDIA.test(
+                                    (node as HTMLElement).innerHTML
+                                ))
                         )
                             node.remove()
                     })
