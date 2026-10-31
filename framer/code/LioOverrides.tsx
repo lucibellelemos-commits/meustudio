@@ -156,6 +156,7 @@ export function withLioLogo(Component): ComponentType {
                     items={HOME_UNNI_NEW}
                 />
                 <HomeMetaProject />
+                <HomeBormamProject />
                 <HomeBvlgariReplacement />
                 <CleanVideoPresentation />
                 <SilentSiteMedia />
@@ -1468,11 +1469,43 @@ const WORK_TEMPLATE_CSS = `
 @media(max-width:809px){.luci-project-story{padding-left:44px!important}.luci-project-story>figure{margin-bottom:28px!important}}
 `
 // Ordem de destaque na Work (os demais seguem na ordem atual)
+// Projeto Bormam 1920: imagens com IA e catálogo da coleção (começa no trompete)
+const BORMAM_BASE =
+    "https://cdn.jsdelivr.net/gh/lucibellelemos-commits/meustudio@2e19be9127b9972c47a8308f7d448f50a076d3c1/bormam/"
+const BORMAM_ITEMS: [string, string][] = [
+    ["01-trompete.jpg", "Bormam 1920 — Selo trompete"],
+    ["02-aneis.jpg", "Bormam 1920 — Anéis de esmeralda"],
+    ["03-broche.jpg", "Bormam 1920 — Broche geométrico"],
+    ["04-catalogo.jpg", "Bormam 1920 — Catálogo"],
+    ["05-after-dark.jpg", "Bormam 1920 — After Dark in November"],
+    ["06-retrato.jpg", "Bormam 1920 — Retrato com broche"],
+    ["07-pulseira.jpg", "Bormam 1920 — Pulseira de diamantes"],
+    ["08-resinas.jpg", "Bormam 1920 — Resinas"],
+]
+const BORMAM_TEXT =
+    "Imagens criadas com IA e catálogo da coleção Bormam 1920: joias art déco em cenas noturnas, entre retratos, stills de produto e bastidores da criação."
+const BORMAM_ENTRY: WorkEntry = {
+    media: BORMAM_ITEMS.map(([file]) => ({
+        src: BORMAM_BASE + file,
+        poster: "",
+        video: false,
+    })),
+    key: "ai-foto:Bormam 1920",
+    title: "Bormam 1920",
+    area: "ai-foto",
+    description: BORMAM_TEXT,
+    src: BORMAM_BASE + BORMAM_ITEMS[0][0],
+    poster: "",
+    video: false,
+    ratio: 0.8,
+}
+
 const WORK_PRIORITY = [
     "Harper’s Bazaar — Retoque 3D",
     "Porsche × Louis Vuitton",
     "Kleber Matheus Studio — Index Conectada",
     "Itaú — Estudo visual",
+    "Bormam 1920",
     "Moda — Estudos de motion",
     "Harper’s Bazaar — Imagens e tipografia",
     "Achei Primeiro — Stills de produto",
@@ -1620,6 +1653,7 @@ function WorkTemplate() {
                                 Number(image?.getAttribute("height")) || 1,
                     })
                 })
+            if (!keys.has(BORMAM_ENTRY.key)) found.push(BORMAM_ENTRY)
             const next = JSON.stringify(found)
             if (next !== signature) {
                 signature = next
@@ -4323,6 +4357,141 @@ function HomeMetaProject() {
                 ))}
             </div>
         </>,
+        target
+    )
+}
+
+// Bormam 1920 na home, em 5º lugar (logo depois de Havaianas)
+function HomeBormamProject() {
+    const [target, setTarget] = React.useState<HTMLElement | null>(null)
+    React.useEffect(() => {
+        if (window.location.pathname.replace(/\/$/, "") !== "") return
+        if (document.body.dataset.luciBormamOwner) return
+        document.body.dataset.luciBormamOwner = "true"
+        let host: HTMLElement | null = null
+        const find = () => {
+            if (host?.isConnected) return
+            const gallery = Array.from(
+                document.querySelectorAll<HTMLElement>("[data-luci-home-gallery]")
+            ).find((node) => node.textContent?.includes("Havaianas — Filme 3D + IA"))
+            const section = gallery?.closest('[data-framer-name="Section Projects"]')
+            if (!gallery || !section) return
+            let anchor: HTMLElement = gallery
+            while (anchor.parentElement && anchor.parentElement !== section)
+                anchor = anchor.parentElement
+            if (anchor.parentElement !== section) return
+            const native = anchor.querySelector<HTMLElement>(
+                '[data-framer-name="Project Bar"]'
+            )
+            if (!native) return
+            host = document.createElement("div")
+            host.dataset.luciBormamProject = "true"
+            host.style.width = "100%"
+            host.style.minWidth = "0"
+            anchor.insertAdjacentElement("afterend", host)
+            // barra igual às outras: copia a barra nativa e troca os textos
+            const bar = native.cloneNode(true) as HTMLElement
+            bar.removeAttribute("data-luci-info-open")
+            bar.querySelectorAll("[data-luci-gallery-buttons]").forEach((n) => n.remove())
+            bar.querySelectorAll("[id]").forEach((n) => n.removeAttribute("id"))
+            const set = (sel: string, text: string) => {
+                const el = bar.querySelector(sel + " p")
+                if (el) el.textContent = text
+            }
+            set('[data-framer-name="TItle"]', "Bormam 1920")
+            set('[data-framer-name="Category"]', "Imagem com IA")
+            const details = bar.querySelector('[data-framer-name="Details"]')
+            const year = details?.lastElementChild
+            const yearP = year?.querySelector("p")
+            if (yearP && /\d{4}/.test(yearP.textContent || "")) yearP.textContent = "2026"
+            const info = bar.querySelector('[data-framer-name="Info"] p')
+            if (info) info.textContent = BORMAM_TEXT
+            const slot = document.createElement("div")
+            slot.dataset.luciMetaSlot = "true"
+            slot.style.position = "sticky"
+            slot.style.height = "45px"
+            slot.style.marginBottom = "18px"
+            slot.style.zIndex = "8"
+            const sticky = native.parentElement
+            const top = sticky ? getComputedStyle(sticky).top : "0px"
+            slot.style.top = top && top !== "auto" ? top : "0px"
+            bar.style.position = "absolute"
+            bar.style.top = "0"
+            bar.style.left = "0"
+            bar.style.right = "0"
+            bar.style.background = getComputedStyle(native).backgroundColor
+            slot.appendChild(bar)
+            host.appendChild(slot)
+            const g = document.createElement("div")
+            host.appendChild(g)
+            setTarget(g)
+        }
+        find()
+        const observer = new LuciObserver(find)
+        observer.observe(document.body, {
+            childList: true,
+            subtree: true,
+            attributes: true,
+            attributeFilter: ["data-luci-home-gallery"],
+        })
+        return () => {
+            observer.disconnect()
+            host?.remove()
+            delete document.body.dataset.luciBormamOwner
+        }
+    }, [])
+    if (!target) return null
+    return createPortal(
+        <div
+            data-luci-home-gallery="regular"
+            style={{
+                display: "flex",
+                gap: 20,
+                width: "100%",
+                overflowX: "auto",
+                alignItems: "flex-start",
+            }}
+        >
+            {BORMAM_ITEMS.map(([file, caption]) => (
+                <article
+                    key={file}
+                    data-framer-name="Project Item Added Bormam"
+                    data-luci-home-card="regular"
+                    style={{ minWidth: 0, fontFamily: '"Fragment Mono", monospace' }}
+                >
+                    <div
+                        data-framer-name="Content Wrapper"
+                        style={{ width: "100%", overflow: "hidden" }}
+                    >
+                        <img
+                            src={BORMAM_BASE + file}
+                            alt={caption}
+                            width={1080}
+                            height={1350}
+                            loading="lazy"
+                            decoding="async"
+                            draggable={false}
+                            style={{
+                                display: "block",
+                                width: "100%",
+                                height: "auto",
+                                objectFit: "cover",
+                            }}
+                        />
+                    </div>
+                    <p
+                        style={{
+                            fontSize: 12,
+                            lineHeight: 1.3,
+                            margin: "10px 0 0",
+                            textTransform: "uppercase",
+                        }}
+                    >
+                        {caption}
+                    </p>
+                </article>
+            ))}
+        </div>,
         target
     )
 }
