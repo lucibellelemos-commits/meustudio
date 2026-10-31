@@ -1740,6 +1740,26 @@ function WorkTemplate() {
         .map((e, i) => ({ e, i }))
         .sort((a, b) => rank(a.e) - rank(b.e) || a.i - b.i)
         .map(({ e }) => e)
+        // nunca dois vídeos seguidos (nem lado a lado na grade): puxa a
+        // próxima imagem da fila, mantendo a ordem o máximo possível
+        .reduce(
+            (acc, _e, _i, arr) => {
+                if (acc.done) return acc
+                const pool = arr.slice()
+                const out: WorkEntry[] = []
+                while (pool.length) {
+                    const prev = out[out.length - 1]
+                    let k = 0
+                    if (prev?.video && pool[0].video) {
+                        const j = pool.findIndex((x) => !x.video)
+                        if (j > 0) k = j
+                    }
+                    out.push(pool.splice(k, 1)[0])
+                }
+                return { done: true, list: out }
+            },
+            { done: false, list: [] as WorkEntry[] }
+        ).list
     const close = () => {
         modal.current?.close()
         setOpened(null)
