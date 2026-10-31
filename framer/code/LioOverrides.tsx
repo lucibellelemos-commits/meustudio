@@ -3394,7 +3394,8 @@ function HomeHoverGalleries() {
                                 : Math.min(
                                       targetH * (w / rh),
                                       baseWidth * 2.2,
-                                      gallery.clientWidth * 0.9
+                                      gallery.clientWidth *
+                                          (innerWidth <= 809 ? 1.5 : 0.9)
                                   )
                         node.style.setProperty(
                             "--luci-natural-width",
