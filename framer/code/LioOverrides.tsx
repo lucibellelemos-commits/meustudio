@@ -1424,39 +1424,54 @@ function shortDescription(text: string) {
     return first.length > 120 ? first.slice(0, 117).trim() + "…" : first
 }
 
-// Work no estilo do estúdio de referência: título mono com contagem,
-// temas à esquerda e grade de duas colunas com imagens grandes
+// Work: filtros em texto grande (ativo preto, resto cinza claro), ícones de
+// grade/lista e legendas grandes com número — proposta aprovada em nov/2026
 const CVB_WORK_CSS = `
-.lci-work-intro .luci-cvb{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,3fr);column-gap:28px;align-items:start}
+.lci-work-intro .luci-cvb{display:grid;grid-template-columns:minmax(280px,1fr) minmax(0,3fr);column-gap:48px;align-items:start}
 .lci-work-intro .luci-cvb .luci-cvb-side{position:sticky;top:110px;align-self:start}
-.lci-work-intro .luci-cvb h1{font:500 clamp(48px,4.4vw,72px)/1 Switzer,Arial,sans-serif!important;letter-spacing:-.05em!important;margin:0 0 32px!important}
+.lci-work-intro .luci-cvb h1{font:500 64px/.9 Switzer,Arial,sans-serif!important;letter-spacing:-.05em!important;margin:0 0 22px!important;color:#111}
 .lci-work-intro .luci-cvb h1>span{position:relative;display:inline-block}
-.lci-work-intro .luci-cvb h1 sup{position:absolute;top:0;left:100%;margin-left:.2em;font:400 11px/1 "Fragment Mono",monospace;letter-spacing:0}
-.lci-work-intro .luci-cvb .luci-cvb-filters{position:static!important;left:auto!important;right:auto!important;top:auto!important;transform:none!important;width:auto!important;background:none!important;padding:0!important;margin:0!important;box-shadow:none!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important;display:flex!important;flex-direction:column!important;align-items:flex-start!important;gap:2px!important;z-index:auto!important}
-.lci-work-intro .luci-cvb .luci-cvb-filters button{font:500 16px/1.4 Switzer,Arial,sans-serif!important;color:#111!important;letter-spacing:-.01em!important;text-decoration:none}
-.lci-work-intro .luci-cvb .luci-cvb-filters button sup{font:400 9px/1 "Fragment Mono",monospace;margin-left:3px;color:#999;vertical-align:super;letter-spacing:0}
-.lci-work-intro .luci-cvb .luci-cvb-filters button:not([aria-pressed="true"]){color:#aaa!important}
-.lci-work-intro .luci-cvb .luci-cvb-filters button:not([aria-pressed="true"]):hover{color:#111!important}
-.luci-template-gallery.luci-cvb-grid{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:96px 28px!important;align-items:end!important;columns:auto}
+.lci-work-intro .luci-cvb h1 sup{position:absolute;top:.08em;left:100%;margin-left:.12em;font:500 13px/1 Switzer,Arial,sans-serif;letter-spacing:0;color:#A3A3A3}
+.luci-cvb-bar{display:flex;justify-content:space-between;align-items:center;font:500 24px/1.12 Switzer,Arial,sans-serif;letter-spacing:-.03em;color:#111}
+.luci-cvb-filtro{display:flex;align-items:center;gap:10px}
+.lci-work-intro .luci-cvb .luci-cvb-clear{font:500 11px/1 Switzer,Arial,sans-serif!important;letter-spacing:.04em!important;text-transform:uppercase;background:#111;color:#fff!important;padding:7px 10px;border-radius:99px;cursor:pointer}
+.luci-cvb-views{display:flex;margin-right:-11px}
+.lci-work-intro .luci-cvb .luci-cvb-views button{width:44px;height:44px;display:flex;align-items:center;justify-content:center;color:#BDBDBD;cursor:pointer;transition:color .2s}
+.lci-work-intro .luci-cvb .luci-cvb-views button[aria-pressed="true"],.lci-work-intro .luci-cvb .luci-cvb-views button:hover{color:#111}
+.lci-work-intro .luci-cvb .luci-cvb-filters{position:static!important;left:auto!important;right:auto!important;top:auto!important;transform:none!important;width:auto!important;background:none!important;padding:0!important;margin:14px 0 0!important;box-shadow:none!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important;display:flex!important;flex-direction:row!important;flex-wrap:wrap!important;align-items:flex-start!important;gap:0 8px!important;z-index:auto!important}
+.lci-work-intro .luci-cvb .luci-cvb-filters button{font:500 24px/1.12 Switzer,Arial,sans-serif!important;letter-spacing:-.03em!important;color:#111!important;text-decoration:none;cursor:pointer;transition:color .2s}
+.lci-work-intro .luci-cvb .luci-cvb-filters button:not(.is-on){color:#BDBDBD!important}
+.lci-work-intro .luci-cvb .luci-cvb-filters button:not(.is-on):hover{color:#111!important}
+.luci-cvb-rule{height:1px;background:#E8E8E8;border:0;margin:18px 0 0}
+.luci-template-gallery.luci-cvb-grid{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:56px 20px!important;align-items:start!important;columns:auto}
 .luci-cvb-grid .luci-template-card{margin:0!important;display:block;width:100%}
-.luci-cvb-grid .luci-template-image{aspect-ratio:auto!important;border-radius:0!important;overflow:hidden;background:#f2f2f2}
-.luci-cvb-grid .luci-template-image img,.luci-cvb-grid .luci-template-image video{position:static!important;width:100%!important;height:auto!important;max-height:78vh;object-fit:cover;display:block;border-radius:0!important}
+.luci-cvb-grid .luci-template-image{position:relative;display:block;width:100%;aspect-ratio:4/5!important;border-radius:0!important;overflow:hidden;background:#f2f2f2}
+.luci-cvb-grid .luci-template-image img,.luci-cvb-grid .luci-template-image video{position:absolute!important;inset:0;width:100%!important;height:100%!important;max-height:none;object-fit:cover;display:block;border-radius:0!important}
 .luci-cvb-grid .luci-template-image::after{display:none}
 .luci-cvb-grid .luci-template-hover{display:none!important}
-.luci-cvb-cap{display:grid!important;grid-template-columns:minmax(0,.7fr) minmax(0,4fr);gap:14px;align-items:start;padding-top:10px!important;min-height:0!important}
-.lci-work-intro .luci-cvb .luci-cvb-cap>button{font:500 8px/1.35 Switzer,Arial,sans-serif!important;letter-spacing:-.01em!important;color:#111;text-align:left}
-.luci-cvb-cap p{margin:0;font:500 8px/1.4 Switzer,Arial,sans-serif;letter-spacing:.01em;color:rgba(17,17,17,.38)}
-.lci-work-intro .luci-cvb .luci-cvb-more{display:flex;align-items:center;gap:6px;margin-top:8px;font:400 8px/1 "Fragment Mono",monospace!important;text-transform:uppercase;letter-spacing:0!important;color:#111;opacity:1}
-.luci-cvb-more i{font-style:normal;font-size:6px}
-.lci-work-intro .luci-cvb .luci-cvb-more:hover{color:#888!important}
+.luci-cvb-cap{display:flex!important;flex-direction:column;align-items:flex-start;padding-top:12px!important;min-height:0!important;font:500 17px/1.15 Switzer,Arial,sans-serif;letter-spacing:-.03em;color:#111}
+.lci-work-intro .luci-cvb .luci-cvb-cap>button{font:inherit!important;letter-spacing:inherit!important;color:#111;text-align:left;cursor:pointer}
+.luci-cvb-n{font-size:11px;letter-spacing:0;color:#A3A3A3;margin-bottom:3px}
+.luci-cvb-area{color:#A3A3A3}
+.luci-cvb-list{display:flex;flex-direction:column}
+.lci-work-intro .luci-cvb .luci-cvb-row{display:flex;align-items:center;gap:16px;padding:14px 0;border-bottom:1px solid #E8E8E8;text-align:left;cursor:pointer;width:100%}
+.luci-cvb-row img,.luci-cvb-row video{width:80px;height:100px;object-fit:cover;flex:none;display:block;background:#f2f2f2}
+.luci-cvb-row span{display:flex;flex-direction:column;min-width:0;font:500 24px/1.1 Switzer,Arial,sans-serif;letter-spacing:-.03em;color:#111}
+.luci-cvb-row small{font-size:15px;letter-spacing:-.01em;color:#A3A3A3;margin-top:4px}
+.lci-work-intro .luci-cvb .luci-cvb-row:hover span{color:#A3A3A3}
+@media(max-width:1199px){.luci-template-gallery.luci-cvb-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}}
 @media(max-width:809px){
-.lci-work-intro .luci-cvb{grid-template-columns:1fr;row-gap:40px}
+.lci-work-intro .luci-cvb{grid-template-columns:1fr;row-gap:22px}
 .lci-work-intro .luci-cvb .luci-cvb-side{position:static}
-.lci-work-intro .luci-cvb h1{font-size:48px!important;margin-bottom:20px!important}
-.lci-work-intro .luci-cvb .luci-cvb-filters{flex-direction:row!important;flex-wrap:wrap!important;gap:4px 16px!important}
-.luci-template-gallery.luci-cvb-grid{grid-template-columns:1fr!important;gap:56px!important}
-.luci-cvb-cap{grid-template-columns:minmax(0,.7fr) minmax(0,3fr);gap:10px}
-.lci-work-intro .luci-cvb .luci-cvb-cap>button,.luci-cvb-cap p{font-size:8px!important}
+.lci-work-intro .luci-cvb h1{font-size:46px!important;line-height:.95!important;letter-spacing:-.045em!important;margin-bottom:40px!important}
+.lci-work-intro .luci-cvb h1 sup{font-size:14px}
+.luci-cvb-bar,.lci-work-intro .luci-cvb .luci-cvb-filters button{font-size:26px!important}
+.lci-work-intro .luci-cvb .luci-cvb-filters{margin-top:18px!important;gap:0 7px!important}
+.luci-template-gallery.luci-cvb-grid{grid-template-columns:1fr!important;gap:40px!important}
+.luci-cvb-cap{font-size:22px;line-height:1.08}
+.luci-cvb-n{font-size:13px;margin-bottom:4px}
+.luci-cvb-row img,.luci-cvb-row video{width:64px;height:80px}
+.luci-cvb-row span{font-size:20px}
 }
 `
 
@@ -1650,6 +1665,30 @@ const KRISNA_ENTRY: WorkEntry = {
     ratio: 0.8,
 }
 
+// Estudo autoral de ilustração (sem afiliação com a Gucci)
+const GUCCI_BASE =
+    "https://cdn.jsdelivr.net/gh/lucibellelemos-commits/meustudio@dccf7a0a99b2d38fec71ad2278729a288b5fc034/gucci/"
+const GUCCI_FILES = [1, 2, 3, 4, 5, 6, 7, 8].map(
+    (n) => "gucci-0" + n + ".jpg"
+)
+const GUCCI_TEXT =
+    "Ilustrações técnicas da lingerie com monograma do desfile de Tom Ford para a Gucci em 1997, ao lado de imagens do desfile. Projeto autoral de ilustração, sem afiliação com a Gucci."
+const GUCCI_ENTRY: WorkEntry = {
+    media: GUCCI_FILES.map((file) => ({
+        src: GUCCI_BASE + file,
+        poster: "",
+        video: false,
+    })),
+    key: "design-grafico:Gucci 1997",
+    title: "Gucci 1997 — Estudo de ilustração",
+    area: "design-grafico",
+    description: GUCCI_TEXT,
+    src: GUCCI_BASE + GUCCI_FILES[0],
+    poster: "",
+    video: false,
+    ratio: 0.8,
+}
+
 const WORK_PRIORITY = [
     "Harper’s Bazaar — Retoque 3D",
     "Porsche × Louis Vuitton",
@@ -1657,6 +1696,7 @@ const WORK_PRIORITY = [
     "Kleber Matheus Studio — Index Conectada",
     "Itaú — Estudo visual",
     "Bormam 1920",
+    "Gucci 1997 — Estudo de ilustração",
     "Moda — Estudos de motion",
     "Harper’s Bazaar — Imagens e tipografia",
     "Achei Primeiro — Stills de produto",
@@ -1806,6 +1846,7 @@ function WorkTemplate() {
                 })
             if (!keys.has(BORMAM_ENTRY.key)) found.push(BORMAM_ENTRY)
             if (!keys.has(KRISNA_ENTRY.key)) found.push(KRISNA_ENTRY)
+            if (!keys.has(GUCCI_ENTRY.key)) found.push(GUCCI_ENTRY)
             const next = JSON.stringify(found)
             if (next !== signature) {
                 signature = next
@@ -1882,7 +1923,30 @@ function WorkTemplate() {
         modal.current?.close()
         setOpened(null)
     }
-    const card = (entry: WorkEntry) => (
+    const areaName = (id: string) =>
+        AREA_DATA.find(([a]) => a === id)?.[1] || ""
+    const row = (entry: WorkEntry) => (
+        <button
+            className="luci-cvb-row"
+            key={entry.key}
+            onClick={() => setOpened(entry)}
+        >
+            <img
+                src={entry.poster || (entry.video ? "" : entry.src)}
+                alt=""
+                loading="lazy"
+                draggable={false}
+                style={entry.poster || !entry.video ? undefined : { display: "none" }}
+            />
+            <span>
+                {entry.title}
+                <small>{areaName(entry.area)}</small>
+            </span>
+        </button>
+    )
+    const card = (entry: WorkEntry, i: number) => {
+        const n = i + 1
+        return (
         <article
             className="luci-template-card"
             key={entry.key}
@@ -1922,20 +1986,15 @@ function WorkTemplate() {
                 onClick={() => setOpened(entry)}
             />
             <div className="luci-template-caption luci-cvb-cap">
+                <span className="luci-cvb-n">
+                    Nº {String(n).padStart(2, "0")}
+                </span>
                 <button onClick={() => setOpened(entry)}>{entry.title}</button>
-                <p>
-                    {shortDescription(entry.description) ||
-                        AREA_DATA.find(([id]) => id === entry.area)?.[1]}
-                    <button
-                        className="luci-cvb-more"
-                        onClick={() => setOpened(entry)}
-                    >
-                        <i aria-hidden="true">●</i> Ver projeto
-                    </button>
-                </p>
+                <span className="luci-cvb-area">{areaName(entry.area)}</span>
             </div>
         </article>
-    )
+        )
+    }
     return (
         <section className="luci-template luci-cvb">
             <style>{WORK_TEMPLATE_CSS + CVB_WORK_CSS}</style>
@@ -1948,39 +2007,78 @@ function WorkTemplate() {
                         </sup>
                     </span>
                 </h1>
+                <div className="luci-cvb-bar">
+                    <div className="luci-cvb-filtro">
+                        <span>Filtro</span>
+                        {area !== "all" && (
+                            <button
+                                className="luci-cvb-clear"
+                                onClick={() => setArea("all")}
+                            >
+                                × Limpar
+                            </button>
+                        )}
+                    </div>
+                    <div className="luci-cvb-views">
+                        <button
+                            aria-label="Ver em grade"
+                            aria-pressed={view === "grid"}
+                            onClick={() => setView("grid")}
+                        >
+                            <svg width="20" height="20" viewBox="0 0 22 22" fill="currentColor" stroke="currentColor" strokeWidth="1.6" aria-hidden="true">
+                                <rect x="2" y="2" width="7" height="7" />
+                                <rect x="13" y="2" width="7" height="7" />
+                                <rect x="2" y="13" width="7" height="7" />
+                                <rect x="13" y="13" width="7" height="7" />
+                            </svg>
+                        </button>
+                        <button
+                            aria-label="Ver em lista"
+                            aria-pressed={view === "list"}
+                            onClick={() => setView("list")}
+                        >
+                            <svg width="20" height="20" viewBox="0 0 22 22" fill="none" stroke="currentColor" strokeWidth="1.6" aria-hidden="true">
+                                <line x1="2" y1="4" x2="20" y2="4" />
+                                <line x1="2" y1="11" x2="20" y2="11" />
+                                <line x1="2" y1="18" x2="20" y2="18" />
+                            </svg>
+                        </button>
+                    </div>
+                </div>
                 <nav
                     className="luci-cvb-filters"
                     aria-label="Filtrar projetos por tema"
                 >
-                    {[
-                        ["all", "Todos"],
-                        ...AREA_DATA.map(([id, name]) => [id, name]),
-                    ].map(([id, name]) => (
+                    {AREA_DATA.filter(([id]) =>
+                        entries.some((e) => e.area === id)
+                    ).map(([id, name], i, arr) => (
                         <button
                             key={id}
+                            className={
+                                area === "all" || area === id ? "is-on" : ""
+                            }
                             aria-pressed={area === id}
-                            onClick={() => setArea(id)}
+                            onClick={() => setArea(area === id ? "all" : id)}
                         >
                             {name}
-                            <sup>
-                                <CountUp
-                                    value={
-                                        id === "all"
-                                            ? entries.length
-                                            : entries.filter(
-                                                  (e) => e.area === id
-                                              ).length
-                                    }
-                                    delay={120}
-                                />
-                            </sup>
+                            {i < arr.length - 1 ? "," : ""}
                         </button>
                     ))}
                 </nav>
+                <hr className="luci-cvb-rule" />
             </aside>
-            <div className="luci-template-gallery luci-cvb-grid" data-view="cvb">
-                {items.map(card)}
-            </div>
+            {view === "grid" ? (
+                <div
+                    className="luci-template-gallery luci-cvb-grid"
+                    data-view="cvb"
+                >
+                    {items.map(card)}
+                </div>
+            ) : (
+                <div className="luci-cvb-list" data-view="list">
+                    {items.map(row)}
+                </div>
+            )}
             <dialog
                 className="luci-template-modal"
                 ref={modal}
