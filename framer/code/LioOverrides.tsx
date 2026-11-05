@@ -1451,6 +1451,7 @@ const CVB_WORK_CSS = `
 .luci-cvb-grid .luci-template-hover{display:none!important}
 .luci-cvb-cap{display:flex!important;flex-direction:column;align-items:flex-start;padding-top:12px!important;min-height:0!important;font:500 17px/1.15 Switzer,Arial,sans-serif;letter-spacing:-.03em;color:#111}
 .lci-work-intro .luci-cvb .luci-cvb-cap>button{font:inherit!important;letter-spacing:inherit!important;color:#111;text-align:left;cursor:pointer}
+.lci-work-intro .luci-cvb .luci-cvb-cap>span{opacity:1!important;transform:none!important;visibility:visible!important}
 .luci-cvb-n{font-size:11px;letter-spacing:0;color:#A3A3A3;margin-bottom:3px}
 .luci-cvb-area{color:#A3A3A3}
 .luci-cvb-list{display:flex;flex-direction:column}
