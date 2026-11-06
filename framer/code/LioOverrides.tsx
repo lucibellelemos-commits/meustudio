@@ -2055,9 +2055,7 @@ function WorkTemplate() {
                     ).map(([id, name]) => (
                         <button
                             key={id}
-                            className={
-                                area === "all" || area === id ? "is-on" : ""
-                            }
+                            className={area === id ? "is-on" : ""}
                             aria-pressed={area === id}
                             onClick={() => setArea(area === id ? "all" : id)}
                         >
