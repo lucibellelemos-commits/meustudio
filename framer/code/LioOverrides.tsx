@@ -4641,7 +4641,7 @@ function HomeSpacingSync() {
                             .filter((r) => r.right > gr.left && r.left < gr.right)
                             .map((r) => r.height)
                     )
-                    if (isFinite(h) && h > 40 && g.scrollHeight - h > 0.5)
+                    if (isFinite(h) && h > 40 && g.scrollHeight - h > 0.5 && g.scrollHeight - h <= 12)
                         g.style.height = Math.round(h) + "px"
                 })
             const bars = Array.from(
