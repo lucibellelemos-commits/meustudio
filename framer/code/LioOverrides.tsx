@@ -4632,10 +4632,14 @@ function HomeSpacingSync() {
                 .forEach((g) => {
                     if (!visible(g)) return
                     g.style.height = ""
-                    const h = median(
-                        Array.from(
+                    const gr = g.getBoundingClientRect()
+                    const h = Math.max(
+                        ...Array.from(
                             g.querySelectorAll<HTMLElement>(":scope > [data-luci-home-card]")
-                        ).map((c) => c.getBoundingClientRect().height)
+                        )
+                            .map((c) => c.getBoundingClientRect())
+                            .filter((r) => r.right > gr.left && r.left < gr.right)
+                            .map((r) => r.height)
                     )
                     if (isFinite(h) && h > 40 && g.scrollHeight - h > 0.5)
                         g.style.height = Math.round(h) + "px"
