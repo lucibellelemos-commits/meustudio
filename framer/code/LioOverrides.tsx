@@ -1477,6 +1477,8 @@ const CVB_WORK_CSS = `
 .lci-work-intro .luci-cvb .luci-template-modal .luci-project-story>figure{grid-column:auto!important;width:100%!important;height:auto!important;max-width:none!important;margin:0!important;align-self:start!important;background:#f2f2f2!important}
 .lci-work-intro .luci-cvb .luci-template-modal .luci-project-story>figure:first-child{grid-column:1/-1!important}
 .lci-work-intro .luci-cvb .luci-template-modal .luci-project-story>figure::before{content:none!important}
+.lci-work-intro .luci-cvb .luci-template-modal .luci-project-story>figure:first-child{background:none!important}
+.lci-work-intro .luci-cvb .luci-template-modal .luci-project-story>figure:first-child img,.lci-work-intro .luci-cvb .luci-template-modal .luci-project-story>figure:first-child video{max-height:88vh!important;object-fit:contain!important}
 .lci-work-intro .luci-cvb .luci-template-modal .luci-project-story>figure img,.lci-work-intro .luci-cvb .luci-template-modal .luci-project-story>figure video{width:100%!important;height:auto!important;max-height:none!important;max-width:100%!important;object-fit:cover!important}
 @media(max-width:809px){
 .lci-work-intro .luci-cvb .luci-template-modal .luci-project-credits{margin:0 16px!important;padding:90px 0 32px!important}
