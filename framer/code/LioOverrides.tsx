@@ -1987,9 +1987,6 @@ function WorkTemplate() {
                 onClick={() => setOpened(entry)}
             />
             <div className="luci-template-caption luci-cvb-cap">
-                <span className="luci-cvb-n">
-                    Nº {String(n).padStart(2, "0")}
-                </span>
                 <button onClick={() => setOpened(entry)}>{entry.title}</button>
                 <span className="luci-cvb-area">{areaName(entry.area)}</span>
             </div>
