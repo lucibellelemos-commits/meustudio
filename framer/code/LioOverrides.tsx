@@ -74,6 +74,7 @@ const SITE_FIX_CSS = `
 @media (hover:hover) and (pointer:fine){[data-luci-pg-card]{transition:opacity .45s cubic-bezier(.16,1,.3,1)}[data-luci-pg-gallery]:has([data-luci-pg-card]:hover) [data-luci-pg-card]:not(:hover){opacity:.28}}
 /* home: sem legendas embaixo das imagens dos projetos */
 [data-luci-home-card]>p,[data-luci-home-card] p{display:none!important}
+[data-luci-home-card] [class*="framer-"]:has(> p.framer-text){display:none!important}
 /* playground: sem a imagem antiga atrás dos vídeos; o vídeo preenche o card */
 [data-luci-pg-card]:has(video) img{visibility:hidden!important}
 [data-luci-pg-card] video{object-fit:cover!important;background:#000}
@@ -4624,6 +4625,21 @@ function HomeSpacingSync() {
             // barras ficam presas no topo ao rolar: só mede com a página no início
             if (window.scrollY > 4) return
             const visible = (e: Element) => e.getBoundingClientRect().height > 0
+            // cada faixa fica com a altura dos seus cards (sem sobra embaixo
+            // por causa de um card 1-5px mais alto fora da tela)
+            document
+                .querySelectorAll<HTMLElement>("[data-luci-home-gallery]")
+                .forEach((g) => {
+                    if (!visible(g)) return
+                    g.style.height = ""
+                    const h = median(
+                        Array.from(
+                            g.querySelectorAll<HTMLElement>(":scope > [data-luci-home-card]")
+                        ).map((c) => c.getBoundingClientRect().height)
+                    )
+                    if (isFinite(h) && h > 40 && g.scrollHeight - h > 0.5)
+                        g.style.height = Math.round(h) + "px"
+                })
             const bars = Array.from(
                 document.querySelectorAll<HTMLElement>('[data-framer-name="Project Bar"]')
             ).filter((b) => !b.closest(HOSTS) && !b.closest("[data-luci-home-clone]") && visible(b))
