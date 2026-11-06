@@ -1438,7 +1438,8 @@ const CVB_WORK_CSS = `
 .luci-cvb-views{display:flex;margin-right:-11px}
 .lci-work-intro .luci-cvb .luci-cvb-views button{width:44px;height:44px;display:flex;align-items:center;justify-content:center;color:#BDBDBD;cursor:pointer;transition:color .2s}
 .lci-work-intro .luci-cvb .luci-cvb-views button[aria-pressed="true"],.lci-work-intro .luci-cvb .luci-cvb-views button:hover{color:#111}
-.lci-work-intro .luci-cvb .luci-cvb-filters{position:static!important;left:auto!important;right:auto!important;top:auto!important;transform:none!important;width:auto!important;background:none!important;padding:0!important;margin:14px 0 0!important;box-shadow:none!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important;display:flex!important;flex-direction:row!important;flex-wrap:wrap!important;align-items:flex-start!important;gap:0 8px!important;z-index:auto!important}
+.lci-work-intro .luci-cvb .luci-cvb-filters{position:static!important;left:auto!important;right:auto!important;top:auto!important;transform:none!important;width:auto!important;background:none!important;padding:0!important;margin:14px 0 0!important;box-shadow:none!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important;display:flex!important;flex-direction:column!important;flex-wrap:nowrap!important;align-items:flex-start!important;gap:2px!important;z-index:auto!important}
+.lci-work-intro .luci-cvb .luci-cvb-filters button sup{font:500 11px/1 Switzer,Arial,sans-serif;letter-spacing:0;margin-left:4px;vertical-align:super;color:#BDBDBD}
 .lci-work-intro .luci-cvb .luci-cvb-filters button{font:500 20px/1.15 Switzer,Arial,sans-serif!important;letter-spacing:-.03em!important;color:#111!important;text-decoration:none;cursor:pointer;transition:color .2s}
 .lci-work-intro .luci-cvb .luci-cvb-filters button:not(.is-on){color:#BDBDBD!important}
 .lci-work-intro .luci-cvb .luci-cvb-filters button:not(.is-on):hover{color:#111!important}
@@ -1467,7 +1468,7 @@ const CVB_WORK_CSS = `
 .lci-work-intro .luci-cvb .luci-cvb-side{position:static}
 .lci-work-intro .luci-cvb h1{font-size:46px!important;line-height:.95!important;letter-spacing:-.045em!important;margin-bottom:40px!important}
 .luci-cvb-bar,.lci-work-intro .luci-cvb .luci-cvb-filters button,.luci-cvb-cap,.luci-cvb-row span{font-size:20px!important}
-.lci-work-intro .luci-cvb .luci-cvb-filters{margin-top:18px!important;gap:0 7px!important}
+.lci-work-intro .luci-cvb .luci-cvb-filters{margin-top:18px!important}
 .luci-template-gallery.luci-cvb-grid{grid-template-columns:1fr!important;gap:40px!important}
 .luci-cvb-n{margin-bottom:4px}
 .luci-cvb-row img,.luci-cvb-row video{width:64px;height:80px}
@@ -2050,7 +2051,7 @@ function WorkTemplate() {
                 >
                     {AREA_DATA.filter(([id]) =>
                         entries.some((e) => e.area === id)
-                    ).map(([id, name], i, arr) => (
+                    ).map(([id, name]) => (
                         <button
                             key={id}
                             className={
@@ -2060,7 +2061,12 @@ function WorkTemplate() {
                             onClick={() => setArea(area === id ? "all" : id)}
                         >
                             {name}
-                            {i < arr.length - 1 ? "," : ""}
+                            <sup>
+                                {
+                                    entries.filter((e) => e.area === id)
+                                        .length
+                                }
+                            </sup>
                         </button>
                     ))}
                 </nav>
