@@ -1431,15 +1431,15 @@ const CVB_WORK_CSS = `
 .lci-work-intro .luci-cvb .luci-cvb-side{position:sticky;top:110px;align-self:start}
 .lci-work-intro .luci-cvb h1{font:500 64px/.9 Switzer,Arial,sans-serif!important;letter-spacing:-.05em!important;margin:0 0 22px!important;color:#111}
 .lci-work-intro .luci-cvb h1>span{position:relative;display:inline-block}
-.lci-work-intro .luci-cvb h1 sup{position:absolute;top:.08em;left:100%;margin-left:.12em;font:500 13px/1 Switzer,Arial,sans-serif;letter-spacing:0;color:#A3A3A3}
-.luci-cvb-bar{display:flex;justify-content:space-between;align-items:center;font:500 24px/1.12 Switzer,Arial,sans-serif;letter-spacing:-.03em;color:#111}
+.lci-work-intro .luci-cvb h1 sup{position:absolute;top:.08em;left:100%;margin-left:.12em;font:500 11px/1 Switzer,Arial,sans-serif;letter-spacing:0;color:#A3A3A3}
+.luci-cvb-bar{display:flex;justify-content:space-between;align-items:center;font:500 20px/1.15 Switzer,Arial,sans-serif;letter-spacing:-.03em;color:#111}
 .luci-cvb-filtro{display:flex;align-items:center;gap:10px}
 .lci-work-intro .luci-cvb .luci-cvb-clear{font:500 11px/1 Switzer,Arial,sans-serif!important;letter-spacing:.04em!important;text-transform:uppercase;background:#111;color:#fff!important;padding:7px 10px;border-radius:99px;cursor:pointer}
 .luci-cvb-views{display:flex;margin-right:-11px}
 .lci-work-intro .luci-cvb .luci-cvb-views button{width:44px;height:44px;display:flex;align-items:center;justify-content:center;color:#BDBDBD;cursor:pointer;transition:color .2s}
 .lci-work-intro .luci-cvb .luci-cvb-views button[aria-pressed="true"],.lci-work-intro .luci-cvb .luci-cvb-views button:hover{color:#111}
 .lci-work-intro .luci-cvb .luci-cvb-filters{position:static!important;left:auto!important;right:auto!important;top:auto!important;transform:none!important;width:auto!important;background:none!important;padding:0!important;margin:14px 0 0!important;box-shadow:none!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important;display:flex!important;flex-direction:row!important;flex-wrap:wrap!important;align-items:flex-start!important;gap:0 8px!important;z-index:auto!important}
-.lci-work-intro .luci-cvb .luci-cvb-filters button{font:500 24px/1.12 Switzer,Arial,sans-serif!important;letter-spacing:-.03em!important;color:#111!important;text-decoration:none;cursor:pointer;transition:color .2s}
+.lci-work-intro .luci-cvb .luci-cvb-filters button{font:500 20px/1.15 Switzer,Arial,sans-serif!important;letter-spacing:-.03em!important;color:#111!important;text-decoration:none;cursor:pointer;transition:color .2s}
 .lci-work-intro .luci-cvb .luci-cvb-filters button:not(.is-on){color:#BDBDBD!important}
 .lci-work-intro .luci-cvb .luci-cvb-filters button:not(.is-on):hover{color:#111!important}
 .luci-cvb-rule{height:1px;background:#E8E8E8;border:0;margin:18px 0 0}
@@ -1449,7 +1449,8 @@ const CVB_WORK_CSS = `
 .luci-cvb-grid .luci-template-image img,.luci-cvb-grid .luci-template-image video{position:absolute!important;inset:0;width:100%!important;height:100%!important;max-height:none;object-fit:cover;display:block;border-radius:0!important}
 .luci-cvb-grid .luci-template-image::after{display:none}
 .luci-cvb-grid .luci-template-hover{display:none!important}
-.luci-cvb-cap{display:flex!important;flex-direction:column;align-items:flex-start;padding-top:12px!important;min-height:0!important;font:500 17px/1.15 Switzer,Arial,sans-serif;letter-spacing:-.03em;color:#111}
+.luci-cvb-grid .luci-template-card,.luci-cvb-grid .luci-template-image,.luci-cvb-grid .luci-template-image img,.luci-cvb-grid .luci-template-image video{transform:none!important;transition:none!important;animation:none!important}
+.luci-cvb-cap{display:flex!important;flex-direction:column;align-items:flex-start;padding-top:12px!important;min-height:0!important;font:500 20px/1.15 Switzer,Arial,sans-serif;letter-spacing:-.03em;color:#111}
 .lci-work-intro .luci-cvb .luci-cvb-cap>button{font:inherit!important;letter-spacing:inherit!important;color:#111;text-align:left;cursor:pointer}
 .lci-work-intro .luci-cvb .luci-cvb-cap>span{opacity:1!important;transform:none!important;visibility:visible!important}
 .luci-cvb-n{font-size:11px;letter-spacing:0;color:#A3A3A3;margin-bottom:3px}
@@ -1457,22 +1458,19 @@ const CVB_WORK_CSS = `
 .luci-cvb-list{display:flex;flex-direction:column}
 .lci-work-intro .luci-cvb .luci-cvb-row{display:flex;align-items:center;gap:16px;padding:14px 0;border-bottom:1px solid #E8E8E8;text-align:left;cursor:pointer;width:100%}
 .luci-cvb-row img,.luci-cvb-row video{width:80px;height:100px;object-fit:cover;flex:none;display:block;background:#f2f2f2}
-.luci-cvb-row span{display:flex;flex-direction:column;min-width:0;font:500 24px/1.1 Switzer,Arial,sans-serif;letter-spacing:-.03em;color:#111}
-.luci-cvb-row small{font-size:15px;letter-spacing:-.01em;color:#A3A3A3;margin-top:4px}
+.luci-cvb-row span{display:flex;flex-direction:column;min-width:0;font:500 20px/1.15 Switzer,Arial,sans-serif;letter-spacing:-.03em;color:#111}
+.luci-cvb-row small{font-size:inherit;letter-spacing:inherit;color:#A3A3A3;margin-top:0}
 .lci-work-intro .luci-cvb .luci-cvb-row:hover span{color:#A3A3A3}
 @media(max-width:1199px){.luci-template-gallery.luci-cvb-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}}
 @media(max-width:809px){
 .lci-work-intro .luci-cvb{grid-template-columns:1fr;row-gap:22px}
 .lci-work-intro .luci-cvb .luci-cvb-side{position:static}
 .lci-work-intro .luci-cvb h1{font-size:46px!important;line-height:.95!important;letter-spacing:-.045em!important;margin-bottom:40px!important}
-.lci-work-intro .luci-cvb h1 sup{font-size:14px}
-.luci-cvb-bar,.lci-work-intro .luci-cvb .luci-cvb-filters button{font-size:26px!important}
+.luci-cvb-bar,.lci-work-intro .luci-cvb .luci-cvb-filters button,.luci-cvb-cap,.luci-cvb-row span{font-size:20px!important}
 .lci-work-intro .luci-cvb .luci-cvb-filters{margin-top:18px!important;gap:0 7px!important}
 .luci-template-gallery.luci-cvb-grid{grid-template-columns:1fr!important;gap:40px!important}
-.luci-cvb-cap{font-size:22px;line-height:1.08}
-.luci-cvb-n{font-size:13px;margin-bottom:4px}
+.luci-cvb-n{margin-bottom:4px}
 .luci-cvb-row img,.luci-cvb-row video{width:64px;height:80px}
-.luci-cvb-row span{font-size:20px}
 }
 `
 
@@ -1924,6 +1922,12 @@ function WorkTemplate() {
         modal.current?.close()
         setOpened(null)
     }
+    const coverOf = (entry: WorkEntry) =>
+        !entry.video
+            ? entry.src
+            : entry.poster ||
+              entry.media.find((m) => !m.video && m.src)?.src ||
+              ""
     const areaName = (id: string) =>
         AREA_DATA.find(([a]) => a === id)?.[1] || ""
     const row = (entry: WorkEntry) => (
@@ -1933,11 +1937,11 @@ function WorkTemplate() {
             onClick={() => setOpened(entry)}
         >
             <img
-                src={entry.poster || (entry.video ? "" : entry.src)}
+                src={coverOf(entry)}
                 alt=""
                 loading="lazy"
                 draggable={false}
-                style={entry.poster || !entry.video ? undefined : { display: "none" }}
+                style={coverOf(entry) ? undefined : { visibility: "hidden" }}
             />
             <span>
                 {entry.title}
@@ -1951,32 +1955,26 @@ function WorkTemplate() {
         <article
             className="luci-template-card"
             key={entry.key}
-            onMouseLeave={liftReset}
         >
             <button
                 className="luci-template-image"
                 aria-label={"Ampliar " + entry.title}
-                onPointerDown={liftStart}
-                onClick={(e) => {
-                    if (!wasDragged(e)) setOpened(entry)
-                }}
+                onClick={() => setOpened(entry)}
             >
-                {entry.video ? (
-                    <video
-                        src={entry.src}
-                        poster={entry.poster}
-                        muted
-                        data-luci-autoplay=""
-                        loop
-                        playsInline
-                        preload="metadata"
+                {/* capa estática: imagem de capa, ou o 1º quadro parado do vídeo */}
+                {coverOf(entry) ? (
+                    <img
+                        src={coverOf(entry)}
+                        alt={entry.title}
+                        loading="lazy"
                         draggable={false}
                     />
                 ) : (
-                    <img
-                        src={entry.src}
-                        alt={entry.title}
-                        loading="lazy"
+                    <video
+                        src={entry.src.split("#")[0] + "#t=0.1"}
+                        muted
+                        playsInline
+                        preload="metadata"
                         draggable={false}
                     />
                 )}
