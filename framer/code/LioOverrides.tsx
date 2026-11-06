@@ -2069,7 +2069,6 @@ function WorkTemplate() {
                         </button>
                     ))}
                 </nav>
-                <hr className="luci-cvb-rule" />
             </aside>
             {view === "grid" ? (
                 <div
