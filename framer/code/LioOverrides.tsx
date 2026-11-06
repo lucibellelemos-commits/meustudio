@@ -1463,6 +1463,26 @@ const CVB_WORK_CSS = `
 .luci-cvb-row span{display:flex;flex-direction:column;min-width:0;font:500 20px/1.15 Switzer,Arial,sans-serif;letter-spacing:-.03em;color:#111}
 .luci-cvb-row small{font-size:inherit;letter-spacing:inherit;color:#A3A3A3;margin-top:0}
 .lci-work-intro .luci-cvb .luci-cvb-row:hover span{color:#A3A3A3}
+/* Projeto aberto no mesmo visual do Work */
+.lci-work-intro .luci-cvb .luci-template-modal .luci-project-credits{display:flex!important;flex-direction:column;align-items:flex-start;margin:0 30px!important;padding:120px 0 48px!important;border:0!important;gap:0!important;font:500 20px/1.15 Switzer,Arial,sans-serif;letter-spacing:-.03em;color:#111}
+.lci-work-intro .luci-cvb .luci-template-modal .luci-project-credits h2{font:500 64px/.95 Switzer,Arial,sans-serif!important;letter-spacing:-.05em!important;margin:0!important;max-width:14ch;color:#111}
+.lci-work-intro .luci-cvb .luci-template-modal .luci-project-area{color:#A3A3A3;margin-top:14px}
+.lci-work-intro .luci-cvb .luci-template-modal .luci-project-credits>div{display:flex;flex-direction:column;align-items:flex-start;margin-top:32px;max-width:760px}
+.lci-work-intro .luci-cvb .luci-template-modal .luci-project-meta{font:inherit!important;letter-spacing:inherit!important;text-transform:none!important;color:#A3A3A3!important;margin:0 0 14px!important}
+.lci-work-intro .luci-cvb .luci-template-modal .luci-project-credits p{font:500 20px/1.3 Switzer,Arial,sans-serif!important;letter-spacing:-.02em!important;color:#555!important;margin:0!important;max-width:760px}
+.lci-work-intro .luci-cvb .luci-template-modal .luci-project-credits button{font:500 20px/1.15 Switzer,Arial,sans-serif!important;letter-spacing:-.03em!important;color:#111!important;text-decoration:none!important;margin-top:28px;padding:0;background:none;border:0;cursor:pointer}
+.lci-work-intro .luci-cvb .luci-template-modal .luci-project-credits button::before{content:"← "}
+.lci-work-intro .luci-cvb .luci-template-modal .luci-project-credits button:hover{color:#A3A3A3!important}
+.lci-work-intro .luci-cvb .luci-template-modal .luci-project-story{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:20px!important;align-items:start!important;padding:24px 30px 140px!important;counter-reset:none}
+.lci-work-intro .luci-cvb .luci-template-modal .luci-project-story>figure{grid-column:auto!important;width:100%!important;height:auto!important;max-width:none!important;margin:0!important;align-self:start!important;background:#f2f2f2!important}
+.lci-work-intro .luci-cvb .luci-template-modal .luci-project-story>figure:first-child{grid-column:1/-1!important}
+.lci-work-intro .luci-cvb .luci-template-modal .luci-project-story>figure::before{content:none!important}
+.lci-work-intro .luci-cvb .luci-template-modal .luci-project-story>figure img,.lci-work-intro .luci-cvb .luci-template-modal .luci-project-story>figure video{width:100%!important;height:auto!important;max-height:none!important;max-width:100%!important;object-fit:cover!important}
+@media(max-width:809px){
+.lci-work-intro .luci-cvb .luci-template-modal .luci-project-credits{margin:0 16px!important;padding:90px 0 32px!important}
+.lci-work-intro .luci-cvb .luci-template-modal .luci-project-credits h2{font-size:46px!important}
+.lci-work-intro .luci-cvb .luci-template-modal .luci-project-story{grid-template-columns:1fr!important;gap:10px!important;padding:16px 16px 100px!important}
+}
 @media(max-width:1199px){.luci-template-gallery.luci-cvb-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}}
 @media(max-width:809px){
 .lci-work-intro .luci-cvb{grid-template-columns:1fr;row-gap:22px}
@@ -2166,6 +2186,9 @@ function WorkTemplate() {
                         </div>
                         <section className="luci-project-credits">
                             <h2>{opened.title}</h2>
+                            <span className="luci-project-area">
+                                {areaName(opened.area)}
+                            </span>
                             <div>
                                 {(() => {
                                     // A descrição vem no formato "Título — , — Categoria — , — Ano — Texto"
