@@ -1477,9 +1477,9 @@ const CVB_WORK_CSS = `
 .luci-cvb-n{font-size:11px;letter-spacing:0;color:#A3A3A3;margin-bottom:3px}
 .luci-cvb-area{color:#A3A3A3}
 .luci-cvb-list{display:flex;flex-direction:column}
-.lci-work-intro .luci-cvb .luci-cvb-row{display:flex;align-items:center;gap:16px;padding:14px 0;border-bottom:1px solid #E8E8E8;text-align:left;cursor:pointer;width:100%}
-.luci-cvb-row img,.luci-cvb-row video{width:80px;height:100px;object-fit:cover;flex:none;display:block;background:#f2f2f2}
-.luci-cvb-row span{display:flex;flex-direction:column;min-width:0;font:500 20px/1.15 Switzer,Arial,sans-serif;letter-spacing:-.03em;color:#111}
+.lci-work-intro .luci-cvb .luci-cvb-row{display:flex;align-items:center;gap:14px;padding:10px 0;border-bottom:1px solid #E8E8E8;text-align:left;cursor:pointer;width:100%}
+.luci-cvb-row img,.luci-cvb-row video{width:64px;height:80px;object-fit:cover;flex:none;display:block;background:#f2f2f2}
+.luci-cvb-row span{display:flex;flex-direction:column;min-width:0;font:500 16px/1.2 Switzer,Arial,sans-serif;letter-spacing:-.03em;color:#111}
 .luci-cvb-row small{font-size:inherit;letter-spacing:inherit;color:#A3A3A3;margin-top:0}
 .lci-work-intro .luci-cvb .luci-cvb-row:hover span{color:#A3A3A3}
 /* Projeto aberto no mesmo visual do Work */
@@ -1509,7 +1509,8 @@ const CVB_WORK_CSS = `
 .lci-work-intro .luci-cvb{grid-template-columns:1fr;row-gap:22px}
 .lci-work-intro .luci-cvb .luci-cvb-side{position:static}
 .lci-work-intro .luci-cvb h1{font-size:46px!important;line-height:.95!important;letter-spacing:-.045em!important;margin-bottom:40px!important}
-.luci-cvb-bar,.lci-work-intro .luci-cvb .luci-cvb-filters button,.luci-cvb-cap,.luci-cvb-row span{font-size:20px!important}
+.luci-cvb-bar,.lci-work-intro .luci-cvb .luci-cvb-filters button,.luci-cvb-cap{font-size:20px!important}
+.luci-cvb-row span{font-size:16px!important}
 .lci-work-intro .luci-cvb .luci-cvb-filters{margin-top:18px!important}
 .luci-template-gallery.luci-cvb-grid{grid-template-columns:1fr!important;gap:40px!important}
 .luci-cvb-n{margin-bottom:4px}
@@ -1739,6 +1740,18 @@ const ITAU_ENTRY: WorkEntry = {
     ratio: 0.41,
 }
 
+// Ajustes de projetos que vêm do Framer: capa e imagens a mais
+const WORK_FIXES: Record<string, { cover?: string; add?: string[] }> = {
+    "Easy Diagnostics": {
+        cover: "McIh0jmmdqdXusDVSG7CQ367s",
+        add: [
+            "https://cdn.jsdelivr.net/gh/lucibellelemos-commits/meustudio@921c6b7112a19d8a9248560fa9ba02516dd2263a/easy/easy-paineis.jpg",
+            "https://cdn.jsdelivr.net/gh/lucibellelemos-commits/meustudio@921c6b7112a19d8a9248560fa9ba02516dd2263a/easy/easy-copos.jpg",
+            "https://cdn.jsdelivr.net/gh/lucibellelemos-commits/meustudio@921c6b7112a19d8a9248560fa9ba02516dd2263a/easy/easy-instagram.jpg",
+        ],
+    },
+}
+
 // Estudo autoral de ilustração (sem afiliação com a Gucci)
 const GUCCI_BASE =
     "https://cdn.jsdelivr.net/gh/lucibellelemos-commits/meustudio@dccf7a0a99b2d38fec71ad2278729a288b5fc034/gucci/"
@@ -1923,6 +1936,28 @@ function WorkTemplate() {
             if (!keys.has(KRISNA_ENTRY.key)) found.push(KRISNA_ENTRY)
             if (!keys.has(ITAU_ENTRY.key)) found.push(ITAU_ENTRY)
             if (!keys.has(GUCCI_ENTRY.key)) found.push(GUCCI_ENTRY)
+            // ajustes por projeto: capa escolhida e imagens extras
+            found.forEach((e) => {
+                const fix = WORK_FIXES[e.title]
+                if (!fix) return
+                if (fix.add) {
+                    const have = new Set(e.media.map((m) => m.src))
+                    fix.add.forEach((src) => {
+                        if (!have.has(src))
+                            e.media.push({ src, poster: "", video: false })
+                    })
+                }
+                if (fix.cover) {
+                    const i = e.media.findIndex((m) => m.src.includes(fix.cover!))
+                    if (i > 0) e.media.unshift(e.media.splice(i, 1)[0])
+                    const c = e.media[0]
+                    if (c && c.src.includes(fix.cover)) {
+                        e.src = c.src
+                        e.poster = c.poster
+                        e.video = c.video
+                    }
+                }
+            })
             const next = JSON.stringify(found)
             if (next !== signature) {
                 signature = next
