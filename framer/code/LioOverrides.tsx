@@ -327,6 +327,27 @@ function LinkedInFix() {
                         a.setAttribute("rel", "noopener")
                     }
                 })
+            // Instagram do estúdio em todos os links e textos
+            document
+                .querySelectorAll<HTMLAnchorElement>('a[href*="instagram.com"]')
+                .forEach((a) => {
+                    if (a.getAttribute("href") !== INSTAGRAM_URL) {
+                        a.setAttribute("href", INSTAGRAM_URL)
+                        a.setAttribute("target", "_blank")
+                        a.setAttribute("rel", "noopener")
+                    }
+                })
+            // frase removida a pedido
+            document.querySelectorAll("p, h1, h2, h3, span").forEach((el) => {
+                if (el.children.length) return
+                const t = (el.textContent || "").trim()
+                if (/^Projetos no Brasil e no exterior\.?$/i.test(t)) {
+                    const box = el.closest('[data-framer-component-type="RichTextContainer"]') as HTMLElement | null
+                    ;(box || (el as HTMLElement)).style.display = "none"
+                }
+                if (/@?luci\.lemos\b/.test(t) && !t.includes("@lucistudio"))
+                    el.textContent = (el.textContent || "").replace(/@?luci\.lemos\b/g, "@LUCIstudio___")
+            })
             // e-mail de contato do estúdio em todos os links e textos
             document
                 .querySelectorAll<HTMLAnchorElement>('a[href^="mailto:"]')
@@ -960,6 +981,7 @@ const CLIENTS: [string, string, number][] = [
 ]
 
 const EMAIL = "oi@lucistudio.com.br"
+const INSTAGRAM_URL = "https://www.instagram.com/lucistudio___/"
 
 const BLOCK_CSS = `
 .lci-b{width:100%;box-sizing:border-box;padding:24px 0 96px;font-family:"Switzer","Switzer Placeholder",sans-serif;font-size:16px;font-weight:500;letter-spacing:-.01em;line-height:1.2;color:var(--fg);background:var(--bg)}
