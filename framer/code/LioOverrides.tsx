@@ -161,6 +161,7 @@ export function withLioLogo(Component): ComponentType {
                 <HomeMetaProject />
                 <HomeBormamProject />
                 <HomeKrisnaProject />
+                <HomeItauProject />
                 <HomeSpacingSync />
                 <LinkedInFix />
                 <ContactTitle />
@@ -1706,6 +1707,38 @@ const KRISNA_ENTRY: WorkEntry = {
     ratio: 0.8,
 }
 
+// Itaú Personnalité: storyboard da campanha, com o Jeferson Araujo Studio
+const ITAU_BASE =
+    "https://cdn.jsdelivr.net/gh/lucibellelemos-commits/meustudio@b835dde7a1e9e7683af4da4734c153c57de649cf/itau/"
+const ITAU_ITEMS: [string, string, number, number][] = [
+    ["itau-01.jpg", "Itaú Personnalité — Cartão personalizável", 1080, 2652],
+    ["itau-02.jpg", "Itaú Personnalité — Conta para filhos", 1080, 2652],
+    ["itau-03.jpg", "Itaú Personnalité — Cartões", 1080, 2652],
+    ["itau-04.jpg", "Itaú Personnalité — Cartão e desenhos", 1080, 2652],
+    ["itau-05.jpg", "Itaú Personnalité — Cartão", 1080, 2652],
+    ["itau-06.jpg", "Itaú Personnalité — Desenho no cartão", 1080, 2652],
+    ["itau-07.jpg", "Itaú Personnalité — Sequência de cartões", 1080, 2789],
+]
+// ano da campanha: preencher quando confirmado (vazio esconde o ano)
+const ITAU_YEAR = ""
+const ITAU_TEXT =
+    "Storyboard da campanha do Itaú Personnalité para a conta com cartão de crédito personalizável e a conta feita para filhos, criado em parceria com o Jeferson Araujo Studio."
+const ITAU_ENTRY: WorkEntry = {
+    media: ITAU_ITEMS.map(([file]) => ({
+        src: ITAU_BASE + file,
+        poster: "",
+        video: false,
+    })),
+    key: "design-grafico:Itau Personnalite",
+    title: "Itaú Personnalité — Storyboard",
+    area: "design-grafico",
+    description: ITAU_TEXT,
+    src: ITAU_BASE + ITAU_ITEMS[0][0],
+    poster: "",
+    video: false,
+    ratio: 0.41,
+}
+
 // Estudo autoral de ilustração (sem afiliação com a Gucci)
 const GUCCI_BASE =
     "https://cdn.jsdelivr.net/gh/lucibellelemos-commits/meustudio@dccf7a0a99b2d38fec71ad2278729a288b5fc034/gucci/"
@@ -1734,6 +1767,7 @@ const WORK_PRIORITY = [
     "Harper’s Bazaar — Retoque 3D",
     "Porsche × Louis Vuitton",
     "Krisna — The Technique",
+    "Itaú Personnalité — Storyboard",
     "Kleber Matheus Studio — Index Conectada",
     "Itaú — Estudo visual",
     "Bormam 1920",
@@ -1887,6 +1921,7 @@ function WorkTemplate() {
                 })
             if (!keys.has(BORMAM_ENTRY.key)) found.push(BORMAM_ENTRY)
             if (!keys.has(KRISNA_ENTRY.key)) found.push(KRISNA_ENTRY)
+            if (!keys.has(ITAU_ENTRY.key)) found.push(ITAU_ENTRY)
             if (!keys.has(GUCCI_ENTRY.key)) found.push(GUCCI_ENTRY)
             const next = JSON.stringify(found)
             if (next !== signature) {
@@ -4818,7 +4853,7 @@ function HomeSpacingSync() {
     React.useEffect(() => {
         if (window.location.pathname.replace(/\/$/, "") !== "") return
         const HOSTS =
-            "[data-luci-meta-project],[data-luci-bormam-project],[data-luci-krisna-project]"
+            "[data-luci-meta-project],[data-luci-bormam-project],[data-luci-krisna-project],[data-luci-itau-project]"
         const median = (v: number[]) => {
             const a = v.filter((n) => isFinite(n)).sort((x, y) => x - y)
             return a.length ? a[Math.floor(a.length / 2)] : NaN
@@ -5266,7 +5301,7 @@ function HomeKrisnaProject() {
                 document.querySelectorAll<HTMLElement>('[data-framer-name="Project Bar"]')
             ).find(
                 (b) =>
-                    !b.closest("[data-luci-meta-project],[data-luci-bormam-project],[data-luci-home-clone]") &&
+                    !b.closest("[data-luci-meta-project],[data-luci-bormam-project],[data-luci-itau-project],[data-luci-home-clone]") &&
                     b.getBoundingClientRect().height > 0
             )
             if (!meta || !native) return
@@ -5333,6 +5368,109 @@ function HomeKrisnaProject() {
                     <div data-framer-name="Content Wrapper" style={{ width: "100%", overflow: "hidden" }}>
                         <img
                             src={KRISNA_BASE + file}
+                            alt={caption}
+                            width={w}
+                            height={h}
+                            loading="lazy"
+                            decoding="async"
+                            draggable={false}
+                            style={{ display: "block", width: "100%", height: "auto", objectFit: "cover" }}
+                        />
+                    </div>
+                    <p style={{ fontSize: 12, lineHeight: 1.3, margin: "10px 0 0", textTransform: "uppercase" }}>
+                        {caption}
+                    </p>
+                </article>
+            ))}
+        </div>,
+        target
+    )
+}
+
+function HomeItauProject() {
+    const [target, setTarget] = React.useState<HTMLElement | null>(null)
+    React.useEffect(() => {
+        if (window.location.pathname.replace(/\/$/, "") !== "") return
+        if (document.body.dataset.luciItauOwner) return
+        document.body.dataset.luciItauOwner = "true"
+        let host: HTMLElement | null = null
+        const find = () => {
+            if (host?.isConnected) return
+            const meta = document.querySelector<HTMLElement>("[data-luci-krisna-project]")
+            const native = Array.from(
+                document.querySelectorAll<HTMLElement>('[data-framer-name="Project Bar"]')
+            ).find(
+                (b) =>
+                    !b.closest("[data-luci-meta-project],[data-luci-bormam-project],[data-luci-krisna-project],[data-luci-home-clone]") &&
+                    b.getBoundingClientRect().height > 0
+            )
+            if (!meta || !native) return
+            host = document.createElement("div")
+            host.dataset.luciItauProject = "true"
+            host.style.width = "100%"
+            host.style.minWidth = "0"
+            meta.insertAdjacentElement("afterend", host)
+            const bar = native.cloneNode(true) as HTMLElement
+            bar.removeAttribute("data-luci-info-open")
+            bar.querySelectorAll("[data-luci-gallery-buttons]").forEach((n) => n.remove())
+            bar.querySelectorAll("[id]").forEach((n) => n.removeAttribute("id"))
+            const set = (sel: string, text: string) => {
+                const el = bar.querySelector(sel + " p")
+                if (el) el.textContent = text
+            }
+            set('[data-framer-name="TItle"]', "Itaú Personnalité")
+            set('[data-framer-name="Category"]', "Storyboard")
+            const details = bar.querySelector('[data-framer-name="Details"]')
+            const yearP = details?.lastElementChild?.querySelector("p")
+            if (yearP && /\d{4}/.test(yearP.textContent || "")) {
+                if (ITAU_YEAR) yearP.textContent = ITAU_YEAR
+                else (details!.lastElementChild as HTMLElement).style.display = "none"
+            }
+            const info = bar.querySelector('[data-framer-name="Info"] p')
+            if (info) info.textContent = ITAU_TEXT
+            const slot = document.createElement("div")
+            slot.dataset.luciMetaSlot = "true"
+            slot.style.position = "sticky"
+            slot.style.height = "45px"
+            slot.style.marginBottom = "18px"
+            slot.style.zIndex = "8"
+            const sticky = native.parentElement
+            const top = sticky ? getComputedStyle(sticky).top : "0px"
+            slot.style.top = top && top !== "auto" ? top : "0px"
+            bar.style.position = "absolute"
+            bar.style.top = "0"
+            bar.style.left = "0"
+            bar.style.right = "0"
+            bar.style.background = getComputedStyle(native).backgroundColor
+            slot.appendChild(bar)
+            host.appendChild(slot)
+            setTarget(host)
+        }
+        find()
+        const observer = new LuciObserver(find)
+        observer.observe(document.body, { childList: true, subtree: true })
+        return () => {
+            observer.disconnect()
+            host?.remove()
+            delete document.body.dataset.luciItauOwner
+        }
+    }, [])
+    if (!target) return null
+    return createPortal(
+        <div
+            data-luci-home-gallery="regular"
+            style={{ display: "flex", gap: 20, width: "100%", overflowX: "auto", alignItems: "flex-start" }}
+        >
+            {ITAU_ITEMS.map(([file, caption, w, h]) => (
+                <article
+                    key={file}
+                    data-framer-name="Project Item Added Itau"
+                    data-luci-home-card="regular"
+                    style={{ minWidth: 0, fontFamily: '"Fragment Mono", monospace' }}
+                >
+                    <div data-framer-name="Content Wrapper" style={{ width: "100%", overflow: "hidden" }}>
+                        <img
+                            src={ITAU_BASE + file}
                             alt={caption}
                             width={w}
                             height={h}
