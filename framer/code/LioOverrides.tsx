@@ -1709,7 +1709,7 @@ const KRISNA_ENTRY: WorkEntry = {
 
 // Itaú Personnalité: storyboard da campanha, com o Jeferson Araujo Studio
 const ITAU_BASE =
-    "https://cdn.jsdelivr.net/gh/lucibellelemos-commits/meustudio@b835dde7a1e9e7683af4da4734c153c57de649cf/itau/"
+    "https://cdn.jsdelivr.net/gh/lucibellelemos-commits/meustudio@053d13a8f5ad044878b41146ce5b95f6b085f460/itau/"
 const ITAU_ITEMS: [string, string, number, number][] = [
     ["itau-01.jpg", "Itaú Personnalité — Cartão personalizável", 1080, 2652],
     ["itau-02.jpg", "Itaú Personnalité — Conta para filhos", 1080, 2652],
@@ -1717,7 +1717,7 @@ const ITAU_ITEMS: [string, string, number, number][] = [
     ["itau-04.jpg", "Itaú Personnalité — Cartão e desenhos", 1080, 2652],
     ["itau-05.jpg", "Itaú Personnalité — Cartão", 1080, 2652],
     ["itau-06.jpg", "Itaú Personnalité — Desenho no cartão", 1080, 2652],
-    ["itau-07.jpg", "Itaú Personnalité — Sequência de cartões", 1080, 2789],
+    ["itau-07.jpg", "Itaú Personnalité — Sequência de cartões", 1080, 2652],
 ]
 // ano da campanha: preencher quando confirmado (vazio esconde o ano)
 const ITAU_YEAR = ""
@@ -5125,10 +5125,9 @@ function HomeMetaProject() {
                                 loop
                                 playsInline
                                 controls={false}
-                                preload="none"
+                                preload="metadata"
                                 style={{
                                     display: "block",
-                                    aspectRatio: index === 0 ? "16 / 9" : "9 / 16",
                                     width: "100%",
                                     height: "auto",
                                     objectFit: "contain",
@@ -5424,7 +5423,13 @@ function HomeItauProject() {
             const yearP = details?.lastElementChild?.querySelector("p")
             if (yearP && /\d{4}/.test(yearP.textContent || "")) {
                 if (ITAU_YEAR) yearP.textContent = ITAU_YEAR
-                else (details!.lastElementChild as HTMLElement).style.display = "none"
+                else {
+                    const last = details!.lastElementChild as HTMLElement
+                    last.style.display = "none"
+                    // tira a vírgula que vinha antes do ano
+                    const comma = last.previousElementSibling as HTMLElement | null
+                    if (comma && comma.textContent?.trim() === ",") comma.style.display = "none"
+                }
             }
             const info = bar.querySelector('[data-framer-name="Info"] p')
             if (info) info.textContent = ITAU_TEXT
