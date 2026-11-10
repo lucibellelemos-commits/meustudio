@@ -1720,9 +1720,9 @@ const ITAU_ITEMS: [string, string, number, number][] = [
     ["itau-07.jpg", "Itaú Personnalité — Sequência de cartões", 1080, 2652],
 ]
 // ano da campanha: preencher quando confirmado (vazio esconde o ano)
-const ITAU_YEAR = ""
+const ITAU_YEAR = "Telão vertical Iguatemi"
 const ITAU_TEXT =
-    "Storyboard da campanha do Itaú Personnalité para a conta com cartão de crédito personalizável e a conta feita para filhos, criado em parceria com o Jeferson Araujo Studio."
+    "Storyboard da campanha do Itaú Personnalité para o telão vertical do Iguatemi: a conta com cartão de crédito personalizável e a conta feita para filhos. Criado em parceria com o Jeferson Araujo Studio."
 const ITAU_ENTRY: WorkEntry = {
     media: ITAU_ITEMS.map(([file]) => ({
         src: ITAU_BASE + file,
@@ -1769,7 +1769,7 @@ const WORK_PRIORITY = [
     "Krisna — The Technique",
     "Itaú Personnalité — Storyboard",
     "Kleber Matheus Studio — Index Conectada",
-    "Itaú — Estudo visual",
+    "Itaú — Rock in Rio",
     "Bormam 1920",
     "Gucci 1997 — Estudo de ilustração",
     "Moda — Estudos de motion",
@@ -3971,13 +3971,38 @@ const WORK_BATCH_MEDIA = {
             ],
         },
         {
-            title: "Itaú — Estudo visual",
+            title: "Itaú — Rock in Rio",
             description:
-                "Estudo de composição com bicicletas e personagens na praia, parte do filme com IA para o Itaú.",
+                "Cenas com IA para a campanha do Itaú no Rock in Rio, feitas para o Jeferson Araujo Studio: tomadas de drone no calçadão e a bicicleta laranja do Itaú transformada em uma banda de rock na praia.",
             media: [
                 {
+                    caption: "Itaú — Drone",
+                    poster: "https://cdn.jsdelivr.net/gh/lucibellelemos-commits/meustudio@c4900c2e8bdb31a3b17e638639505fe77a1a1325/itau-rir/video-01.jpg",
+                    src: "https://cdn.jsdelivr.net/gh/lucibellelemos-commits/meustudio@c4900c2e8bdb31a3b17e638639505fe77a1a1325/itau-rir/video-01.mp4",
+                },
+                {
                     src: "https://framerusercontent.com/images/L3JIbzJ6WVajmQ9Gg1kFL0HreO8.png?width=1584&height=2816",
-                    caption: "Itaú — Estudo visual",
+                    caption: "Itaú — Banda de bicicletas",
+                    image: true,
+                },
+                {
+                    caption: "Itaú — Cena 2",
+                    poster: "https://cdn.jsdelivr.net/gh/lucibellelemos-commits/meustudio@c4900c2e8bdb31a3b17e638639505fe77a1a1325/itau-rir/video-02.jpg",
+                    src: "https://cdn.jsdelivr.net/gh/lucibellelemos-commits/meustudio@c4900c2e8bdb31a3b17e638639505fe77a1a1325/itau-rir/video-02.mp4",
+                },
+                {
+                    src: "https://cdn.jsdelivr.net/gh/lucibellelemos-commits/meustudio@c4900c2e8bdb31a3b17e638639505fe77a1a1325/itau-rir/foto-02.jpg",
+                    caption: "Itaú — Bike vista de cima",
+                    image: true,
+                },
+                {
+                    caption: "Itaú — Cena 3",
+                    poster: "https://cdn.jsdelivr.net/gh/lucibellelemos-commits/meustudio@c4900c2e8bdb31a3b17e638639505fe77a1a1325/itau-rir/video-03.jpg",
+                    src: "https://cdn.jsdelivr.net/gh/lucibellelemos-commits/meustudio@c4900c2e8bdb31a3b17e638639505fe77a1a1325/itau-rir/video-03.mp4",
+                },
+                {
+                    src: "https://cdn.jsdelivr.net/gh/lucibellelemos-commits/meustudio@c4900c2e8bdb31a3b17e638639505fe77a1a1325/itau-rir/foto-03.jpg",
+                    caption: "Itaú — Roda-gigante",
                     image: true,
                 },
             ],
