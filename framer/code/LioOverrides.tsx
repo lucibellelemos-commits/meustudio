@@ -1742,6 +1742,11 @@ const ITAU_ENTRY: WorkEntry = {
 
 // Ajustes de projetos que vêm do Framer: capa e imagens a mais
 const WORK_FIXES: Record<string, { cover?: string; add?: string[] }> = {
+    "Best Amuse": {
+        add: [
+            "https://cdn.jsdelivr.net/gh/lucibellelemos-commits/meustudio@f00eefcbe20d9521c95958d26d5474525e37b28c/bestamuse/best-amuse-painel.jpg",
+        ],
+    },
     "Easy Diagnostics": {
         cover: "McIh0jmmdqdXusDVSG7CQ367s",
         add: [
@@ -1938,6 +1943,22 @@ function WorkTemplate() {
             if (!keys.has(GUCCI_ENTRY.key)) found.push(GUCCI_ENTRY)
             // ajustes por projeto: capa escolhida e imagens extras
             found.forEach((e) => {
+                // projetos do lote novo: usa todas as mídias (a página só
+                // mostra 3 por vez, então a coleta via tela vinha incompleta)
+                const batch = Object.values(WORK_BATCH_MEDIA as any)
+                    .flat()
+                    .find((g: any) => g.title === e.title) as any
+                if (batch && batch.media.length > e.media.length) {
+                    e.media = batch.media.map((m: any) => ({
+                        src: m.src,
+                        poster: m.poster || "",
+                        video: !m.image && /\.mp4/.test(m.src),
+                    }))
+                    const c = e.media[0]
+                    e.src = c.src
+                    e.poster = c.poster
+                    e.video = c.video
+                }
                 const fix = WORK_FIXES[e.title]
                 if (!fix) return
                 if (fix.add) {
