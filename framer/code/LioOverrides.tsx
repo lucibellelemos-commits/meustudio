@@ -169,6 +169,7 @@ export function withLioLogo(Component): ComponentType {
                 <SilentSiteMedia />
                 <style>{`[data-framer-name="Right Column"] div:has(>a[href$="/imprint"]),[data-framer-name="Right Column"] div:has(>a[href$="/creditos"]),[data-framer-name="Right Column"] [data-framer-component-type="RichTextContainer"]:has(+div>a[href$="/imprint"]),[data-framer-name="Right Column"] [data-framer-component-type="RichTextContainer"]:has(+div>a[href$="/creditos"]){display:none!important}`}</style>
                 <PlaygroundLightbox />
+                <PlaygroundIntro />
                 <BritneyRemakeVideo />
                 <PlaygroundCuration />
                 <CaptionLabels />
@@ -325,6 +326,23 @@ function LinkedInFix() {
                         a.setAttribute("rel", "noopener")
                     }
                 })
+            // e-mail de contato do estúdio em todos os links e textos
+            document
+                .querySelectorAll<HTMLAnchorElement>('a[href^="mailto:"]')
+                .forEach((a) => {
+                    const h = a.getAttribute("href") || ""
+                    if (!h.startsWith("mailto:" + EMAIL))
+                        a.setAttribute(
+                            "href",
+                            h.replace(/^mailto:[^?]*/, "mailto:" + EMAIL)
+                        )
+                })
+            document.querySelectorAll("p, span, a").forEach((el) => {
+                if (el.children.length) return
+                const t = el.textContent || ""
+                if (t.includes("lucibellelemos@gmail.com"))
+                    el.textContent = t.replace(/lucibellelemos@gmail\.com/g, EMAIL)
+            })
             document.querySelectorAll("p").forEach((p) => {
                 if (p.closest("a") || p.children.length) return
                 const t = p.textContent || ""
@@ -921,7 +939,7 @@ function usePortfolioRoute() {
     return route
 }
 
-// ---------- Bloco "Ferramentas / Clientes / Tem um projeto em mente?" ----------
+// ---------- Bloco "Ferramentas / Parceiros / Tem um projeto em mente?" ----------
 
 const LOGO_BASE =
     "https://cdn.jsdelivr.net/gh/lucibellelemos-commits/meustudio@0f48cbb37f6d65b2298f9bb792019de616ae9a3e/clientes/preto/"
@@ -940,7 +958,7 @@ const CLIENTS: [string, string, number][] = [
     ["Lupo", "lupo.png", 18],
 ]
 
-const EMAIL = "lucibellelemos@gmail.com"
+const EMAIL = "oi@lucistudio.com.br"
 
 const BLOCK_CSS = `
 .lci-b{width:100%;box-sizing:border-box;padding:24px 0 96px;font-family:"Switzer","Switzer Placeholder",sans-serif;font-size:16px;font-weight:500;letter-spacing:-.01em;line-height:1.2;color:var(--fg);background:var(--bg)}
@@ -1078,7 +1096,7 @@ export function LCIBlock(props: any) {
         >
             <style>{BLOCK_CSS}</style>
             <div className="lci-row">
-                <span className="lci-lab">Clientes</span>
+                <span className="lci-lab">Parceiros</span>
                 <div className="lci-mq">
                     <div
                         className="lci-track rev"
@@ -4164,6 +4182,173 @@ function NewWorkBatch({ area }: { area: string }) {
     )
 }
 
+// ── Playground no celular: abertura em tela cheia ─────────────────────
+// Ao entrar no /playground pelo celular, alguns projetos passam em sequência
+// cobrindo a tela; um toque fecha a abertura e revela os outros em miniatura.
+const PG_INTRO_CSS = `
+.luci-pgi{position:fixed;inset:0;z-index:2147483000;background:#0e0e0e;color:#fff;overflow:hidden;font-family:Switzer,Arial,sans-serif;font-weight:500;cursor:pointer;transition:opacity .55s ease,transform .55s cubic-bezier(.2,.7,.2,1)}
+.luci-pgi.is-out{opacity:0;transform:scale(.94);pointer-events:none}
+.luci-pgi-s{position:absolute;inset:0;opacity:0;transition:opacity .9s ease}
+.luci-pgi-s.is-on{opacity:1}
+.luci-pgi-s img,.luci-pgi-s video{width:100%;height:100%;object-fit:cover;display:block;transform:scale(1.1);transition:transform 2.6s ease-out}
+.luci-pgi-s.is-on img,.luci-pgi-s.is-on video{transform:scale(1)}
+.luci-pgi-shade{position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.35),transparent 22%,transparent 70%,rgba(0,0,0,.5))}
+.luci-pgi-top{position:absolute;top:18px;left:16px;right:16px;display:flex;justify-content:space-between;font-size:15px;letter-spacing:-.01em}
+.luci-pgi-bot{position:absolute;left:16px;right:16px;bottom:calc(22px + env(safe-area-inset-bottom));display:flex;justify-content:space-between;align-items:flex-end}
+.luci-pgi-bot h2{margin:0;font:500 46px/.95 Switzer,Arial,sans-serif;letter-spacing:-.045em}
+.luci-pgi-bot span{font-size:15px;opacity:.75}
+.luci-pgi-bar{position:absolute;left:16px;right:16px;top:46px;display:flex;gap:4px}
+.luci-pgi-bar i{flex:1;height:2px;background:rgba(255,255,255,.3);overflow:hidden}
+.luci-pgi-bar i b{display:block;height:100%;width:0;background:#fff}
+.luci-pgi-bar i.done b{width:100%}
+.luci-pgi-bar i.now b{animation:luci-pgi-fill var(--d) linear forwards}
+@keyframes luci-pgi-fill{to{width:100%}}
+body.luci-pg-reveal [data-luci-pg-card]{animation:luci-pg-in .6s cubic-bezier(.2,.7,.2,1) both;animation-delay:var(--luci-pg-delay,0ms)}
+@keyframes luci-pg-in{from{opacity:0;transform:translateY(18px) scale(.96)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){.luci-pgi-s img,.luci-pgi-s video{transform:none!important;transition:none}body.luci-pg-reveal [data-luci-pg-card]{animation:none}}
+`
+const PG_INTRO_STEP = 1900
+function PlaygroundIntro() {
+    const [open, setOpen] = React.useState(false)
+    const [out, setOut] = React.useState(false)
+    const [slides, setSlides] = React.useState<{ src: string; video: boolean }[]>([])
+    const [index, setIndex] = React.useState(0)
+    React.useEffect(() => {
+        const onPg =
+            window.location.pathname.replace(/\/$/, "") === "/playground"
+        if (!onPg || !window.matchMedia("(max-width: 809px)").matches) return
+        try {
+            if (sessionStorage.getItem("luci-pg-intro")) return
+            sessionStorage.setItem("luci-pg-intro", "1")
+        } catch {}
+        setOpen(true)
+        let tries = 0
+        const collect = () => {
+            const cards = Array.from(
+                document.querySelectorAll<HTMLElement>("[data-luci-pg-card]")
+            )
+                .filter((c) => !c.hasAttribute("data-luci-pg-hidden"))
+                .sort((a, b) => (+a.style.order || 0) - (+b.style.order || 0))
+            const found: { src: string; video: boolean }[] = []
+            for (const c of cards) {
+                const v = c.querySelector("video")
+                const img = c.querySelector("img")
+                const src = v
+                    ? (v.getAttribute("src") || v.currentSrc || "").split("#")[0]
+                    : img?.currentSrc || img?.src || ""
+                if (src && !found.some((f) => f.src === src))
+                    found.push({ src, video: !!v })
+                if (found.length >= 6) break
+            }
+            if (found.length >= 3 || tries > 20) {
+                if (found.length) setSlides(found)
+                else setOpen(false)
+                return true
+            }
+            tries++
+            return false
+        }
+        if (collect()) return
+        const t = window.setInterval(() => {
+            if (collect()) window.clearInterval(t)
+        }, 200)
+        return () => window.clearInterval(t)
+    }, [])
+    React.useEffect(() => {
+        if (!open) return
+        const prev = document.documentElement.style.overflow
+        document.documentElement.style.overflow = "hidden"
+        return () => {
+            document.documentElement.style.overflow = prev
+        }
+    }, [open])
+    React.useEffect(() => {
+        if (!open || out || slides.length < 2) return
+        const t = window.setTimeout(
+            () => setIndex((i) => (i + 1) % slides.length),
+            PG_INTRO_STEP
+        )
+        return () => window.clearTimeout(t)
+    }, [open, out, index, slides.length])
+    const close = () => {
+        if (out) return
+        setOut(true)
+        document
+            .querySelectorAll<HTMLElement>("[data-luci-pg-card]")
+            .forEach((c, i) =>
+                c.style.setProperty(
+                    "--luci-pg-delay",
+                    Math.min(i * 45, 700) + "ms"
+                )
+            )
+        document.body.classList.add("luci-pg-reveal")
+        window.setTimeout(() => setOpen(false), 560)
+        window.setTimeout(
+            () => document.body.classList.remove("luci-pg-reveal"),
+            1600
+        )
+    }
+    if (!open) return null
+    return createPortal(
+        <div
+            className={"luci-pgi" + (out ? " is-out" : "")}
+            role="button"
+            tabIndex={0}
+            aria-label="Ver todos os projetos do Playground"
+            onClick={close}
+            onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === " ") close()
+            }}
+        >
+            <style>{PG_INTRO_CSS}</style>
+            {slides.map((s, i) => (
+                <div
+                    key={s.src}
+                    className={"luci-pgi-s" + (i === index ? " is-on" : "")}
+                    aria-hidden="true"
+                >
+                    {s.video ? (
+                        <video
+                            src={s.src + "#t=0.1"}
+                            muted
+                            playsInline
+                            autoPlay
+                            loop
+                            preload={Math.abs(i - index) <= 1 ? "auto" : "none"}
+                        />
+                    ) : (
+                        <img src={s.src} alt="" decoding="async" />
+                    )}
+                </div>
+            ))}
+            <div className="luci-pgi-shade" />
+            <div className="luci-pgi-bar" aria-hidden="true">
+                {slides.map((s, i) => (
+                    <i
+                        key={s.src}
+                        className={i < index ? "done" : i === index ? "now" : ""}
+                        style={{ ["--d" as any]: PG_INTRO_STEP + "ms" }}
+                    >
+                        <b key={i === index ? "on" + index : "off"} />
+                    </i>
+                ))}
+            </div>
+            <div className="luci-pgi-top">
+                <span>LUCI Studio°</span>
+                <span>
+                    {String(index + 1).padStart(2, "0")}/
+                    {String(Math.max(slides.length, 1)).padStart(2, "0")}
+                </span>
+            </div>
+            <div className="luci-pgi-bot">
+                <h2>Playground</h2>
+                <span>Toque para ver todos ↓</span>
+            </div>
+        </div>,
+        document.body
+    )
+}
+
 function PlaygroundLightbox() {
     const [media, setMedia] = React.useState<any>(null)
     const [closing, setClosing] = React.useState(false)
@@ -4905,9 +5090,10 @@ function HomeMetaProject() {
                                 loop
                                 playsInline
                                 controls={false}
-                                preload="metadata"
+                                preload="none"
                                 style={{
                                     display: "block",
+                                    aspectRatio: index === 0 ? "16 / 9" : "9 / 16",
                                     width: "100%",
                                     height: "auto",
                                     objectFit: "contain",
