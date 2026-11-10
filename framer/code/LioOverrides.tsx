@@ -779,8 +779,14 @@ function ViewportVideos() {
                 .filter(([v, r]) => r > 0.35 && wants(v) && v.isConnected)
                 .sort((a, b) => b[1] - a[1])
                 .map(([v]) => v)
-            const allowed = new Set(ranked.slice(0, MAX_PLAYING))
+            // projeto aberto em tela cheia (Playground): só ele toca
+            const lb = document.querySelector<HTMLVideoElement>(
+                "[data-luci-lightbox] video"
+            )
+            const allowed = new Set(lb ? [] : ranked.slice(0, MAX_PLAYING))
+            if (lb && lb.paused) lb.play().catch(() => {})
             ratios.forEach((r, v) => {
+                if (v === lb) return
                 if (allowed.has(v)) {
                     if (v.preload === "none") v.preload = "metadata"
                     if (v.paused) v.play().catch(() => {})
@@ -4808,7 +4814,7 @@ function PlaygroundLightbox() {
         objectFit: "contain",
         animation: closing
             ? "luciLbMediaOut .26s cubic-bezier(.4,0,1,1) both"
-            : "luciLbMediaIn .55s cubic-bezier(.16,1,.3,1) both",
+            : "luciLbMediaIn .8s cubic-bezier(.16,1,.3,1) both",
     }
     return createPortal(
         <div
@@ -4832,10 +4838,10 @@ function PlaygroundLightbox() {
                 gap: 16,
                 animation: closing
                     ? "luciLbOut .26s ease-in both"
-                    : "luciLbIn .4s ease-out both",
+                    : "luciLbIn .55s ease-out both",
             }}
         >
-            <style>{`@keyframes luciLbIn{from{opacity:0}to{opacity:1}}@keyframes luciLbOut{from{opacity:1}to{opacity:0}}@keyframes luciLbMediaIn{from{opacity:0;transform:translateY(14px) scale(.97)}to{opacity:1;transform:none}}@keyframes luciLbMediaOut{from{opacity:1;transform:none}to{opacity:0;transform:scale(.98)}}@media (prefers-reduced-motion:reduce){[data-luci-lightbox],[data-luci-lightbox] *{animation:none!important}}`}</style>
+            <style>{`@keyframes luciLbIn{from{opacity:0}to{opacity:1}}@keyframes luciLbOut{from{opacity:1}to{opacity:0}}@keyframes luciLbMediaIn{from{opacity:0;transform:translateY(10px) scale(.985)}to{opacity:1;transform:none}}@keyframes luciLbMediaOut{from{opacity:1;transform:none}to{opacity:0;transform:scale(.98)}}@media (prefers-reduced-motion:reduce){[data-luci-lightbox],[data-luci-lightbox] *{animation:none!important}}`}</style>
             <button
                 ref={closeButton}
                 onClick={close}
