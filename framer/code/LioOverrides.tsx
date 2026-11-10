@@ -4326,9 +4326,9 @@ function NewWorkBatch({ area }: { area: string }) {
 const PG_INTRO_CSS = `
 .luci-pgi{position:fixed;inset:0;z-index:2147483000;background:#0e0e0e;color:#fff;overflow:hidden;font-family:Switzer,Arial,sans-serif;font-weight:500;cursor:pointer;transition:opacity .55s ease,transform .55s cubic-bezier(.2,.7,.2,1)}
 .luci-pgi.is-out{opacity:0;transform:scale(.94);pointer-events:none}
-.luci-pgi-s{position:absolute;inset:0;opacity:0;transition:opacity .9s ease}
+.luci-pgi-s{position:absolute;inset:0;opacity:0;transition:opacity .3s ease}
 .luci-pgi-s.is-on{opacity:1}
-.luci-pgi-s img,.luci-pgi-s video{width:100%;height:100%;object-fit:cover;display:block;transform:scale(1.1);transition:transform 2.6s ease-out}
+.luci-pgi-s img,.luci-pgi-s video{width:100%;height:100%;object-fit:cover;display:block;transform:scale(1.08);transition:transform 1.4s ease-out}
 .luci-pgi-s.is-on img,.luci-pgi-s.is-on video{transform:scale(1)}
 .luci-pgi-shade{position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.35),transparent 22%,transparent 70%,rgba(0,0,0,.5))}
 .luci-pgi-top{position:absolute;top:18px;left:16px;right:16px;display:flex;justify-content:space-between;font-size:15px;letter-spacing:-.01em}
@@ -4345,7 +4345,15 @@ body.luci-pg-reveal [data-luci-pg-card]{animation:luci-pg-in .6s cubic-bezier(.2
 @keyframes luci-pg-in{from{opacity:0;transform:translateY(18px) scale(.96)}to{opacity:1;transform:none}}
 @media (prefers-reduced-motion:reduce){.luci-pgi-s img,.luci-pgi-s video{transform:none!important;transition:none}body.luci-pg-reveal [data-luci-pg-card]{animation:none}}
 `
-const PG_INTRO_STEP = 1900
+const PG_INTRO_STEP = 950
+// projetos da abertura, nesta ordem (o MBOOM fecha a sequência)
+const PG_INTRO_PICK = [
+    "LOEWE Agua — Filme",
+    "Moda — Filme experimental",
+    "Objetos em equilíbrio",
+    "LOEWE Agua — Still",
+    "MBOOM Beauty — IA + 3D",
+]
 function PlaygroundIntro() {
     const [open, setOpen] = React.useState(false)
     const [out, setOut] = React.useState(false)
@@ -4368,7 +4376,12 @@ function PlaygroundIntro() {
                 .filter((c) => !c.hasAttribute("data-luci-pg-hidden"))
                 .sort((a, b) => (+a.style.order || 0) - (+b.style.order || 0))
             const found: { src: string; video: boolean }[] = []
-            for (const c of cards) {
+            const caption = (c: HTMLElement) =>
+                (c.querySelector("p")?.textContent || "").trim()
+            const picked = PG_INTRO_PICK.map((name) =>
+                cards.find((c) => caption(c) === name)
+            ).filter(Boolean) as HTMLElement[]
+            for (const c of picked.length >= 3 ? picked : cards) {
                 const v = c.querySelector("video")
                 const img = c.querySelector("img")
                 const src = v
@@ -4452,7 +4465,7 @@ function PlaygroundIntro() {
                             playsInline
                             autoPlay
                             loop
-                            preload={Math.abs(i - index) <= 1 ? "auto" : "none"}
+                            preload="auto"
                         />
                     ) : (
                         <img src={s.src} alt="" decoding="async" />
