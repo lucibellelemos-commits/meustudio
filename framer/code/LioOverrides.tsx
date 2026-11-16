@@ -1785,6 +1785,74 @@ const WORK_FIXES: Record<string, { cover?: string; add?: string[] }> = {
     },
 }
 
+// Projetos de branding (mockups)
+const BRANDING_BASE =
+    "https://cdn.jsdelivr.net/gh/lucibellelemos-commits/meustudio@f6e8687520b50aad49a608b73528059886bbe83e/branding/"
+const BRANDING_ENTRIES: WorkEntry[] = [
+    {
+        media: [
+            { src: BRANDING_BASE + "skyhour-01.jpg", poster: "", video: false },
+            { src: BRANDING_BASE + "skyhour-02.jpg", poster: "", video: false },
+        ],
+        key: "branding:Sky Hour",
+        title: "Sky Hour",
+        area: "branding",
+        description:
+            "Identidade visual do Sky Hour, com o logotipo de círculo e ponto aplicado em cartões de visita com relevo e na presença digital.",
+        src: BRANDING_BASE + "skyhour-01.jpg",
+        poster: "",
+        video: false,
+        ratio: 1.78,
+    },
+    {
+        media: [
+            { src: BRANDING_BASE + "messa-01.jpg", poster: "", video: false },
+            { src: BRANDING_BASE + "messa-02.jpg", poster: "", video: false },
+            { src: BRANDING_BASE + "messa-03.jpg", poster: "", video: false },
+        ],
+        key: "branding:Messa",
+        title: "Messa",
+        area: "branding",
+        description:
+            "Identidade visual da Messa, assessoria de gestão de redes sociais, produção de conteúdo, branding e anúncios. Sistema com degradês vibrantes aplicado em papelaria, redes sociais e painel.",
+        src: BRANDING_BASE + "messa-01.jpg",
+        poster: "",
+        video: false,
+        ratio: 1.78,
+    },
+    {
+        media: [
+            { src: BRANDING_BASE + "rafael-01.jpg", poster: "", video: false },
+            { src: BRANDING_BASE + "rafael-02.jpg", poster: "", video: false },
+        ],
+        key: "branding:Dr. Rafael Leonardo",
+        title: "Dr. Rafael Leonardo",
+        area: "branding",
+        description:
+            "Identidade visual com assinatura caligráfica para o Dr. Rafael Leonardo, em azul-marinho e dourado, aplicada em papelaria e crachá.",
+        src: BRANDING_BASE + "rafael-01.jpg",
+        poster: "",
+        video: false,
+        ratio: 1.78,
+    },
+    {
+        media: [
+            { src: BRANDING_BASE + "lys-01.jpg", poster: "", video: false },
+            { src: BRANDING_BASE + "lys-02.jpg", poster: "", video: false },
+            { src: BRANDING_BASE + "lys-03.jpg", poster: "", video: false },
+        ],
+        key: "branding:Clínic Lys",
+        title: "Clínic Lys",
+        area: "branding",
+        description:
+            "Identidade visual da Clínic Lys, com o monograma LYS em bordô e dourado aplicado em papelaria, pôster e vitrines.",
+        src: BRANDING_BASE + "lys-01.jpg",
+        poster: "",
+        video: false,
+        ratio: 1.78,
+    },
+]
+
 // Estudo autoral de ilustração (sem afiliação com a Gucci)
 const GUCCI_BASE =
     "https://cdn.jsdelivr.net/gh/lucibellelemos-commits/meustudio@dccf7a0a99b2d38fec71ad2278729a288b5fc034/gucci/"
@@ -1969,6 +2037,9 @@ function WorkTemplate() {
             if (!keys.has(KRISNA_ENTRY.key)) found.push(KRISNA_ENTRY)
             if (!keys.has(ITAU_ENTRY.key)) found.push(ITAU_ENTRY)
             if (!keys.has(GUCCI_ENTRY.key)) found.push(GUCCI_ENTRY)
+            BRANDING_ENTRIES.forEach((e) => {
+                if (!keys.has(e.key)) found.push(e)
+            })
             // ajustes por projeto: capa escolhida e imagens extras
             found.forEach((e) => {
                 // projetos do lote novo: usa todas as mídias (a página só
