@@ -1857,7 +1857,7 @@ const BRANDING_ENTRIES: WorkEntry[] = [
 
 // Índice de branding com motion (abre no lugar das imagens nos projetos de identidade visual)
 const BRAND_INDEX_JS =
-    "https://cdn.jsdelivr.net/gh/lucibellelemos-commits/meustudio@d61a346c8b4ee7880e1477f73b6f49cb8f21649c/brand/brand-index.js"
+    "https://cdn.jsdelivr.net/gh/lucibellelemos-commits/meustudio@3ce1eaea3e805ef81d9a20bd9bbd1109f70958c5/brand/brand-index.js"
 const BRAND_INDEX_NAMES = new Set([
     "Krisna — The Technique",
     "Sky Hour",
