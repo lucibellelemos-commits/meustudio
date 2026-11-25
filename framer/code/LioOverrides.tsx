@@ -1618,6 +1618,8 @@ const WORK_TEMPLATE_CSS = `
 .luci-template-modal header{position:fixed;top:20px;left:50%;transform:translateX(-50%);width:min(560px,calc(100% - 40px));box-sizing:border-box;z-index:20;display:flex;align-items:center;justify-content:space-between;background:rgba(240,240,240,.86);backdrop-filter:blur(16px);border-radius:40px;padding:12px 20px!important;font:13px Switzer,Arial,sans-serif}
 .luci-template-modal header button{font-size:13px!important}
 .luci-project-story{padding-top:0;width:100%}
+.luci-brand-index{box-sizing:border-box;width:100%;padding:24px 30px 140px}
+@media(max-width:809px){.luci-brand-index{padding:16px 16px 100px}}
 .luci-project-story figure{margin:0 auto 55px;display:flex;justify-content:center;align-items:center}
 .luci-project-story .luci-project-hero{width:100%;min-height:100dvh;background:#fff}
 .luci-project-story .luci-project-hero img,.luci-project-story .luci-project-hero video{width:100%;height:100dvh;max-height:none;object-fit:contain}
@@ -1852,6 +1854,64 @@ const BRANDING_ENTRIES: WorkEntry[] = [
         ratio: 1.78,
     },
 ]
+
+// Índice de branding com motion (abre no lugar das imagens nos projetos de identidade visual)
+const BRAND_INDEX_JS =
+    "https://cdn.jsdelivr.net/gh/lucibellelemos-commits/meustudio@3357a057f3e6615d541e96cec2e49518bf4e227b/brand/brand-index.js"
+const BRAND_INDEX_NAMES = new Set([
+    "Krisna — The Technique",
+    "Sky Hour",
+    "Messa",
+    "Dr. Rafael Leonardo",
+    "Clínic Lys",
+    "Easy Diagnostics",
+    "Best Amuse",
+])
+let brandIndexLoad: Promise<void> | null = null
+function loadBrandIndex(): Promise<void> {
+    if (typeof window === "undefined") return Promise.reject()
+    if ((window as any).LuciBrandIndex) return Promise.resolve()
+    if (!brandIndexLoad)
+        brandIndexLoad = new Promise((resolve, reject) => {
+            const s = document.createElement("script")
+            s.src = BRAND_INDEX_JS
+            s.async = true
+            s.charset = "utf-8"
+            s.onload = () => resolve()
+            s.onerror = () => {
+                brandIndexLoad = null
+                reject()
+            }
+            document.head.appendChild(s)
+        })
+    return brandIndexLoad
+}
+function BrandIndexStage({
+    name,
+    fallback,
+}: {
+    name: string
+    fallback: React.ReactNode
+}) {
+    const ref = React.useRef<HTMLDivElement>(null)
+    const [failed, setFailed] = React.useState(false)
+    React.useEffect(() => {
+        let alive = true
+        loadBrandIndex()
+            .then(() => {
+                const api = (window as any).LuciBrandIndex
+                if (!alive || !ref.current || !api) return
+                if (!api.mount(ref.current, name)) setFailed(true)
+            })
+            .catch(() => alive && setFailed(true))
+        return () => {
+            alive = false
+            ;(window as any).LuciBrandIndex?.destroy()
+        }
+    }, [name])
+    if (failed) return <>{fallback}</>
+    return <div className="luci-brand-index" ref={ref} />
+}
 
 // Estudo autoral de ilustração (sem afiliação com a Gucci)
 const GUCCI_BASE =
@@ -2351,49 +2411,62 @@ function WorkTemplate() {
                                 }
                             </span>
                         </div>
-                        <div className="luci-project-story">
-                            {(opened.media.length
-                                ? opened.media
-                                : [opened]
-                            ).map((media, index) => (
-                                <figure
-                                    key={media.src}
-                                    className={
-                                        (index === 0
-                                            ? "luci-project-hero"
-                                            : "luci-project-frame") +
-                                        (media.video
-                                            ? " luci-project-film"
-                                            : "")
-                                    }
-                                >
-                                    {media.video ? (
-                                        <video
-                                            src={media.src}
-                                            poster={media.poster}
-                                            muted
-                                            data-luci-autoplay=""
-                                            loop
-                                            playsInline
-                                            controls={false}
-                                            preload="metadata"
-                                        />
-                                    ) : (
-                                        <img
-                                            src={media.src}
-                                            alt={
-                                                opened.title +
-                                                " — " +
-                                                (index + 1)
-                                            }
-                                            loading={
-                                                index === 0 ? "eager" : "lazy"
-                                            }
-                                        />
-                                    )}
-                                </figure>
-                            ))}
-                        </div>
+                        {(() => {
+                            const story = (
+                            <div className="luci-project-story">
+                                {(opened.media.length
+                                    ? opened.media
+                                    : [opened]
+                                ).map((media, index) => (
+                                    <figure
+                                        key={media.src}
+                                        className={
+                                            (index === 0
+                                                ? "luci-project-hero"
+                                                : "luci-project-frame") +
+                                            (media.video
+                                                ? " luci-project-film"
+                                                : "")
+                                        }
+                                    >
+                                        {media.video ? (
+                                            <video
+                                                src={media.src}
+                                                poster={media.poster}
+                                                muted
+                                                data-luci-autoplay=""
+                                                loop
+                                                playsInline
+                                                controls={false}
+                                                preload="metadata"
+                                            />
+                                        ) : (
+                                            <img
+                                                src={media.src}
+                                                alt={
+                                                    opened.title +
+                                                    " — " +
+                                                    (index + 1)
+                                                }
+                                                loading={
+                                                    index === 0 ? "eager" : "lazy"
+                                                }
+                                            />
+                                        )}
+                                    </figure>
+                                ))}
+                            </div>
+                            )
+                            return BRAND_INDEX_NAMES.has(opened.title) ? (
+                                <BrandIndexStage
+                                    key={opened.title}
+                                    name={opened.title}
+                                    fallback={story}
+                                />
+                            ) : (
+                                story
+                            )
+                        })()}
                         <section className="luci-project-credits">
                             <h2>{opened.title}</h2>
                             <span className="luci-project-area">
